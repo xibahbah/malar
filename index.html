@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>malar boutique</title>
+  <meta name="description" content="malar is a small boutique of handmade jewelry and crafts." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="#hero">malar</a>
+    <nav>
+      <a href="#collection">Jewelry</a>
+      <a href="#crafts">Crafts</a>
+      <a href="#story">Story</a>
+      <a href="#gift">Gift cards</a>
+    </nav>
+    <a class="bag" href="#collection" aria-label="Shopping bag">Bag <span>0</span></a>
+  </header>
+
+  <section id="hero" class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Handmade jewelry &amp; crafts</p>
+      <h1>malar</h1>
+      <p class="sub"><em>small things, made to bloom</em></p>
+    </div>
+    <canvas id="garden" aria-hidden="true"></canvas>
+    <div class="hero-foot">
+      <a class="btn" href="#collection">Shop the collection</a>
+      <span class="hint">move, brush or tap the flowers</span>
+    </div>
+  </section>
+
+  <section id="collection" class="section">
+    <div class="section-head">
+      <p class="eyebrow">The jewelry</p>
+      <h2>Pieces picked like <em>wildflowers</em></h2>
+      <p class="lede">Each piece is shaped by hand in small batches, so no two are quite the same.</p>
+    </div>
+    <div class="grid">
+      <article class="card" style="--tint:#e0142d">
+        <div class="art"><svg viewBox="0 0 120 120"><path d="M40 18c0 8 8 8 8 16M80 18c0 8-8 8-8 16"/><circle cx="48" cy="44" r="6"/><circle cx="72" cy="44" r="6"/><path d="M48 50c-10 14-10 30 0 44 10-14 10-30 0-44zM72 50c-10 14-10 30 0 44 10-14 10-30 0-44z"/></svg></div>
+        <h3>Marigold drop earrings</h3><p>Brass, hand-hammered</p><span class="price">$48</span>
+      </article>
+      <article class="card" style="--tint:#ff7fb0">
+        <div class="art"><svg viewBox="0 0 120 120"><ellipse cx="60" cy="72" rx="30" ry="26"/><ellipse cx="60" cy="72" rx="21" ry="18"/><path d="M60 46c-6-8-6-16 0-22 6 6 6 14 0 22zM60 46c-9-3-14-10-14-18 9 1 14 9 14 18zM60 46c9-3 14-10 14-18-9 1-14 9-14 18z"/></svg></div>
+        <h3>Lotus signet ring</h3><p>Sterling silver</p><span class="price">$64</span>
+      </article>
+      <article class="card" style="--tint:#ffc21a">
+        <div class="art"><svg viewBox="0 0 120 120"><path d="M20 24c6 44 26 66 40 66s34-22 40-66"/><circle cx="60" cy="96" r="6"/><circle cx="34" cy="64" r="3"/><circle cx="44" cy="78" r="3"/><circle cx="76" cy="78" r="3"/><circle cx="86" cy="64" r="3"/><circle cx="27" cy="46" r="3"/><circle cx="93" cy="46" r="3"/></svg></div>
+        <h3>Jasmine strand necklace</h3><p>Freshwater pearl, gold-fill</p><span class="price">$82</span>
+      </article>
+    </div>
+  </section>
+
+  <section id="crafts" class="section">
+    <div class="section-head">
+      <p class="eyebrow">The crafts</p>
+      <h2>For the home, <em>by hand</em></h2>
+      <p class="lede">Clay, brass and palm, made slowly by makers we know by name.</p>
+    </div>
+    <div class="grid">
+      <article class="card" style="--tint:#ff6a12">
+        <div class="art"><svg viewBox="0 0 120 120"><path d="M50 22h20M52 22c0 12-18 22-18 46 0 18 12 30 26 30s26-12 26-30c0-24-18-34-18-46"/><path d="M38 62c14 6 30 6 44 0"/></svg></div>
+        <h3>Hand-thrown bud vase</h3><p>Stoneware, ember glaze</p><span class="price">$36</span>
+      </article>
+      <article class="card" style="--tint:#ff5e4d">
+        <div class="art"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="40"/><circle cx="60" cy="60" r="30"/><path d="M60 34c8 10 8 16 0 26-8-10-8-16 0-26zM60 86c8-10 8-16 0-26-8 10-8 16 0 26zM34 60c10-8 16-8 26 0-10 8-16 8-26 0zM86 60c-10-8-16-8-26 0 10 8 16 8 26 0z"/></svg></div>
+        <h3>Kolam brass tray</h3><p>Etched brass, 10 in</p><span class="price">$54</span>
+      </article>
+      <article class="card" style="--tint:#ffb0cc">
+        <div class="art"><svg viewBox="0 0 120 120"><path d="M24 50h72l-8 44H32z"/><path d="M28 62h64M30 74h60M32 86h56M44 50l4 44M60 50v44M76 50l-4 44"/><path d="M40 50c0-16 40-16 40 0"/></svg></div>
+        <h3>Woven palm basket</h3><p>Palmyra leaf, natural dye</p><span class="price">$42</span>
+      </article>
+    </div>
+  </section>
+
+  <section id="story" class="section story">
+    <div class="story-inner">
+      <p class="eyebrow">Our story</p>
+      <h2><em>Malar</em> means flower.</h2>
+      <p>We started with a table of earrings at a weekend market and a jar of flowers beside them. The flowers sold the earrings. Today malar is still small: a handful of makers, a studio that smells of clay and brass polish, and a promise that everything we sell was made by a person, not a line.</p>
+      <div class="facts">
+        <div><strong>100%</strong><span>handmade</span></div>
+        <div><strong>12</strong><span>makers</span></div>
+        <div><strong>Small</strong><span>batches only</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="gift" class="section gift">
+    <div class="gift-card" aria-hidden="true">
+      <span class="bloom b1"></span><span class="bloom b2"></span><span class="bloom b3"></span>
+      <span class="gc-brand">malar</span>
+      <span class="gc-label">gift card</span>
+      <span class="gc-amount">$50</span>
+    </div>
+    <div class="gift-copy">
+      <p class="eyebrow">Gift cards</p>
+      <h2>Not sure what they'll love? <em>Send a bouquet.</em></h2>
+      <p>Digital gift cards in any amount, delivered by email with a note from you.</p>
+      <div class="amounts"><button>$25</button><button class="on">$50</button><button>$100</button><button>Custom</button></div>
+      <a class="btn" href="#gift">Send a gift card</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="foot-brand">malar</div>
+    <form class="news" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Thank you';">
+      <label for="email">New pieces bloom monthly. Hear about them first.</label>
+      <div><input id="email" type="email" placeholder="your@email.com" required /><button>Join</button></div>
+    </form>
+    <p class="small">© 2026 malar · Handmade jewelry &amp; crafts</p>
+  </footer>
+
+  <script type="module" src="flowers.js"></script>
+</body>
+</html>
