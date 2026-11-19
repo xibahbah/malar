@@ -480,7 +480,7 @@ function garden(hero) {
     const lamp = wanderers[2];
     lamp.light = {x:.5, y:.5};
     lamp.intensity = fade * .65;
-    if (entranceTime >= 350) root.classList.add('relief-reveal');
+    if (entranceTime >= 850) root.classList.add('relief-reveal');
     if (entranceTime >= 2150) {
       finishEntrance();
       nextStroke = time + 400;
