@@ -440,13 +440,9 @@ function garden(hero) {
   let target=null, seed=true, introStart=0;
   const ambient = document.body.classList.contains('ambient-landing');
   const userBrush = {head:null, leader:null, light:lastLamp, intensity:0};
-  const wanderers = ambient ? [false,true].map(secondary=>{
-    const dot=document.createElement('span');
-    dot.className=secondary ? 'garden-pointer garden-pointer-secondary' : 'garden-pointer';
-    dot.setAttribute('aria-hidden','true');
-    hero.append(dot);
-    return {dot, path:null, head:null, leader:null, light:lastLamp, intensity:0};
-  }) : [];
+  const wanderers = ambient ? Array.from({length:2},()=>({
+    path:null, head:null, leader:null, light:lastLamp, intensity:0
+  })) : [];
   const brushes=[{brush:userBrush,uniform:'userLight',weight:1.8},
     ...wanderers.map((brush,i)=>({brush,uniform:i===0 ? 'wanderingLight' : 'occasionalLight',weight:1}))];
   let nextStroke=0;
@@ -610,13 +606,7 @@ function garden(hero) {
       if(!wanderers[1].path && Math.random()<.14) startWander(wanderers[1],t+240);
     }
     wanderers.forEach(brush=>{
-      const aim=motion ? wanderAim(brush,t) : null;
-      advanceBrush(brush,aim,dt,t);
-      brush.dot.classList.toggle('is-active',Boolean(aim));
-      if(aim){
-        brush.dot.style.left=(100*brush.head.x)+'%';
-        brush.dot.style.top=(100*brush.head.y)+'%';
-      }
+      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t);
     });
     // The native pointer gets its own brush and interacts even during an ambient stroke.
     advanceBrush(userBrush,aim,dt,t);
