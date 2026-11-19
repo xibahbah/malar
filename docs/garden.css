@@ -243,18 +243,18 @@ canvas.crease-detail {
 /* Opening strokes are driven by the same relief field as pointer movement. */
 .ambient-landing .stage > .axis { animation:none }
 .relief-intro .wordmark > span { opacity:0 }
+/* Individual translate/scale preserve the Latin wordmark's horizontal stretch. */
 .relief-reveal .wordmark > span {
-  animation:carve-lettering 1.45s cubic-bezier(.18,.65,.25,1) both;
-  mask-image:linear-gradient(100deg,#000 35%,transparent 65%);
-  mask-size:300% 100%;
-  mask-repeat:no-repeat;
+  animation:surface-lettering 1.3s cubic-bezier(.2,.7,.3,1) both;
+  transform-origin:50% 60%;
 }
-.relief-reveal .wordmark-script { animation-delay:.20s; animation-duration:1.55s }
-@keyframes carve-lettering {
-  0% { opacity:0; color:#38251a; mask-position:100% 0; filter:blur(.7px); text-shadow:0 -2px 1px #090604,0 2px 1px #c39c68 }
-  24% { opacity:1; color:#705139; text-shadow:0 -2px 1px #090604,0 2px 1px #e1b77a }
-  60% { color:#dbc29c; filter:blur(0); text-shadow:0 -1px 1px #140c07,0 1px 1px #ffe5b8 }
-  100% { opacity:1; color:#fff; mask-position:0 0; filter:blur(0); text-shadow:0 0 0 transparent }
+.relief-reveal .wordmark-script { animation-delay:.09s }
+@keyframes surface-lettering {
+  0% { opacity:0; color:#8e7963; translate:0 2px; scale:.995; filter:blur(.5px) drop-shadow(0 0 0 transparent) }
+  16% { opacity:.35; color:#c5b39b; translate:0 1px; scale:1; filter:blur(.2px) drop-shadow(0 1px .5px #0a060340) }
+  36% { opacity:1; color:#fff9ec; translate:0 -3px; scale:1.015; filter:blur(0) drop-shadow(0 5px 3px #090503a6) }
+  52% { opacity:1; color:#fff; translate:0 -2px; scale:1.01; filter:blur(0) drop-shadow(0 4px 2px #09050380) }
+  100% { opacity:1; color:#fff; translate:0 0; scale:1; filter:blur(0) drop-shadow(0 0 0 transparent) }
 }
 @media(prefers-reduced-motion:reduce) {
   .relief-intro .wordmark > span { opacity:1; mask-image:none; animation:none }
