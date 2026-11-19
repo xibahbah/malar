@@ -6,17 +6,6 @@
 .hero{background-image:url(wall-water.jpg);background-position:center var(--wall-position,0%);background-size:cover}
 @media(max-aspect-ratio:1/1){.stage{height:calc(max(450svh,864vw) + 100svh)}.hero{background-image:url(wall-tall-water.jpg)}}
 
-.garden-pointer {
-  position:absolute; z-index:3; width:4px; height:4px; border-radius:50%;
-  background:#eadac1; pointer-events:none; opacity:0;
-  transform:translate(-50%,-50%); transition:opacity .12s ease;
-}
-.garden-pointer-secondary {width:3px; height:3px}
-@media(hover:hover) and (prefers-reduced-motion:no-preference){
-  .garden-pointer.is-active {opacity:.9}
-  .garden-pointer-secondary.is-active {opacity:.65}
-}
-
 .hero{background-color:#21150e;background-blend-mode:multiply;color:#fff}
 .hero:before{background:transparent}
 
