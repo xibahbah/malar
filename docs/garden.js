@@ -258,6 +258,7 @@ function garden(hero) {
   const canvas = hero.querySelector('canvas');
   const gl = canvas.getContext('webgl', {alpha:false, antialias:false, depth:true});
   if (!gl || gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS)<2) {
+    document.documentElement.classList.remove('relief-intro', 'relief-reveal');
     const panBackground=()=>{
       const stage=hero.parentElement;
       const fraction=Math.min(1,Math.max(0,-stage.getBoundingClientRect().top/Math.max(1,stage.offsetHeight-hero.offsetHeight)));
@@ -439,6 +440,39 @@ function garden(hero) {
   let strokeX,strokeY,contactTime;
   let target=null, seed=true, introStart=0;
   const ambient = document.body.classList.contains('ambient-landing');
+  const root = document.documentElement;
+  let entranceTime = 0, entranceStroke = 0;
+  let entering = ambient && root.classList.contains('relief-intro');
+  const entrancePaths = [
+    {at:220, x:-.08, y:.35, dx:1.16, dy:.08, bend:-.06},
+    {at:680, x:1.08, y:.58, dx:-1.16, dy:-.10, bend:.07},
+    {at:1140, x:-.08, y:.69, dx:1.16, dy:-.25, bend:.04}
+  ];
+  function finishEntrance() {
+    entering = false;
+    root.classList.remove('relief-intro', 'relief-reveal');
+    clearTimeout(window.malarIntroFallback);
+  }
+  function advanceEntrance(dt, time) {
+    if (!entering) return;
+    if (reduce.matches || !root.classList.contains('relief-intro')) {
+      finishEntrance();
+      return;
+    }
+    entranceTime += dt * 1000;
+    while (entranceStroke < entrancePaths.length && entranceTime >= entrancePaths[entranceStroke].at) {
+      const path = entrancePaths[entranceStroke];
+      const brush = wanderers[entranceStroke % 2];
+      brush.head = brush.leader = null;
+      brush.path = {...path, start:time, duration:620, easing:.3, weave:0};
+      entranceStroke++;
+    }
+    if (entranceTime >= 1800) root.classList.add('relief-reveal');
+    if (entranceTime >= 3650) {
+      finishEntrance();
+      nextStroke = time + 400;
+    }
+  }
   const userBrush = {head:null, leader:null, light:lastLamp, intensity:0};
   const wanderers = ambient ? Array.from({length:2},()=>({
     path:null, head:null, leader:null, light:lastLamp, intensity:0
@@ -485,7 +519,7 @@ function garden(hero) {
           gl.texImage2D(gl.TEXTURE_2D,0,format,format,gl.UNSIGNED_BYTE,source);
         });
         artSize=[images[0].width,images[0].height];schedule();
-      }).catch(()=>canvas.classList.remove('ready'));
+      }).catch(()=>{canvas.classList.remove('ready');finishEntrance();});
     }
     schedule();
   }
@@ -609,13 +643,14 @@ function garden(hero) {
     const decay=Math.exp(-dt/.405), attack=1-Math.exp(-dt/.15);
     for(let i=0;i<energy.length;i++) energy[i]*=decay;
 
-    if(ambient && motion && t>=nextStroke){
+    advanceEntrance(dt,t);
+    if(ambient && motion && !entering && t>=nextStroke){
       startWander(wanderers[0],t);
       nextStroke=t+wanderers[0].path.duration+80+1100*Math.pow(Math.random(),1.45);
       if(!wanderers[1].path && Math.random()<.14) startWander(wanderers[1],t+100+350*Math.random());
     }
     wanderers.forEach(brush=>{
-      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t,1.7);
+      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t,entering ? 5 : 1.7);
     });
     // The native pointer gets its own brush and interacts even during an ambient stroke.
     advanceBrush(userBrush,aim,dt,t);
