@@ -443,6 +443,7 @@ function garden(hero) {
   const ambient = document.body.classList.contains('ambient-landing');
   const root = document.documentElement;
   let entranceTime = 0;
+  let revealDistance, revealWidth;
   let entering = ambient && root.classList.contains('relief-intro');
   function finishEntrance() {
     entering = false;
@@ -456,19 +457,19 @@ function garden(hero) {
       return;
     }
     entranceTime += dt * 1000;
-    // A single circular front in screen space, with a soft trailing falloff.
-    const progress = Math.max(0, Math.min(1, (entranceTime - 160) / 1800));
+    // One outward front follows a deeply uneven arrival map, then settles.
+    const progress = Math.max(0, Math.min(1, (entranceTime - 100) / 1050));
     const aspect = hero.clientWidth / hero.clientHeight;
     const reach = Math.hypot(aspect * .5, .5) + .18;
-    const radius = progress * reach;
+    const radius = progress * reach * 1.9;
     const fade = Math.min(1, progress * 12) * Math.min(1, (1 - progress) * 12);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       const dx = (x / (w - 1) - .5) * aspect;
       const dy = y / (h - 1) - .5;
       const distance = Math.hypot(dx, dy);
-      const band = Math.max(0, 1 - Math.abs(distance - radius) / .12);
-      const strength = band * band * (3 - 2 * band) * fade;
       const i = y * w + x;
+      const band = Math.max(0, 1 - Math.abs(revealDistance[i] - radius) / revealWidth[i]);
+      const strength = band * band * (3 - 2 * band) * fade;
       energy[i] = Math.max(energy[i], strength);
       if (strength > .05) {
         strokeX[i] = dx / Math.max(.001, distance) * strength * .55;
@@ -479,8 +480,8 @@ function garden(hero) {
     const lamp = wanderers[2];
     lamp.light = {x:.5, y:.5};
     lamp.intensity = fade * .65;
-    if (entranceTime >= 1550) root.classList.add('relief-reveal');
-    if (entranceTime >= 3450) {
+    if (entranceTime >= 1100) root.classList.add('relief-reveal');
+    if (entranceTime >= 1900) {
       finishEntrance();
       nextStroke = time + 400;
     }
@@ -506,6 +507,21 @@ function garden(hero) {
     strokeX=new Float32Array(w*h);
     strokeY=new Float32Array(w*h);
     contactTime=new Float64Array(w*h);
+    // Cache the asymmetric lobes and torn edge detail once per viewport size.
+    revealDistance = new Float32Array(w*h);
+    revealWidth = new Float32Array(w*h);
+    const aspect = hero.clientWidth / hero.clientHeight;
+    for (let y=0; y<h; y++) for (let x=0; x<w; x++) {
+      const dx=(x/(w-1)-.5)*aspect, dy=y/(h-1)-.5;
+      const angle=Math.atan2(dy,dx), distance=Math.hypot(dx,dy);
+      const lobes=1+.29*Math.sin(3*angle+.8)+.19*Math.cos(5*angle-1.1)
+        +.12*Math.sin(9*angle+.4)+.07*Math.cos(17*angle);
+      const roughness=.055*Math.sin(dx*29+dy*17)*Math.cos(dy*31-dx*11)
+        +.025*Math.sin(dx*67-dy*43);
+      const i=y*w+x;
+      revealDistance[i]=Math.max(0,distance/Math.max(.55,lobes)+roughness*Math.min(1,distance*8));
+      revealWidth[i]=.07+.055*(.5+.5*Math.sin(angle*7+dx*13-dy*19));
+    }
     gl.activeTexture(gl.TEXTURE2);
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,w,h,0,gl.RGB,gl.UNSIGNED_BYTE,bytes);
     userBrush.head=userBrush.leader=null;
@@ -652,7 +668,7 @@ function garden(hero) {
     }
     const motion=!reduce.matches;
     const aim=motion ? target||(!ambient&&seed ? {x:.31,y:.34} : null) : null;
-    const decay=Math.exp(-dt/.405), attack=1-Math.exp(-dt/.15);
+    const decay=Math.exp(-dt/(entering ? .19 : .405)), attack=1-Math.exp(-dt/.15);
     for(let i=0;i<energy.length;i++) energy[i]*=decay;
 
     advanceEntrance(dt,t);
