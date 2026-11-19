@@ -13,7 +13,7 @@
 .hero:before{background:transparent}
 .garden-pointer{background:#eadac1}
 
-.stage>.axis{top:clamp(5rem,12svh,8rem);transform:none;color:#fff;pointer-events:none}
+.stage>.axis{top:50svh;color:#fff;pointer-events:none}
 .stage>.axis a{pointer-events:auto}
 .hero:focus-within #menu:focus-visible,.stage a:focus-visible,.stage button:focus-visible{outline:2px solid #c5a16a;outline-offset:5px}
 #studio{background:#36271f;color:#eee4d4}
