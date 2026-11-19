@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#21150e"><title>Malar — The Garden</title><script>
+  history.scrollRestoration = 'manual';
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted && !location.hash) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  });
+</script><link rel="preload" href="gilded-edge.png" as="image"><link rel="stylesheet" href="garden.css"><script src="garden.js" defer></script></head>
+<body class="ambient-landing"><button id="menu" aria-controls="garden-menu" aria-expanded="false" aria-haspopup="dialog">Menu <i></i></button><main><section class="stage" id="garden" aria-label="Interactive Kerala garden relief"><div class="hero">
+<canvas aria-hidden="true"></canvas>
+</div><div class="axis"><h1 class="wordmark"><span class="wordmark-latin">MALAR</span><span class="wordmark-script" lang="ml">മലർ</span></h1></div><span id="grove" aria-hidden="true"></span></section>
+<header class="shop-header">
+  <a class="shop-brand" href="#garden">MALAR</a>
+  <nav class="shop-nav" aria-label="Shop"><a href="#collection">Jewelry</a>
+    <a href="#crafts">Crafts</a>
+    <a href="#studio">Story</a>
+    <a href="#gift">Gift cards</a></nav>
+  <div class="shop-controls">
+    <button id="sound" aria-pressed="false">Sound off</button>
+    
+  </div>
+</header>
+<section class="shop-section" id="collection" aria-labelledby="collection-title">
+  <h2 id="collection-title">Jewelry</h2>
+  <p>Collection coming soon.</p>
+  <ul class="product-grid">
+    <li><div class="product-placeholder" aria-hidden="true"></div><h3>Earrings</h3></li>
+    <li><div class="product-placeholder" aria-hidden="true"></div><h3>Rings</h3></li>
+    <li><div class="product-placeholder" aria-hidden="true"></div><h3>Necklaces</h3></li>
+  </ul>
+</section>
+<section class="shop-section" id="crafts" aria-labelledby="crafts-title">
+  <h2 id="crafts-title">Crafts</h2>
+  <p>Collection coming soon.</p>
+  <ul class="product-grid">
+    <li><div class="product-placeholder" aria-hidden="true"></div><h3>Ceramics</h3></li>
+    <li><div class="product-placeholder" aria-hidden="true"></div><h3>Metalwork</h3></li>
+    <li><div class="product-placeholder" aria-hidden="true"></div><h3>Woven goods</h3></li>
+  </ul>
+</section>
+<section id="studio" class="shop-section shop-feature" aria-labelledby="studio-title">
+  <div class="detail" role="img" aria-label="Detail of a carved botanical relief"></div>
+  <article><small>THE STUDIO</small><h2 id="studio-title">Our story</h2><p>Malar means flower. More about the studio is coming soon.</p></article>
+</section>
+<section id="gift" class="shop-section shop-feature" aria-labelledby="gift-title">
+  <div class="gift-preview" aria-hidden="true"><span>MALAR</span><small>GIFT CARD</small></div>
+  <article><h2 id="gift-title">Gift cards</h2><p>Digital gift cards are coming soon.</p></article>
+</section>
+<section id="account" class="shop-section" aria-labelledby="account-title">
+  <h2 id="account-title">Account</h2>
+  <p>Customer accounts are coming soon.</p>
+</section>
+</main>
+<footer class="shop-footer">
+  <a class="shop-brand" href="#garden">MALAR</a>
+  <p>Newsletter coming soon.</p>
+  <a href="#garden">Back to top ↑</a>
+</footer>
+<dialog id="garden-menu" aria-label="Menu">
+  <section class="leaf-menu" aria-label="Navigation">
+    <canvas class="leaf-surface" aria-hidden="true"></canvas>
+    <form method="dialog"><button>Close ×</button></form>
+    <nav aria-label="Main">
+      <a href="#garden"><span>The<br>Garden</span></a>
+      <a href="#collection"><span>Jewelry</span></a>
+      <a href="#crafts"><span>Crafts</span></a>
+      <a href="#studio"><span>Story</span></a>
+      <a href="#gift"><span>Gift<br>Cards</span></a>
+      <a href="#account"><span>Account</span></a>
+    </nav>
+  </section>
+</dialog>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <filter id="engraved-lettering" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+    <!-- Keep the fine serifs while reducing coverage at the sides of each stroke. -->
+    <feMorphology in="SourceGraphic" operator="erode" radius="1 0" result="core"/>
+    <feComposite in="SourceGraphic" in2="core" operator="arithmetic" k2=".42" k3=".58" result="cut"/>
+    <feOffset in="cut" dy=".8" result="lower"/>
+    <feComposite in="lower" in2="cut" operator="out" result="rim"/>
+    <feFlood flood-color="#fff0bd" flood-opacity=".72" result="gold"/>
+    <feComposite in="gold" in2="rim" operator="in" result="shine"/>
+    <feOffset in="cut" dy="-.42" result="upper"/>
+    <feColorMatrix in="upper" type="matrix" values="0 0 0 0 .14 0 0 0 0 .075 0 0 0 0 .037 0 0 0 .26 0" result="shadow"/>
+    <feMerge><feMergeNode in="shine"/><feMergeNode in="shadow"/><feMergeNode in="cut"/></feMerge>
+  </filter>
+</svg>
+</body>
+</html>
