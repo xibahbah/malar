@@ -442,13 +442,8 @@ function garden(hero) {
   let target=null, seed=true, introStart=0;
   const ambient = document.body.classList.contains('ambient-landing');
   const root = document.documentElement;
-  let entranceTime = 0, entranceStroke = 0;
+  let entranceTime = 0;
   let entering = ambient && root.classList.contains('relief-intro');
-  const entrancePaths = [
-    {at:200, x:-.08, y:.22, dx:1.16, dy:0, bend:0},
-    {at:240, x:1.08, y:.50, dx:-1.16, dy:0, bend:0},
-    {at:280, x:-.08, y:.78, dx:1.16, dy:0, bend:0}
-  ];
   function finishEntrance() {
     entering = false;
     root.classList.remove('relief-intro', 'relief-reveal');
@@ -461,15 +456,31 @@ function garden(hero) {
       return;
     }
     entranceTime += dt * 1000;
-    while (entranceStroke < entrancePaths.length && entranceTime >= entrancePaths[entranceStroke].at) {
-      const path = entrancePaths[entranceStroke];
-      const brush = wanderers[entranceStroke];
-      brush.head = brush.leader = null;
-      brush.path = {...path, start:time, duration:540, easing:.15, weave:0};
-      entranceStroke++;
+    // A single circular front in screen space, with a soft trailing falloff.
+    const progress = Math.max(0, Math.min(1, (entranceTime - 160) / 1800));
+    const aspect = hero.clientWidth / hero.clientHeight;
+    const reach = Math.hypot(aspect * .5, .5) + .18;
+    const radius = progress * reach;
+    const fade = Math.min(1, progress * 12) * Math.min(1, (1 - progress) * 12);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const dx = (x / (w - 1) - .5) * aspect;
+      const dy = y / (h - 1) - .5;
+      const distance = Math.hypot(dx, dy);
+      const band = Math.max(0, 1 - Math.abs(distance - radius) / .12);
+      const strength = band * band * (3 - 2 * band) * fade;
+      const i = y * w + x;
+      energy[i] = Math.max(energy[i], strength);
+      if (strength > .05) {
+        strokeX[i] = dx / Math.max(.001, distance) * strength * .55;
+        strokeY[i] = dy / Math.max(.001, distance) * strength * .55;
+        contactTime[i] = time;
+      }
     }
-    if (entranceTime >= 880) root.classList.add('relief-reveal');
-    if (entranceTime >= 2400) {
+    const lamp = wanderers[2];
+    lamp.light = {x:.5, y:.5};
+    lamp.intensity = fade * .65;
+    if (entranceTime >= 1550) root.classList.add('relief-reveal');
+    if (entranceTime >= 3450) {
       finishEntrance();
       nextStroke = time + 400;
     }
