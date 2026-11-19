@@ -1,12 +1,18 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#21150e"><title>Malar — The Garden</title><script>
+  if (!location.hash && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('relief-intro');
+    window.malarIntroFallback = setTimeout(() => {
+      document.documentElement.classList.remove('relief-intro', 'relief-reveal');
+    }, 9000);
+  }
   history.scrollRestoration = 'manual';
   window.addEventListener('pageshow', (event) => {
     if (!event.persisted && !location.hash) {
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
   });
-</script><link rel="preload" href="gilded-edge.png" as="image"><link rel="stylesheet" href="garden.css?v=relief-only"><script src="garden.js?v=varied-relief" defer></script></head>
+</script><link rel="preload" href="gilded-edge.png" as="image"><link rel="stylesheet" href="garden.css?v=carved-entrance"><script src="garden.js?v=carved-entrance" defer></script></head>
 <body class="ambient-landing"><button id="menu" aria-controls="garden-menu" aria-expanded="false" aria-haspopup="dialog">Menu <i></i></button><main><section class="stage" id="garden" aria-label="Interactive Kerala garden relief"><div class="hero">
 <canvas aria-hidden="true"></canvas>
 </div><div class="axis"><h1 class="wordmark"><span class="wordmark-latin">MALAR</span><span class="wordmark-script" lang="ml">മലർ</span></h1></div><span id="grove" aria-hidden="true"></span></section>
