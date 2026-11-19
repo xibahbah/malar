@@ -516,7 +516,7 @@ function garden(hero) {
       x=edge===2 ? inset : 1-inset;
       bend=(edge===2 ? -1 : 1)*direction*.08;
     }
-    brush.path={x,y,dx,dy,bend,start:time,duration:520+length*6200};
+    brush.path={x,y,dx,dy,bend,start:time,duration:420+length*5000};
     brush.head=brush.leader=null;
   }
   function wanderAim(brush,time){
