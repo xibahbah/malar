@@ -458,7 +458,7 @@ function garden(hero) {
     }
     entranceTime += dt * 1000;
     // One outward front follows a deeply uneven arrival map, then settles.
-    const progress = Math.max(0, Math.min(1, (entranceTime - 100) / 1200));
+    const progress = Math.max(0, Math.min(1, (entranceTime - 100) / 2000));
     const aspect = hero.clientWidth / hero.clientHeight;
     const reach = Math.hypot(aspect * .5, .5) + .18;
     const radius = progress * reach * 1.9;
@@ -481,7 +481,7 @@ function garden(hero) {
     lamp.light = {x:.5, y:.5};
     lamp.intensity = fade * .65;
     if (entranceTime >= 350) root.classList.add('relief-reveal');
-    if (entranceTime >= 1320) {
+    if (entranceTime >= 2150) {
       finishEntrance();
       nextStroke = time + 400;
     }
