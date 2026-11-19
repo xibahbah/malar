@@ -278,7 +278,7 @@ function garden(hero) {
     gl.attachShader(program,s);
   }
   const localLighting = `
-    uniform vec3 userLight, wanderingLight, occasionalLight;
+    uniform vec3 userLight, wanderingLight, occasionalLight, entranceLight;
     float lightWeight(vec2 p, vec3 light){
       vec2 delta=(p-light.xy)*cover;
       float distance=.016+dot(delta,delta);
@@ -288,8 +288,9 @@ function garden(hero) {
       float a=lightWeight(p,userLight);
       float b=lightWeight(p,wanderingLight);
       float c=lightWeight(p,occasionalLight);
-      return (.25*lightPoint+a*userLight.xy+b*wanderingLight.xy+c*occasionalLight.xy)
-             /(.25+a+b+c);
+      float d=lightWeight(p,entranceLight);
+      return (.25*lightPoint+a*userLight.xy+b*wanderingLight.xy+c*occasionalLight.xy+d*entranceLight.xy)
+             /(.25+a+b+c+d);
     }`;
   shader(gl.VERTEX_SHADER,`
     precision highp float;
@@ -419,7 +420,7 @@ function garden(hero) {
   const pos=gl.getAttribLocation(program,'pos');
   gl.enableVertexAttribArray(pos);
   gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
-  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting','userLight','wanderingLight','occasionalLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
+  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting','userLight','wanderingLight','occasionalLight','entranceLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
   function makeTexture(unit,name){
     const tex=gl.createTexture();
     gl.activeTexture(gl.TEXTURE0+unit);
@@ -444,9 +445,9 @@ function garden(hero) {
   let entranceTime = 0, entranceStroke = 0;
   let entering = ambient && root.classList.contains('relief-intro');
   const entrancePaths = [
-    {at:220, x:-.08, y:.35, dx:1.16, dy:.08, bend:-.06},
-    {at:680, x:1.08, y:.58, dx:-1.16, dy:-.10, bend:.07},
-    {at:1140, x:-.08, y:.69, dx:1.16, dy:-.25, bend:.04}
+    {at:200, x:-.08, y:.22, dx:1.16, dy:0, bend:0},
+    {at:240, x:1.08, y:.50, dx:-1.16, dy:0, bend:0},
+    {at:280, x:-.08, y:.78, dx:1.16, dy:0, bend:0}
   ];
   function finishEntrance() {
     entering = false;
@@ -462,23 +463,23 @@ function garden(hero) {
     entranceTime += dt * 1000;
     while (entranceStroke < entrancePaths.length && entranceTime >= entrancePaths[entranceStroke].at) {
       const path = entrancePaths[entranceStroke];
-      const brush = wanderers[entranceStroke % 2];
+      const brush = wanderers[entranceStroke];
       brush.head = brush.leader = null;
-      brush.path = {...path, start:time, duration:620, easing:.3, weave:0};
+      brush.path = {...path, start:time, duration:540, easing:.15, weave:0};
       entranceStroke++;
     }
-    if (entranceTime >= 1800) root.classList.add('relief-reveal');
-    if (entranceTime >= 3650) {
+    if (entranceTime >= 880) root.classList.add('relief-reveal');
+    if (entranceTime >= 2400) {
       finishEntrance();
       nextStroke = time + 400;
     }
   }
   const userBrush = {head:null, leader:null, light:lastLamp, intensity:0};
-  const wanderers = ambient ? Array.from({length:2},()=>({
+  const wanderers = ambient ? Array.from({length:3},()=>({
     path:null, head:null, leader:null, light:lastLamp, intensity:0
   })) : [];
   const brushes=[{brush:userBrush,uniform:'userLight',weight:1.8},
-    ...wanderers.map((brush,i)=>({brush,uniform:i===0 ? 'wanderingLight' : 'occasionalLight',weight:1}))];
+    ...wanderers.map((brush,i)=>({brush,uniform:['wanderingLight','occasionalLight','entranceLight'][i],weight:1}))];
   let nextStroke=0;
   function schedule(){
     if(!frame && visible && artSize && !document.hidden) frame=requestAnimationFrame(draw);
@@ -650,7 +651,7 @@ function garden(hero) {
       if(!wanderers[1].path && Math.random()<.14) startWander(wanderers[1],t+100+350*Math.random());
     }
     wanderers.forEach(brush=>{
-      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t,entering ? 5 : 1.7);
+      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t,entering ? 8 : 1.7);
     });
     // The native pointer gets its own brush and interacts even during an ambient stroke.
     advanceBrush(userBrush,aim,dt,t);
