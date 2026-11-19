@@ -276,6 +276,20 @@ function garden(hero) {
     if (!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw Error(gl.getShaderInfoLog(s));
     gl.attachShader(program,s);
   }
+  const localLighting = `
+    uniform vec3 userLight, wanderingLight, occasionalLight;
+    float lightWeight(vec2 p, vec3 light){
+      vec2 delta=(p-light.xy)*cover;
+      float distance=.016+dot(delta,delta);
+      return light.z/(distance*distance);
+    }
+    vec2 lightFor(vec2 p){
+      float a=lightWeight(p,userLight);
+      float b=lightWeight(p,wanderingLight);
+      float c=lightWeight(p,occasionalLight);
+      return (.25*lightPoint+a*userLight.xy+b*wanderingLight.xy+c*occasionalLight.xy)
+             /(.25+a+b+c);
+    }`;
   shader(gl.VERTEX_SHADER,`
     precision highp float;
     attribute vec2 pos;
@@ -283,15 +297,17 @@ function garden(hero) {
     uniform highp sampler2D field,heightMap;
     uniform vec2 cover,lightPoint;
     uniform float pan,resting;
+    ${localLighting}
     void main(){
       uv=pos*.5+.5;
       vec2 p=vec2(uv.x,1.-uv.y);
       vec2 tex=(p-.5)*cover+.5+vec2(0.,pan);
       float h=texture2D(heightMap,tex).r;
       float rise=max(resting,smoothstep(.025,.78,texture2D(field,p).r));
-      float rim=1.-smoothstep(.90,1.,max(abs(pos.x),abs(pos.y)));
+      float rim=1.-smoothstep(.965,1.,max(abs(pos.x),abs(pos.y)));
       float z=.060*h*rise*rim;
-      vec2 gaze=vec2((lightPoint.x-.5)*.52,.31+(.5-lightPoint.y)*.40);
+      vec2 localLamp=lightFor(p);
+      vec2 gaze=vec2((localLamp.x-.5)*.52,.31+(.5-localLamp.y)*.40);
       gl_Position=vec4(pos+gaze*z,-z,1.-z);
     }`);
   shader(gl.FRAGMENT_SHADER,`
@@ -300,6 +316,7 @@ function garden(hero) {
     uniform highp sampler2D mural, field, heightMap, normalMap, shapeMap;
     uniform vec2 cover, pixel, lightPoint;
     uniform float resting, pan;
+    ${localLighting}
     void main(){
       vec2 p=vec2(uv.x,1.-uv.y);
       vec2 tex=(p-.5)*cover+.5+vec2(0.,pan);
@@ -327,7 +344,7 @@ function garden(hero) {
       vec3 art=texture2D(mural,surface).rgb;
       float value=dot(art,vec3(.299,.587,.114));
       vec3 normal=normalize(texture2D(normalMap,surface).rgb*2.-1.);
-      vec2 toward=(lightPoint-p)*cover/pixel;
+      vec2 toward=(lightFor(p)-p)*cover/pixel;
       toward/=max(length(toward),.21*min(cover.x/pixel.x,cover.y/pixel.y));
       vec3 key=normalize(vec3(-.55,.60,.82));
       vec3 lamp=normalize(key+vec3(toward.x,-toward.y,0.)*.44);
@@ -401,7 +418,7 @@ function garden(hero) {
   const pos=gl.getAttribLocation(program,'pos');
   gl.enableVertexAttribArray(pos);
   gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
-  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting'].map(k=>[k,gl.getUniformLocation(program,k)]));
+  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting','userLight','wanderingLight','occasionalLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
   function makeTexture(unit,name){
     const tex=gl.createTexture();
     gl.activeTexture(gl.TEXTURE0+unit);
@@ -420,7 +437,19 @@ function garden(hero) {
   let w,h,energy,field,bytes,source,artSize,frame=0,visible=true,previousTime=0;
   let lastLamp={x:.31,y:.34};
   let strokeX,strokeY,contactTime;
-  let target=null, head=null, seed=true, introStart=0;
+  let target=null, seed=true, introStart=0;
+  const ambient = document.body.classList.contains('ambient-landing');
+  const userBrush = {head:null, leader:null, light:lastLamp, intensity:0};
+  const wanderers = ambient ? [false,true].map(secondary=>{
+    const dot=document.createElement('span');
+    dot.className=secondary ? 'garden-pointer garden-pointer-secondary' : 'garden-pointer';
+    dot.setAttribute('aria-hidden','true');
+    hero.append(dot);
+    return {dot, path:null, head:null, leader:null, light:lastLamp, intensity:0};
+  }) : [];
+  const brushes=[{brush:userBrush,uniform:'userLight',weight:1.8},
+    ...wanderers.map((brush,i)=>({brush,uniform:i===0 ? 'wanderingLight' : 'occasionalLight',weight:1}))];
+  let nextStroke=0;
   function schedule(){
     if(!frame && visible && artSize && !document.hidden) frame=requestAnimationFrame(draw);
   }
@@ -437,7 +466,7 @@ function garden(hero) {
     contactTime=new Float64Array(w*h);
     gl.activeTexture(gl.TEXTURE2);
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,w,h,0,gl.RGB,gl.UNSIGNED_BYTE,bytes);
-    head=null;
+    userBrush.head=userBrush.leader=null;
     const files=portrait.matches?['wall-tall-water.jpg','wall-tall-water-geometry.png','wall-tall-water-surface.jpg','wall-tall-water-shapes.png']:['wall-water.jpg','wall-water-geometry.png','wall-water-surface.jpg','wall-water-shapes.png'];
     if(source!==files[0]){
       source=files[0];
@@ -464,54 +493,73 @@ function garden(hero) {
     }
     schedule();
   }
-  const dot=document.createElement('span');
-  dot.className='garden-pointer';
-  dot.setAttribute('aria-hidden','true');
-  hero.append(dot);
-  let leader=null;
-  const ambient = document.body.classList.contains('ambient-landing');
-  let lastInput = -Infinity, nextStroke = 0, path = null;
-  function ambientAim(time) {
-    if (!path && time >= nextStroke) {
-      const angle = Math.random() * 2 * Math.PI;
-      const roll = Math.random();
-      const length = roll < .42 ? .025 + Math.random() * .055
-        : roll < .75 ? .14 + Math.random() * .13
-        : .38 + Math.random() * .30;
-      const dx = length * Math.cos(angle), dy = length * Math.sin(angle);
-      path = {
-        x: .09 + Math.max(0,-dx) + Math.random() * (.82-Math.abs(dx)),
-        y: .09 + Math.max(0,-dy) + Math.random() * (.82-Math.abs(dy)),
-        dx, dy, bend: (Math.random()-.5)*.36,
-        start: time, duration: 650 + length * 8000
-      };
-      head = leader = null;
+  function startWander(brush, time){
+    const roll=Math.random();
+    const length=roll<.42 ? .025+Math.random()*.055
+      : roll<.75 ? .14+Math.random()*.13
+      : .38+Math.random()*.30;
+    const edge=Math.random()<.30 ? Math.floor(Math.random()*4) : -1;
+    const direction=Math.random()<.5 ? -1 : 1;
+    const angle=Math.random()*2*Math.PI;
+    let dx=length*Math.cos(angle),dy=length*Math.sin(angle);
+    if(edge>=0){
+      dx=edge<2 ? length*direction : 0;
+      dy=edge<2 ? 0 : length*direction;
     }
-    if (!path) return null;
-    const progress = (time-path.start)/path.duration;
-    if (progress >= 1) {
-      path = null;
-      nextStroke = time + 450 + Math.random()*1100;
+    const pad=.065;
+    let x=pad+Math.max(0,-dx)+Math.random()*(1-2*pad-Math.abs(dx));
+    let y=pad+Math.max(0,-dy)+Math.random()*(1-2*pad-Math.abs(dy));
+    let bend=(Math.random()-.5)*.36;
+    // Trace parallel to the selected edge, with a shallow bend toward the wall.
+    const inset=.015+Math.random()*.025;
+    if(edge===0 || edge===1){
+      y=edge===0 ? inset : 1-inset;
+      bend=(edge===0 ? 1 : -1)*direction*.08;
+    }
+    if(edge===2 || edge===3){
+      x=edge===2 ? inset : 1-inset;
+      bend=(edge===2 ? -1 : 1)*direction*.08;
+    }
+    brush.path={x,y,dx,dy,bend,start:time,duration:520+length*6200};
+    brush.head=brush.leader=null;
+  }
+  function wanderAim(brush,time){
+    const path=brush.path;
+    if(!path || time<path.start) return null;
+    const progress=(time-path.start)/path.duration;
+    if(progress>=1){
+      brush.path=null;
       return null;
     }
-    const u = progress*progress*(3-2*progress);
-    const arc = Math.sin(Math.PI*u)*path.bend;
-    return {x:path.x+path.dx*u-path.dy*arc, y:path.y+path.dy*u+path.dx*arc};
+    const u=progress*progress*(3-2*progress);
+    const arc=Math.sin(Math.PI*u)*path.bend;
+    return {x:path.x+path.dx*u-path.dy*arc,y:path.y+path.dy*u+path.dx*arc};
+  }
+  function advanceBrush(brush,aim,dt,time){
+    if(!aim){
+      brush.intensity*=Math.exp(-dt/.27);
+      return;
+    }
+    const leader=brush.leader||aim;
+    const follow=1-Math.exp(-dt/.095);
+    brush.leader={x:leader.x+(aim.x-leader.x)*follow,y:leader.y+(aim.y-leader.y)*follow};
+    const from=brush.head||brush.leader;
+    const ease=1-Math.exp(-dt/.13);
+    brush.head={x:from.x+(brush.leader.x-from.x)*ease,y:from.y+(brush.leader.y-from.y)*ease};
+    brush.light=brush.head;
+    brush.intensity=Math.min(1,brush.intensity+dt*9);
+    stroke(from,brush.head,dt,time);
   }
   function mark(e){
     if(reduce.matches || !e.isPrimary) return;
-    if (ambient && performance.now()-lastInput > 1800) head = leader = null;
-    path = null;
-    lastInput = performance.now();
     const r=hero.getBoundingClientRect();
     target={x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height};
-    hero.classList.toggle('tracking',e.pointerType==='mouse' && !e.target.closest('a,button'));
     seed=false;
     schedule();
   }
   function release(){
-    target=null; leader=null; head=null;
-    hero.classList.remove('tracking');
+    target=null;
+    userBrush.head=userBrush.leader=null;
     schedule();
   }
   // Rasterize the full swept segment. A quick flick and a slow stroke leave continuous paths.
@@ -547,22 +595,31 @@ function garden(hero) {
     const dt=Math.min(.25,(t-previousTime)/1000 || .016);
     previousTime=t;
     if(!introStart) introStart=t;
-    if(seed && t-introStart>1600){seed=false;head=null;}
-    const idle = ambient && !reduce.matches && t-lastInput > 1800;
-    const aim = idle ? ambientAim(t) : target || (!ambient && seed ? {x:.31,y:.34} : null);
-    if (idle) hero.classList.toggle('tracking', Boolean(aim));
+    if(seed && t-introStart>1600){
+      seed=false;
+      userBrush.head=userBrush.leader=null;
+    }
+    const motion=!reduce.matches;
+    const aim=motion ? target||(!ambient&&seed ? {x:.31,y:.34} : null) : null;
     const decay=Math.exp(-dt/.405), attack=1-Math.exp(-dt/.15);
     for(let i=0;i<energy.length;i++) energy[i]*=decay;
-    if(aim && !reduce.matches){
-      leader=leader||aim;
-      const follow=1-Math.exp(-dt/.095);
-      leader={x:leader.x+(aim.x-leader.x)*follow,y:leader.y+(aim.y-leader.y)*follow};
-      const from=head||leader,ease=1-Math.exp(-dt/.13);
-      head={x:from.x+(leader.x-from.x)*ease,y:from.y+(leader.y-from.y)*ease};
-      dot.style.left=(100*head.x)+'%';
-      dot.style.top=(100*head.y)+'%';
-      stroke(from,head,dt,t);
+
+    if(ambient && motion && t>=nextStroke){
+      startWander(wanderers[0],t);
+      nextStroke=t+wanderers[0].path.duration+280+Math.random()*560;
+      if(!wanderers[1].path && Math.random()<.14) startWander(wanderers[1],t+240);
     }
+    wanderers.forEach(brush=>{
+      const aim=motion ? wanderAim(brush,t) : null;
+      advanceBrush(brush,aim,dt,t);
+      brush.dot.classList.toggle('is-active',Boolean(aim));
+      if(aim){
+        brush.dot.style.left=(100*brush.head.x)+'%';
+        brush.dot.style.top=(100*brush.head.y)+'%';
+      }
+    });
+    // The native pointer gets its own brush and interacts even during an ambient stroke.
+    advanceBrush(userBrush,aim,dt,t);
     let moving=false;
     for(let i=0;i<field.length;i++){
       field[i]+=(energy[i]-field[i])*attack;
@@ -578,9 +635,12 @@ function garden(hero) {
     const ratio=canvas.width/canvas.height/(artSize[0]/artSize[1]);
     gl.uniform2f(loc.cover,Math.min(1,ratio),Math.min(1,1/ratio));
     gl.uniform2f(loc.pixel,1/artSize[0],1/artSize[1]);
-    const lamp=head||lastLamp;
-    lastLamp=lamp;
-    gl.uniform2f(loc.lightPoint,lamp.x,lamp.y);
+    if(aim) lastLamp=userBrush.light;
+    gl.uniform2f(loc.lightPoint,lastLamp.x,lastLamp.y);
+    brushes.forEach(({brush,uniform,weight})=>{
+      const strength=motion ? brush.intensity*weight : 0;
+      gl.uniform3f(loc[uniform],brush.light.x,brush.light.y,strength);
+    });
     gl.uniform1f(loc.resting,reduce.matches?.76:0);
     const stage=hero.parentElement;
     const progress=Math.max(0,Math.min(1,-stage.getBoundingClientRect().top/Math.max(1,stage.offsetHeight-hero.offsetHeight)));
