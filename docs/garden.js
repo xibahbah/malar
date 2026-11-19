@@ -483,7 +483,6 @@ function garden(hero) {
     if (entranceTime >= 850) root.classList.add('relief-reveal');
     if (entranceTime >= 2150) {
       finishEntrance();
-      nextStroke = time + 400;
     }
   }
   const userBrush = {head:null, leader:null, light:lastLamp, intensity:0};
@@ -672,7 +671,8 @@ function garden(hero) {
     for(let i=0;i<energy.length;i++) energy[i]*=decay;
 
     advanceEntrance(dt,t);
-    if(ambient && motion && !entering && t>=nextStroke){
+    // Begin wandering as the lettering settles and the outer relief fades.
+    if(ambient && motion && (!entering || entranceTime>=1800) && t>=nextStroke){
       startWander(wanderers[0],t);
       nextStroke=t+wanderers[0].path.duration+80+1100*Math.pow(Math.random(),1.45);
       if(!wanderers[1].path && Math.random()<.14) startWander(wanderers[1],t+100+350*Math.random());
