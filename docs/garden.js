@@ -490,10 +490,7 @@ function garden(hero) {
     schedule();
   }
   function startWander(brush, time){
-    const roll=Math.random();
-    const length=roll<.42 ? .025+Math.random()*.055
-      : roll<.75 ? .14+Math.random()*.13
-      : .38+Math.random()*.30;
+    const length=.035+.70*Math.pow(Math.random(),1.55);
     const edge=Math.random()<.30 ? Math.floor(Math.random()*4) : -1;
     const direction=Math.random()<.5 ? -1 : 1;
     const angle=Math.random()*2*Math.PI;
@@ -516,7 +513,18 @@ function garden(hero) {
       x=edge===2 ? inset : 1-inset;
       bend=(edge===2 ? -1 : 1)*direction*.08;
     }
-    brush.path={x,y,dx,dy,bend,start:time,duration:420+length*5000};
+    // Spread individual sweep speeds around a mean of 1.7× the previous rate.
+    const speed=1.7*(.70+.60*Math.random());
+    const easing=.20+.75*Math.random();
+    const weave=edge<0 ? (Math.random()-.5)*.72 : 0;
+    if(edge<0){
+      const clearanceX=Math.min(x,x+dx,1-x,1-x-dx);
+      const clearanceY=Math.min(y,y+dy,1-y,1-y-dy);
+      const maxBend=Math.min(clearanceX/Math.max(.001,Math.abs(dy)),
+                            clearanceY/Math.max(.001,Math.abs(dx)))/(1+Math.abs(weave));
+      bend=Math.sign(bend)*Math.min(Math.abs(bend),maxBend);
+    }
+    brush.path={x,y,dx,dy,bend,easing,weave,start:time,duration:(420+length*5000)/speed};
     brush.head=brush.leader=null;
   }
   function wanderAim(brush,time){
@@ -527,20 +535,21 @@ function garden(hero) {
       brush.path=null;
       return null;
     }
-    const u=progress*progress*(3-2*progress);
-    const arc=Math.sin(Math.PI*u)*path.bend;
+    const eased=progress*progress*(3-2*progress);
+    const u=progress+(eased-progress)*path.easing;
+    const arc=path.bend*(Math.sin(Math.PI*u)+path.weave*Math.sin(2*Math.PI*u));
     return {x:path.x+path.dx*u-path.dy*arc,y:path.y+path.dy*u+path.dx*arc};
   }
-  function advanceBrush(brush,aim,dt,time){
+  function advanceBrush(brush,aim,dt,time,response=1){
     if(!aim){
       brush.intensity*=Math.exp(-dt/.27);
       return;
     }
     const leader=brush.leader||aim;
-    const follow=1-Math.exp(-dt/.095);
+    const follow=1-Math.exp(-dt*response/.095);
     brush.leader={x:leader.x+(aim.x-leader.x)*follow,y:leader.y+(aim.y-leader.y)*follow};
     const from=brush.head||brush.leader;
-    const ease=1-Math.exp(-dt/.13);
+    const ease=1-Math.exp(-dt*response/.13);
     brush.head={x:from.x+(brush.leader.x-from.x)*ease,y:from.y+(brush.leader.y-from.y)*ease};
     brush.light=brush.head;
     brush.intensity=Math.min(1,brush.intensity+dt*9);
@@ -602,11 +611,11 @@ function garden(hero) {
 
     if(ambient && motion && t>=nextStroke){
       startWander(wanderers[0],t);
-      nextStroke=t+wanderers[0].path.duration+280+Math.random()*560;
-      if(!wanderers[1].path && Math.random()<.14) startWander(wanderers[1],t+240);
+      nextStroke=t+wanderers[0].path.duration+80+1100*Math.pow(Math.random(),1.45);
+      if(!wanderers[1].path && Math.random()<.14) startWander(wanderers[1],t+100+350*Math.random());
     }
     wanderers.forEach(brush=>{
-      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t);
+      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t,1.7);
     });
     // The native pointer gets its own brush and interacts even during an ambient stroke.
     advanceBrush(userBrush,aim,dt,t);
