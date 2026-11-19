@@ -233,8 +233,40 @@ function garden(hero) {
   dot.setAttribute('aria-hidden','true');
   hero.append(dot);
   let leader=null;
+  const ambient = document.body.classList.contains('ambient-landing');
+  let lastInput = -Infinity, nextStroke = 0, path = null;
+  function ambientAim(time) {
+    if (!path && time >= nextStroke) {
+      const angle = Math.random() * 2 * Math.PI;
+      const roll = Math.random();
+      const length = roll < .42 ? .025 + Math.random() * .055
+        : roll < .75 ? .14 + Math.random() * .13
+        : .38 + Math.random() * .30;
+      const dx = length * Math.cos(angle), dy = length * Math.sin(angle);
+      path = {
+        x: .09 + Math.max(0,-dx) + Math.random() * (.82-Math.abs(dx)),
+        y: .09 + Math.max(0,-dy) + Math.random() * (.82-Math.abs(dy)),
+        dx, dy, bend: (Math.random()-.5)*.36,
+        start: time, duration: 650 + length * 8000
+      };
+      head = leader = null;
+    }
+    if (!path) return null;
+    const progress = (time-path.start)/path.duration;
+    if (progress >= 1) {
+      path = null;
+      nextStroke = time + 450 + Math.random()*1100;
+      return null;
+    }
+    const u = progress*progress*(3-2*progress);
+    const arc = Math.sin(Math.PI*u)*path.bend;
+    return {x:path.x+path.dx*u-path.dy*arc, y:path.y+path.dy*u+path.dx*arc};
+  }
   function mark(e){
     if(reduce.matches || !e.isPrimary) return;
+    if (ambient && performance.now()-lastInput > 1800) head = leader = null;
+    path = null;
+    lastInput = performance.now();
     const r=hero.getBoundingClientRect();
     target={x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height};
     hero.classList.toggle('tracking',e.pointerType==='mouse' && !e.target.closest('a,button'));
@@ -280,7 +312,9 @@ function garden(hero) {
     previousTime=t;
     if(!introStart) introStart=t;
     if(seed && t-introStart>1600){seed=false;head=null;}
-    const aim=target||(seed?{x:.31,y:.34}:null);
+    const idle = ambient && !reduce.matches && t-lastInput > 1800;
+    const aim = idle ? ambientAim(t) : target || (!ambient && seed ? {x:.31,y:.34} : null);
+    if (idle) hero.classList.toggle('tracking', Boolean(aim));
     const decay=Math.exp(-dt/.405), attack=1-Math.exp(-dt/.15);
     for(let i=0;i<energy.length;i++) energy[i]*=decay;
     if(aim && !reduce.matches){
@@ -319,7 +353,7 @@ function garden(hero) {
     gl.clear(gl.DEPTH_BUFFER_BIT);
     gl.drawElements(gl.TRIANGLE_STRIP,indices.length,gl.UNSIGNED_SHORT,0);
     canvas.classList.add('ready');
-    if(!reduce.matches && (aim||moving)) schedule();
+    if(!reduce.matches && (aim||moving||ambient)) schedule();
   }
   hero.addEventListener('pointermove',mark);
   hero.addEventListener('pointerdown',mark);

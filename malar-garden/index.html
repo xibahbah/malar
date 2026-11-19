@@ -7,11 +7,58 @@
     }
   });
 </script><link rel="stylesheet" href="garden.css"><script src="garden.js" defer></script></head>
-<body><main><section class="stage" id="garden" aria-label="Interactive Kerala garden relief"><div class="hero">
+<body class="ambient-landing"><main><section class="stage" id="garden" aria-label="Interactive Kerala garden relief"><div class="hero">
 <canvas aria-hidden="true"></canvas>
-<button id="menu" aria-haspopup="dialog">Menu <i></i></button>
-
-<div class="foot"><a href="#studio">Discover the studio <span>↘</span></a><button id="sound" aria-pressed="false">Sound off</button></div>
-</div><div class="axis"><a class="signature" href="#garden" aria-label="Malar home"><span lang="ml">മലർ</span> MALAR</a><h1>Jewelry &amp; crafts,<br class="phone"> made by hand.</h1><a href="#grove" class="scroll">Scroll down</a></div><span id="grove" aria-hidden="true"></span></section>
-<section id="studio"><div class="detail" role="img" aria-label="Detail of a bird and a carved hibiscus"></div><article><small>THE STUDIO</small><h2><em>Malar</em> means flower.</h2><p>We started with a table of earrings at a weekend market and a jar of flowers beside them. The flowers sold the earrings.</p><a href="#garden">Return to the garden ↑</a></article></section></main>
-<dialog><form method="dialog"><button>Close ×</button></form><nav aria-label="Main"><a href="#garden">The garden</a><a href="#studio">The studio</a></nav><div lang="ml">മലർ</div></dialog></body></html>
+</div><div class="axis"><h1 class="wordmark"><span class="wordmark-latin">MALAR</span><span class="wordmark-script" lang="ml">മലർ</span></h1></div><span id="grove" aria-hidden="true"></span></section>
+<header class="shop-header">
+  <a class="shop-brand" href="#garden">MALAR</a>
+  <nav class="shop-nav" aria-label="Shop"><a href="#collection">Jewelry</a>
+    <a href="#crafts">Crafts</a>
+    <a href="#studio">Story</a>
+    <a href="#gift">Gift cards</a></nav>
+  <div class="shop-controls">
+    <button id="sound" aria-pressed="false">Sound off</button>
+    <button id="menu" aria-haspopup="dialog">Menu <i></i></button>
+  </div>
+</header>
+<section class="shop-section" id="collection" aria-labelledby="collection-title">
+  <h2 id="collection-title">Jewelry</h2>
+  <p>Collection coming soon.</p>
+  <ul class="product-grid">
+    <li><div class="product-placeholder" aria-hidden="true"></div><h3>Earrings</h3></li>
+    <li><div class="product-placeholder" aria-hidden="true"></div><h3>Rings</h3></li>
+    <li><div class="product-placeholder" aria-hidden="true"></div><h3>Necklaces</h3></li>
+  </ul>
+</section>
+<section class="shop-section" id="crafts" aria-labelledby="crafts-title">
+  <h2 id="crafts-title">Crafts</h2>
+  <p>Collection coming soon.</p>
+  <ul class="product-grid">
+    <li><div class="product-placeholder" aria-hidden="true"></div><h3>Ceramics</h3></li>
+    <li><div class="product-placeholder" aria-hidden="true"></div><h3>Metalwork</h3></li>
+    <li><div class="product-placeholder" aria-hidden="true"></div><h3>Woven goods</h3></li>
+  </ul>
+</section>
+<section id="studio" class="shop-section shop-feature" aria-labelledby="studio-title">
+  <div class="detail" role="img" aria-label="Detail of a carved botanical relief"></div>
+  <article><small>THE STUDIO</small><h2 id="studio-title">Our story</h2><p>Malar means flower. More about the studio is coming soon.</p></article>
+</section>
+<section id="gift" class="shop-section shop-feature" aria-labelledby="gift-title">
+  <div class="gift-preview" aria-hidden="true"><span>MALAR</span><small>GIFT CARD</small></div>
+  <article><h2 id="gift-title">Gift cards</h2><p>Digital gift cards are coming soon.</p></article>
+</section>
+</main>
+<footer class="shop-footer">
+  <a class="shop-brand" href="#garden">MALAR</a>
+  <p>Newsletter coming soon.</p>
+  <a href="#garden">Back to top ↑</a>
+</footer>
+<dialog>
+  <form method="dialog"><button>Close ×</button></form>
+  <nav aria-label="Main"><a href="#garden">The garden</a><a href="#collection">Jewelry</a>
+    <a href="#crafts">Crafts</a>
+    <a href="#studio">Story</a>
+    <a href="#gift">Gift cards</a></nav>
+</dialog>
+</body>
+</html>

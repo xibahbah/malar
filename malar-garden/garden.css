@@ -19,3 +19,133 @@
 #studio{background:#36271f;color:#eee4d4}
 #studio small{color:#c5a16a}
 dialog{background:#21150e;color:#fff}
+
+.axis .wordmark {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .12em;
+  font-size: clamp(3rem, 8.5vw, 7.5rem);
+  line-height: .95;
+  letter-spacing: normal;
+}
+.wordmark-latin {
+  font: 600 .64em/1 Georgia, serif;
+  letter-spacing: .24em;
+  padding-inline-start: .24em;
+  transform: scaleX(1.12);
+}
+.axis .scroll {
+  grid-column: 3;
+}
+@media (max-aspect-ratio: 1/1) {
+  .axis .scroll {
+    position: absolute;
+    top: calc(100% + 1.6rem);
+  }
+}
+
+#studio {
+  position: relative;
+}
+.studio-controls {
+  position: absolute;
+  inset: .25rem 3% auto auto;
+  display: flex;
+  gap: .5rem;
+}
+.studio-controls #menu {
+  position: static;
+}
+.studio-controls button:focus-visible {
+  outline: 2px solid #c5a16a;
+  outline-offset: 2px;
+}
+
+.wordmark-script {
+  font: 400 .4em/1.25 "Malayalam Sangam MN", "Noto Sans Malayalam", "Nirmala UI", sans-serif;
+}
+
+.shop-header, .shop-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  padding: 1.5rem clamp(1.25rem, 7vw, 7rem);
+  background: #21150e;
+  color: #f2e8d8;
+}
+.shop-brand {
+  font: 600 1rem Georgia, serif;
+  letter-spacing: .22em;
+}
+.shop-nav, .shop-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem 1.25rem;
+}
+.shop-nav a {
+  font: inherit;
+  letter-spacing: normal;
+}
+.shop-controls #menu {
+  position: static;
+}
+.shop-section {
+  padding: clamp(3rem, 8vw, 8rem) clamp(1.25rem, 7vw, 7rem);
+  background: #eee6d8;
+  color: #2d211a;
+}
+.shop-section h2 {
+  margin: 0;
+}
+#crafts, #gift {
+  background: #e6d9c6;
+}
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 1.5rem;
+  margin: 2.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.product-placeholder {
+  aspect-ratio: 4 / 5;
+  background: radial-gradient(ellipse at 32% 22%, #d9bda1, #83664f);
+}
+.product-grid li:nth-child(2) .product-placeholder {
+  background: radial-gradient(ellipse at 55% 28%, #dcd1b7, #8b7e63);
+}
+.product-grid li:nth-child(3) .product-placeholder {
+  background: radial-gradient(ellipse at 32% 40%, #c6a88f, #745c50);
+}
+.product-grid h3 {
+  margin: .8rem 0 0;
+  font: 400 1.4rem Georgia, serif;
+}
+.shop-feature {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: clamp(2rem, 6vw, 6rem);
+}
+#studio.shop-feature { min-height: auto; }
+.shop-feature .detail { height: auto; aspect-ratio: 4 / 3; }
+.gift-preview {
+  display: grid;
+  place-content: center;
+  gap: 1rem;
+  aspect-ratio: 8 / 5;
+  background: #36271f;
+  color: #f2e8d8;
+  text-align: center;
+}
+.gift-preview span { font: 600 clamp(1.5rem, 4vw, 4rem) Georgia, serif; letter-spacing: .2em; }
+.shop-footer p { margin: 0; }
+@media (max-width: 640px) {
+  .shop-feature, #studio.shop-feature { grid-template-columns: 1fr; }
+}
