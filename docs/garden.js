@@ -389,7 +389,11 @@ function garden(hero) {
       // The trail stores local swipe velocity. Only its moving edges catch colored light.
       float speedTint=smoothstep(.018,.60,length(sweep));
       vec3 glint=vec3(.023,.016,-.017)*warm+vec3(-.016,.024,-.013)*cool;
-      vec3 illumination=localLift*(vec3(.070)*max(facing,0.)+vec3(.032)*min(facing,0.)+speedTint*glint);
+      // The opening pulse is fast, so let its directional highlights catch sooner.
+      float openingGlint=introDepth*smoothstep(.025,.26,length(sweep));
+      vec3 openingTint=vec3(.065,.039,-.014)*warm+vec3(-.014,.071,-.010)*cool;
+      vec3 illumination=localLift*(vec3(.070)*max(facing,0.)+vec3(.032)*min(facing,0.)
+                                  +speedTint*glint+openingGlint*openingTint);
       // Keep mineral specks attached to the wall as the camera scrolls.
       vec2 stone=tex/pixel;
       vec2 cell=floor(stone*.46);
