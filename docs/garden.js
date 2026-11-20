@@ -329,14 +329,16 @@ function garden(hero) {
     varying vec2 uv;
     uniform highp sampler2D field,heightMap;
     uniform vec2 cover,lightPoint;
-    uniform float pan,resting,introDepth;
+    uniform float pan,resting;
     ${localLighting}
     void main(){
       uv=pos*.5+.5;
       vec2 p=vec2(uv.x,1.-uv.y);
       vec2 tex=(p-.5)*cover+.5+vec2(0.,pan);
       float h=texture2D(heightMap,tex).r;
-      float rise=max(resting,smoothstep(.025,mix(.78,.53,introDepth),texture2D(field,p).r));
+      vec4 contact=texture2D(field,p);
+      float introDepth=contact.a;
+      float rise=max(resting,smoothstep(.025,mix(.78,.53,introDepth),contact.r));
       float rim=1.-smoothstep(.965,1.,max(abs(pos.x),abs(pos.y)));
       float z=mix(.060,.096,introDepth)*h*rise*rim;
       vec2 localLamp=lightFor(p);
@@ -348,13 +350,14 @@ function garden(hero) {
     varying vec2 uv;
     uniform highp sampler2D mural, field, heightMap, normalMap, shapeMap;
     uniform vec2 cover, pixel, lightPoint;
-    uniform float resting, pan, introSurface, introDepth;
+    uniform float resting, pan, introSurface;
     ${localLighting}
     void main(){
       vec2 p=vec2(uv.x,1.-uv.y);
       vec2 tex=(p-.5)*cover+.5+vec2(0.,pan);
       float h=texture2D(heightMap,tex).r;
-      vec3 contact=texture2D(field,p).rgb;
+      vec4 contact=texture2D(field,p);
+      float introDepth=contact.a;
       float brush=contact.r;
       vec2 sweep=(contact.gb*255.-128.)/126.;
       // Adjacent pixels on one carved form share a contact anchor.
@@ -457,7 +460,7 @@ function garden(hero) {
   const pos=gl.getAttribLocation(program,'pos');
   gl.enableVertexAttribArray(pos);
   gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
-  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting','introSurface','introDepth','userLight','wanderingLight','occasionalLight','entranceLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
+  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting','introSurface','userLight','wanderingLight','occasionalLight','entranceLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
   function makeTexture(unit,name){
     const tex=gl.createTexture();
     gl.activeTexture(gl.TEXTURE0+unit);
@@ -473,7 +476,7 @@ function garden(hero) {
   const shapes=makeTexture(4,'shapeMap');
   gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
   const portrait=matchMedia('(max-aspect-ratio:1/1)'), reduce=matchMedia('(prefers-reduced-motion:reduce)');
-  let w,h,energy,field,bytes,source,artSize,frame=0,visible=true,previousTime=null;
+  let w,h,energy,field,revealEnergy,revealField,bytes,source,artSize,frame=0,visible=true,previousTime=null;
   let lastLamp={x:.31,y:.34};
   let strokeX,strokeY,contactTime;
   let target=null, seed=true, introStart=0;
@@ -507,7 +510,7 @@ function garden(hero) {
       const i = y * w + x;
       const band = Math.max(0, 1 - Math.abs(revealDistance[i] - radius) / revealWidth[i]);
       const strength = band * band * (3 - 2 * band) * fade;
-      energy[i] = Math.max(energy[i], strength);
+      revealEnergy[i] = Math.max(revealEnergy[i], strength);
       if (strength > .05) {
         strokeX[i] = dx / Math.max(.001, distance) * strength * .55;
         strokeY[i] = dy / Math.max(.001, distance) * strength * .55;
@@ -540,7 +543,9 @@ function garden(hero) {
     gl.viewport(0,0,canvas.width,canvas.height);
     w=Math.max(32,Math.round(hero.clientWidth/6));
     h=Math.max(32,Math.round(hero.clientHeight/6));
-    energy=new Float32Array(w*h); field=new Float32Array(w*h); bytes=new Uint8Array(w*h*3);
+    energy=new Float32Array(w*h); field=new Float32Array(w*h);
+    revealEnergy=new Float32Array(w*h); revealField=new Float32Array(w*h);
+    bytes=new Uint8Array(w*h*4);
     strokeX=new Float32Array(w*h);
     strokeY=new Float32Array(w*h);
     contactTime=new Float64Array(w*h);
@@ -560,7 +565,7 @@ function garden(hero) {
       revealWidth[i]=.07+.055*(.5+.5*Math.sin(angle*7+dx*13-dy*19));
     }
     gl.activeTexture(gl.TEXTURE2);
-    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,w,h,0,gl.RGB,gl.UNSIGNED_BYTE,bytes);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,bytes);
     userBrush.head=userBrush.leader=null;
     const files=portrait.matches?['wall-tall-water.jpg','wall-tall-water-geometry.png','wall-tall-water-surface.jpg','wall-tall-water-shapes.png']:['wall-water.jpg','wall-water-geometry.png','wall-water-surface.jpg','wall-water-shapes.png'];
     if(source!==files[0]){
@@ -606,14 +611,14 @@ function garden(hero) {
     const x = Math.max(.05, (title.left - stage.left) / stage.width - .07);
     const end = Math.min(.95, (title.right - stage.left) / stage.width + .07);
     const y = (title.top + title.height / 2 - stage.top) / stage.height;
-    const duration = 700;
+    const duration = 850;
     brush.head = brush.leader = null;
-    brush.path = {x, y, dx:end - x, dy:0, bend:0, easing:.55, weave:0, start:time, duration, response:7};
+    brush.path = {x, y, dx:end - x, dy:0, bend:0, easing:.55, weave:0, start:time, duration};
     return time + duration;
   }
   function startWander(brush, time){
     const length=.035+.70*Math.pow(Math.random(),1.55);
-    const edge=Math.random()<.30 ? Math.floor(Math.random()*4) : -1;
+    const edge=Math.random()<.48 ? Math.floor(Math.random()*4) : -1;
     const direction=Math.random()<.5 ? -1 : 1;
     const angle=Math.random()*2*Math.PI;
     let dx=length*Math.cos(angle),dy=length*Math.sin(angle);
@@ -626,7 +631,14 @@ function garden(hero) {
     let y=pad+Math.max(0,-dy)+Math.random()*(1-2*pad-Math.abs(dy));
     let bend=(Math.random()-.5)*.36;
     // Trace parallel to the selected edge, with a shallow bend toward the wall.
-    const inset=.015+Math.random()*.025;
+    const inset=.012+Math.random()*.025;
+    if(edge>=0 && Math.random()<.55){
+      // Lead into or out of a corner so the brush also reaches the ends of each edge.
+      const cornerSide=Math.random()<.5 ? -1 : 1;
+      const corner=cornerSide<0 ? inset : 1-inset;
+      if(edge<2) x=direction===cornerSide ? corner-dx : corner;
+      else y=direction===cornerSide ? corner-dy : corner;
+    }
     if(edge===0 || edge===1){
       y=edge===0 ? inset : 1-inset;
       bend=(edge===0 ? 1 : -1)*direction*.08;
@@ -731,34 +743,48 @@ function garden(hero) {
     }
     const motion=!reduce.matches;
     const aim=motion ? target||(!ambient&&seed ? {x:.31,y:.34} : null) : null;
-    const decay=Math.exp(-dt/(entering ? .19 : .405)), attack=1-Math.exp(-dt/.15);
-    for(let i=0;i<energy.length;i++) energy[i]*=decay;
+    const decay=Math.exp(-dt/.405), revealDecay=Math.exp(-dt/.19), attack=1-Math.exp(-dt/.15);
+    for(let i=0;i<energy.length;i++){
+      energy[i]*=decay;
+      revealEnergy[i]*=revealDecay;
+    }
 
     // Paint the base relief before starting the entrance clock.
     if (!firstFrame && !loader?.isConnected) advanceEntrance(dt,t);
     // Random paths follow the first sweep through the title.
     if(ambient && motion && (!entering || nextStroke>0) && t>=nextStroke){
       startWander(wanderers[0],t);
-      nextStroke=t+wanderers[0].path.duration+80+1100*Math.pow(Math.random(),1.45);
-      if(!wanderers[1].path && Math.random()<.14) startWander(wanderers[1],t+100+350*Math.random());
+      const duration=wanderers[0].path.duration;
+      nextStroke=t+duration+900*Math.pow(Math.random(),1.6);
+      if(!wanderers[1].path && Math.random()<.16){
+        startWander(wanderers[1],t+duration*(.5+.4*Math.random()));
+      }
     }
     wanderers.forEach(brush=>{
-      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t,brush.path?.response ?? 1.7);
+      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t,1.7);
     });
     // The native pointer gets its own brush and interacts even during an ambient stroke.
     advanceBrush(userBrush,aim,dt,t);
+    // Keep the opening ripple's extra depth off the ordinary hover strokes.
+    const surfaceFade = entering ? Math.max(0, Math.min(1, (entranceTime - 1300) / 800)) : 1;
+    const ambientSurface = surfaceFade*surfaceFade*(3-2*surfaceFade);
     let moving=false;
     for(let i=0;i<field.length;i++){
       field[i]+=(energy[i]-field[i])*attack;
+      revealField[i]+=(revealEnergy[i]-revealField[i])*attack;
       const age=(t-contactTime[i])*.001;
       const spring=age<1.25 ? Math.exp(-6*age) : 0;
-      bytes[i*3]=Math.round(field[i]*255);
-      bytes[i*3+1]=128+Math.round(126*strokeX[i]*spring);
-      bytes[i*3+2]=128+Math.round(126*strokeY[i]*spring);
-      if(bytes[i*3]>0) moving=true;
+      const coverage=Math.max(field[i],revealField[i]);
+      const openingShare=Math.max(0,revealField[i]-field[i])/Math.max(.01,revealField[i]);
+      const offset=i*4;
+      bytes[offset]=Math.round(coverage*255);
+      bytes[offset+1]=128+Math.round(126*strokeX[i]*spring);
+      bytes[offset+2]=128+Math.round(126*strokeY[i]*spring);
+      bytes[offset+3]=Math.round((1-ambientSurface)*openingShare*255);
+      if(bytes[offset]>0) moving=true;
     }
     gl.activeTexture(gl.TEXTURE2);
-    gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,w,h,gl.RGB,gl.UNSIGNED_BYTE,bytes);
+    gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,w,h,gl.RGBA,gl.UNSIGNED_BYTE,bytes);
     const ratio=canvas.width/canvas.height/(artSize[0]/artSize[1]);
     gl.uniform2f(loc.cover,Math.min(1,ratio),Math.min(1,1/ratio));
     gl.uniform2f(loc.pixel,1/artSize[0],1/artSize[1]);
@@ -769,11 +795,7 @@ function garden(hero) {
       gl.uniform3f(loc[uniform],brush.light.x,brush.light.y,strength);
     });
     gl.uniform1f(loc.resting,reduce.matches?.76:0);
-    // Restore the ambient surface gradually as the opening ripple clears the frame.
-    const surfaceFade = entering ? Math.max(0, Math.min(1, (entranceTime - 1300) / 800)) : 1;
-    const ambientSurface = surfaceFade*surfaceFade*(3-2*surfaceFade);
     gl.uniform1f(loc.introSurface,ambientSurface);
-    gl.uniform1f(loc.introDepth,1-ambientSurface);
     const stage=hero.parentElement;
     const progress=Math.max(0,Math.min(1,-stage.getBoundingClientRect().top/Math.max(1,stage.offsetHeight-hero.offsetHeight)));
     gl.uniform1f(loc.pan,(progress-.5)*(1.-Math.min(1,1/ratio)));
