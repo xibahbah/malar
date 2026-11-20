@@ -259,10 +259,25 @@ function garden(hero) {
   const loader = document.getElementById('garden-loader');
   const loadingStartedAt = performance.now();
   const root = document.documentElement;
-  function showProgress(percent) {
-    if (!loader?.isConnected) return;
-    loader.style.setProperty('--load-progress', percent / 100);
+  const loaderNumber = loader?.querySelector('.garden-loader-number');
+  let progressFrame = 0;
+  function showProgress(percent, duration = 140) {
+    if (!loaderNumber?.isConnected) return;
     loader.setAttribute('aria-valuenow', percent);
+    cancelAnimationFrame(progressFrame);
+    if (duration === 0 || reduce.matches) {
+      loaderNumber.textContent = percent;
+      return;
+    }
+    const start = Number(loaderNumber.textContent);
+    const startTime = performance.now();
+    function countUp(time) {
+      if (!loaderNumber.isConnected) return;
+      const elapsed = Math.min(1, Math.max(0, (time - startTime) / duration));
+      loaderNumber.textContent = Math.floor(start + (percent - start) * elapsed);
+      if (elapsed < 1) progressFrame = requestAnimationFrame(countUp);
+    }
+    progressFrame = requestAnimationFrame(countUp);
   }
   function dismissLoader() {
     clearTimeout(window.malarIntroFallback);
@@ -755,10 +770,12 @@ function garden(hero) {
         gl.finish();
         requestAnimationFrame(() => {
           if (!loader.isConnected || loader.classList.contains('loaded')) return;
-          const fillDuration = reduce.matches ? 0 : Math.max(180, 650 - (performance.now() - loadingStartedAt));
-          loader.style.setProperty('--load-duration', fillDuration + 'ms');
-          showProgress(100);
-          setTimeout(dismissLoader, fillDuration);
+          const countDuration = reduce.matches ? 0 : Math.max(180, 650 - (performance.now() - loadingStartedAt));
+          showProgress(100, countDuration);
+          setTimeout(() => {
+            showProgress(100, 0);
+            dismissLoader();
+          }, countDuration);
         });
       }
     }
