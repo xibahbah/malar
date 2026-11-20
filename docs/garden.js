@@ -617,34 +617,31 @@ function garden(hero) {
     return time + duration;
   }
   function startWander(brush, time){
-    const length=.035+.70*Math.pow(Math.random(),1.55);
     const edge=Math.random()<.48 ? Math.floor(Math.random()*4) : -1;
     const direction=Math.random()<.5 ? -1 : 1;
     const angle=Math.random()*2*Math.PI;
-    let dx=length*Math.cos(angle),dy=length*Math.sin(angle);
-    if(edge>=0){
-      dx=edge<2 ? length*direction : 0;
-      dy=edge<2 ? 0 : length*direction;
-    }
-    const pad=.065;
-    let x=pad+Math.max(0,-dx)+Math.random()*(1-2*pad-Math.abs(dx));
-    let y=pad+Math.max(0,-dy)+Math.random()*(1-2*pad-Math.abs(dy));
+    const vx=edge<0 ? Math.cos(angle) : edge<2 ? direction : 0;
+    const vy=edge<0 ? Math.sin(angle) : edge<2 ? 0 : direction;
+    // Leave room for the visible brush core, even beside two edges at a corner.
+    const inset=brushRadius()*(.64+.08*Math.random());
+    const padX=inset/w, padY=inset/h;
+    const length=Math.min(.035+.70*Math.pow(Math.random(),1.55),
+                          (1-2*padX)/Math.abs(vx), (1-2*padY)/Math.abs(vy));
+    const dx=length*vx, dy=length*vy;
+    let x=padX+Math.max(0,-dx)+Math.random()*Math.max(0,1-2*padX-Math.abs(dx));
+    let y=padY+Math.max(0,-dy)+Math.random()*Math.max(0,1-2*padY-Math.abs(dy));
     let bend=(Math.random()-.5)*.36;
-    // Trace parallel to the selected edge, with a shallow bend toward the wall.
-    const inset=.012+Math.random()*.025;
     if(edge>=0 && Math.random()<.55){
-      // Lead into or out of a corner so the brush also reaches the ends of each edge.
       const cornerSide=Math.random()<.5 ? -1 : 1;
-      const corner=cornerSide<0 ? inset : 1-inset;
-      if(edge<2) x=direction===cornerSide ? corner-dx : corner;
-      else y=direction===cornerSide ? corner-dy : corner;
+      if(edge<2) x=(cornerSide<0 ? padX : 1-padX)-(direction===cornerSide ? dx : 0);
+      else y=(cornerSide<0 ? padY : 1-padY)-(direction===cornerSide ? dy : 0);
     }
     if(edge===0 || edge===1){
-      y=edge===0 ? inset : 1-inset;
+      y=edge===0 ? padY : 1-padY;
       bend=(edge===0 ? 1 : -1)*direction*.08;
     }
     if(edge===2 || edge===3){
-      x=edge===2 ? inset : 1-inset;
+      x=edge===2 ? padX : 1-padX;
       bend=(edge===2 ? -1 : 1)*direction*.08;
     }
     // Spread individual sweep speeds around a mean of 1.7× the previous rate.
@@ -652,11 +649,11 @@ function garden(hero) {
     const easing=.20+.75*Math.random();
     const weave=edge<0 ? (Math.random()-.5)*.72 : 0;
     if(edge<0){
-      const clearanceX=Math.min(x,x+dx,1-x,1-x-dx);
-      const clearanceY=Math.min(y,y+dy,1-y,1-y-dy);
+      const clearanceX=Math.min(x,x+dx,1-x,1-x-dx)-padX;
+      const clearanceY=Math.min(y,y+dy,1-y,1-y-dy)-padY;
       const maxBend=Math.min(clearanceX/Math.max(.001,Math.abs(dy)),
                             clearanceY/Math.max(.001,Math.abs(dx)))/(1+Math.abs(weave));
-      bend=Math.sign(bend)*Math.min(Math.abs(bend),maxBend);
+      bend=Math.sign(bend)*Math.max(0,Math.min(Math.abs(bend),maxBend));
     }
     brush.path={x,y,dx,dy,bend,easing,weave,start:time,duration:(420+length*5000)/speed};
     brush.head=brush.leader=null;
@@ -701,10 +698,13 @@ function garden(hero) {
     userBrush.head=userBrush.leader=null;
     schedule();
   }
+  function brushRadius(){
+    return Math.min(w,h)*.37;
+  }
   // Rasterize the full swept segment. A quick flick and a slow stroke leave continuous paths.
   function stroke(a,b,dt,time){
     const ax=a.x*w,ay=a.y*h,dx=(b.x-a.x)*w,dy=(b.y-a.y)*h;
-    const radius=Math.min(w,h)*.37, span=dx*dx+dy*dy;
+    const radius=brushRadius(), span=dx*dx+dy*dy;
     const speedScale=1/Math.max(1,dt*Math.min(w,h)*1.55,Math.hypot(dx,dy));
     const x0=Math.max(0,Math.floor(Math.min(ax,ax+dx)-radius)), x1=Math.min(w-1,Math.ceil(Math.max(ax,ax+dx)+radius));
     const y0=Math.max(0,Math.floor(Math.min(ay,ay+dy)-radius)), y1=Math.min(h-1,Math.ceil(Math.max(ay,ay+dy)+radius));
