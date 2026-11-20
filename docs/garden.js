@@ -419,7 +419,7 @@ function garden(hero) {
       float castDark=max(0.,.84-dot(texture2D(mural,shadowProbe).rgb,vec3(.299,.587,.114)));
       float broad=.32*min(darkness-crease,castDark)*pow(lift,1.65);
       float contactShade=.58*crease*lift;
-      float shadow=-min(.095*lift,broad+contactShade)*(1.+.28*introDepth);
+      float shadow=-min(.095*lift,broad+contactShade)*(1.+.08*introDepth);
       float light=max(value-.84,0.)*pow(lift,.88)*(1.+.18*introDepth);
       vec3 surfaceColor=wallTone+wall*mix(1.,.35,lift)+shadow*.66
                         +vec3(1.55,1.12,.75)*light+illumination*vec3(1.35,1.12,.88);
