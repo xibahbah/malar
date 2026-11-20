@@ -256,9 +256,24 @@ sound.onclick = async () => {
 
 function garden(hero) {
   const canvas = hero.querySelector('canvas');
+  const loader = document.getElementById('garden-loader');
+  const root = document.documentElement;
+  function showProgress(percent) {
+    if (!loader?.isConnected) return;
+    loader.querySelector('span').textContent = percent + '%';
+    loader.setAttribute('aria-valuenow', percent);
+  }
+  function dismissLoader() {
+    clearTimeout(window.malarIntroFallback);
+    root.classList.remove('garden-loading');
+    if (!loader?.isConnected || loader.classList.contains('loaded')) return;
+    loader.classList.add('loaded');
+    setTimeout(() => loader.remove(), 180);
+  }
   const gl = canvas.getContext('webgl', {alpha:false, antialias:false, depth:true});
   if (!gl || gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS)<2) {
-    document.documentElement.classList.remove('relief-intro', 'relief-reveal');
+    root.classList.remove('relief-intro', 'relief-reveal');
+    dismissLoader();
     const panBackground=()=>{
       const stage=hero.parentElement;
       const fraction=Math.min(1,Math.max(0,-stage.getBoundingClientRect().top/Math.max(1,stage.offsetHeight-hero.offsetHeight)));
@@ -443,8 +458,8 @@ function garden(hero) {
   let strokeX,strokeY,contactTime;
   let target=null, seed=true, introStart=0;
   const ambient = document.body.classList.contains('ambient-landing');
-  const root = document.documentElement;
   let entranceTime = 0;
+  let firstRenderReady = false;
   let revealDistance, revealWidth;
   let entering = ambient && root.classList.contains('relief-intro');
   function finishEntrance() {
@@ -529,9 +544,15 @@ function garden(hero) {
     const files=portrait.matches?['wall-tall-water.jpg','wall-tall-water-geometry.png','wall-tall-water-surface.jpg','wall-tall-water-shapes.png']:['wall-water.jpg','wall-water-geometry.png','wall-water-surface.jpg','wall-water-shapes.png'];
     if(source!==files[0]){
       source=files[0];
-      Promise.all(files.map(url=>new Promise((resolve,reject)=>{
-        const img=new Image(); img.onload=()=>resolve(img);img.onerror=reject;img.src=url;
-      }))).then(images=>{
+      let decoded = 0;
+      showProgress(10);
+      Promise.all(files.map(async url => {
+        const img = new Image();
+        img.src = url;
+        await img.decode();
+        if (source === files[0] && !firstRenderReady) showProgress(10 + ++decoded * 15);
+        return img;
+      })).then(images=>{
         if(source!==files[0]) return;
         images.forEach((img,i)=>{
           gl.activeTexture(gl.TEXTURE0+[0,1,3,4][i]);
@@ -547,8 +568,14 @@ function garden(hero) {
           }
           gl.texImage2D(gl.TEXTURE_2D,0,format,format,gl.UNSIGNED_BYTE,source);
         });
+        if (!firstRenderReady) showProgress(90);
         artSize=[images[0].width,images[0].height];schedule();
-      }).catch(()=>{canvas.classList.remove('ready');finishEntrance();});
+      }).catch(() => {
+        if (source !== files[0]) return;
+        canvas.classList.remove('ready');
+        finishEntrance();
+        dismissLoader();
+      });
     }
     schedule();
   }
@@ -676,7 +703,7 @@ function garden(hero) {
     for(let i=0;i<energy.length;i++) energy[i]*=decay;
 
     // Paint the base relief before starting the entrance clock.
-    if (!firstFrame) advanceEntrance(dt,t);
+    if (!firstFrame && !loader?.isConnected) advanceEntrance(dt,t);
     // Begin wandering as the lettering settles and the outer relief fades.
     if(ambient && motion && (!entering || entranceTime>=1800) && t>=nextStroke){
       startWander(wanderers[0],t);
@@ -720,6 +747,15 @@ function garden(hero) {
     gl.clear(gl.DEPTH_BUFFER_BIT);
     gl.drawElements(gl.TRIANGLE_STRIP,indices.length,gl.UNSIGNED_SHORT,0);
     canvas.classList.add('ready');
+    if (!firstRenderReady) {
+      firstRenderReady = true;
+      if (loader?.isConnected) {
+        // The progress reaches 100 only after the GPU finishes the first frame.
+        gl.finish();
+        showProgress(100);
+        requestAnimationFrame(dismissLoader);
+      }
+    }
     if(!reduce.matches && (aim||moving||ambient)) schedule();
   }
   hero.addEventListener('pointermove',mark);
@@ -733,7 +769,11 @@ function garden(hero) {
   document.addEventListener('visibilitychange',schedule);
   reduce.addEventListener('change',schedule);
   addEventListener('scroll',schedule,{passive:true});
-  canvas.addEventListener('webglcontextlost',()=>canvas.classList.remove('ready'));
+  canvas.addEventListener('webglcontextlost', () => {
+    canvas.classList.remove('ready');
+    finishEntrance();
+    dismissLoader();
+  });
   resize();
 }
 garden(document.querySelector('#garden .hero'));
