@@ -106,3 +106,35 @@
  #craft-grid .stone-card{height:clamp(340px,31vw,500px);aspect-ratio:auto}
  #craft-grid .stone-caption{margin-top:65px}
 }
+
+@media(min-width:761px){
+ .material-study{pointer-events:auto;cursor:zoom-in}
+ .material-study:focus-visible{outline:1px solid #f3e9d5;outline-offset:8px}
+ .piece-details .view-closely{margin-left:0;order:2;font-size:13px;color:#f2e7d5;padding:6px 0}
+ .piece-details>p{order:0}.piece-details>span{order:1;margin-right:auto}.piece-details>button:not(.view-closely){order:3;margin-left:0}
+ .shop-nav a{opacity:.65;transition:opacity .25s}.shop-nav a:hover,.shop-nav a.is-current{opacity:1}
+ html.viewing-piece{overflow:hidden;scrollbar-gutter:stable}
+ dialog.viewing-room{position:fixed;inset:0;width:100%;height:100dvh;max-width:none;max-height:none;margin:0;padding:clamp(40px,6vw,100px);background:transparent;color:#f3e9d5;overflow:auto;align-content:normal;font-family:MalarText,Arial,sans-serif}
+ dialog.viewing-room:not([open]){display:none}
+ dialog.viewing-room[open]{display:grid;place-items:center;animation:room-enter .35s ease both}
+ dialog.viewing-room::backdrop{background:#130e0af2}
+ .viewing-room .room-close{position:absolute;top:28px;right:4vw;font:14px MalarText,Arial,sans-serif;z-index:2}
+ .viewing-room .room-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);gap:7vw;align-items:center;width:min(1200px,100%);margin:0}
+ .viewing-room .room-image{position:relative;display:block;width:100%;height:min(73vh,760px);padding:0;overflow:hidden;background:#e4e1d7 url(stone-atlas.png) var(--stone-pos)/300% 200%;cursor:zoom-in;isolation:isolate}
+ .viewing-room .room-image svg{position:absolute;inset:11%;width:78%;height:78%;transform:scale(1);transform-origin:var(--detail-x,50%) var(--detail-y,50%);transition:transform .55s cubic-bezier(.2,.7,.2,1);filter:drop-shadow(3px 7px 4px #4b3d324d)}
+ .viewing-room.is-enlarged .room-image{cursor:zoom-out}
+ .viewing-room.is-enlarged .room-image svg{transform:scale(1.8)}
+ .viewing-room .room-info{margin:0}
+ .viewing-room h2{font:400 clamp(42px,4.8vw,76px)/.97 MalarEditorial,Georgia,serif;letter-spacing:-.025em;margin:0 0 28px}
+ .viewing-room .room-material{font:14px/1.7 MalarText,Arial,sans-serif;color:#c6b9a7;margin:0 0 18px}
+ .viewing-room .room-price{font:25px MalarEditorial,Georgia,serif;margin:0}
+ .viewing-room .room-actions{display:flex;gap:30px;align-items:center;margin-top:35px}
+ .viewing-room .room-actions button{padding:8px 0;font:14px MalarText,Arial,sans-serif}
+ .viewing-room .room-actions span{font:12px MalarText,Arial,sans-serif;color:#ab9c87}
+ .viewing-room .room-pagination{display:flex;justify-content:space-between;align-items:center;gap:25px;margin-top:80px}
+ .viewing-room .room-pagination button{padding:8px 0;font:14px MalarText,Arial,sans-serif}
+ .viewing-room .room-count{font:12px MalarText,Arial,sans-serif;color:#ab9c87;font-variant-numeric:tabular-nums}
+ .viewing-room button:focus-visible{outline:1px solid #d9c6a9;outline-offset:6px}
+ @keyframes room-enter{from{opacity:0;translate:0 12px}to{opacity:1;translate:0 0}}
+}
+@media(prefers-reduced-motion:reduce){dialog.viewing-room[open]{animation:none}.viewing-room .room-image svg{transition:none}}
