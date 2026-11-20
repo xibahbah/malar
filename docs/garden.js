@@ -309,7 +309,7 @@ function garden(hero) {
     gl.attachShader(program,s);
   }
   const localLighting = `
-    uniform vec3 userLight, wanderingLight, occasionalLight, entranceLight;
+    uniform vec3 userLight, wanderingLight, entranceLight;
     float lightWeight(vec2 p, vec3 light){
       vec2 delta=(p-light.xy)*cover;
       float distance=.016+dot(delta,delta);
@@ -318,10 +318,9 @@ function garden(hero) {
     vec2 lightFor(vec2 p){
       float a=lightWeight(p,userLight);
       float b=lightWeight(p,wanderingLight);
-      float c=lightWeight(p,occasionalLight);
       float d=lightWeight(p,entranceLight);
-      return (.25*lightPoint+a*userLight.xy+b*wanderingLight.xy+c*occasionalLight.xy+d*entranceLight.xy)
-             /(.25+a+b+c+d);
+      return (.25*lightPoint+a*userLight.xy+b*wanderingLight.xy+d*entranceLight.xy)
+             /(.25+a+b+d);
     }`;
   shader(gl.VERTEX_SHADER,`
     precision highp float;
@@ -460,7 +459,7 @@ function garden(hero) {
   const pos=gl.getAttribLocation(program,'pos');
   gl.enableVertexAttribArray(pos);
   gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
-  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting','introSurface','userLight','wanderingLight','occasionalLight','entranceLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
+  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting','introSurface','userLight','wanderingLight','entranceLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
   function makeTexture(unit,name){
     const tex=gl.createTexture();
     gl.activeTexture(gl.TEXTURE0+unit);
@@ -517,21 +516,22 @@ function garden(hero) {
         contactTime[i] = time;
       }
     }
-    const lamp = wanderers[2];
+    const lamp = wanderers[1];
     lamp.light = {x:.5, y:.5};
     lamp.intensity = fade * .65;
     if (entranceTime >= 850) root.classList.add('relief-reveal');
     if (entranceTime >= 1300 && nextStroke === 0) {
-      nextStroke = startTitleSweep(wanderers[0], time);
+      nextStroke = startTitleSweep(wanderers[0], time) + strokeSettleTime;
     }
     if (entranceTime >= 2150) finishEntrance();
   }
   const userBrush = {head:null, leader:null, light:lastLamp, intensity:0};
-  const wanderers = ambient ? Array.from({length:3},()=>({
+  const wanderers = ambient ? Array.from({length:2},()=>({
     path:null, head:null, leader:null, light:lastLamp, intensity:0
   })) : [];
   const brushes=[{brush:userBrush,uniform:'userLight',weight:1.8},
-    ...wanderers.map((brush,i)=>({brush,uniform:['wanderingLight','occasionalLight','entranceLight'][i],weight:1}))];
+    ...wanderers.map((brush,i)=>({brush,uniform:['wanderingLight','entranceLight'][i],weight:1}))];
+  const strokeSettleTime=1450;
   let nextStroke=0;
   function schedule(){
     if(!frame && visible && artSize && !document.hidden) frame=requestAnimationFrame(draw);
@@ -618,43 +618,41 @@ function garden(hero) {
   }
   function startWander(brush, time){
     const edge=Math.random()<.48 ? Math.floor(Math.random()*4) : -1;
-    const direction=Math.random()<.5 ? -1 : 1;
-    const angle=Math.random()*2*Math.PI;
-    const vx=edge<0 ? Math.cos(angle) : edge<2 ? direction : 0;
-    const vy=edge<0 ? Math.sin(angle) : edge<2 ? 0 : direction;
-    // Leave room for the visible brush core, even beside two edges at a corner.
+    const corner=edge>=0 && Math.random()<.55;
+    // Anchor some paths near a side or corner while leaving room for the brush core.
     const inset=brushRadius()*(.64+.08*Math.random());
     const padX=inset/w, padY=inset/h;
-    const length=Math.min(.035+.70*Math.pow(Math.random(),1.55),
-                          (1-2*padX)/Math.abs(vx), (1-2*padY)/Math.abs(vy));
-    const dx=length*vx, dy=length*vy;
-    let x=padX+Math.max(0,-dx)+Math.random()*Math.max(0,1-2*padX-Math.abs(dx));
-    let y=padY+Math.max(0,-dy)+Math.random()*Math.max(0,1-2*padY-Math.abs(dy));
-    let bend=(Math.random()-.5)*.36;
-    if(edge>=0 && Math.random()<.55){
-      const cornerSide=Math.random()<.5 ? -1 : 1;
-      if(edge<2) x=(cornerSide<0 ? padX : 1-padX)-(direction===cornerSide ? dx : 0);
-      else y=(cornerSide<0 ? padY : 1-padY)-(direction===cornerSide ? dy : 0);
+    const edgeX=edge>=2 ? (edge===2 ? padX : 1-padX)
+                        : corner ? (Math.random()<.5 ? padX : 1-padX) : null;
+    const edgeY=edge===0 || edge===1 ? (edge===0 ? padY : 1-padY)
+                                    : corner ? (Math.random()<.5 ? padY : 1-padY) : null;
+    const angle=Math.random()*2*Math.PI;
+    let vx=Math.cos(angle), vy=Math.sin(angle);
+    if(edgeX!==null) vx=Math.abs(vx)*(edgeX<.5 ? 1 : -1);
+    if(edgeY!==null) vy=Math.abs(vy)*(edgeY<.5 ? 1 : -1);
+    const maxLength=Math.min(.75,(1-2*padX)/Math.abs(vx),(1-2*padY)/Math.abs(vy));
+    const length=.025+(maxLength-.025)*Math.pow(Math.random(),.85);
+    let dx=length*vx, dy=length*vy;
+    let x=edgeX ?? padX+Math.max(0,-dx)+Math.random()*Math.max(0,1-2*padX-Math.abs(dx));
+    let y=edgeY ?? padY+Math.max(0,-dy)+Math.random()*Math.max(0,1-2*padY-Math.abs(dy));
+    if(edge>=0 && Math.random()<.5){
+      // Vary whether the brush approaches the perimeter or moves away from it.
+      x+=dx;
+      y+=dy;
+      dx=-dx;
+      dy=-dy;
     }
-    if(edge===0 || edge===1){
-      y=edge===0 ? padY : 1-padY;
-      bend=(edge===0 ? 1 : -1)*direction*.08;
-    }
-    if(edge===2 || edge===3){
-      x=edge===2 ? padX : 1-padX;
-      bend=(edge===2 ? -1 : 1)*direction*.08;
-    }
+    const curve=(Math.random()-.5)*.36;
     // Spread individual sweep speeds around a mean of 1.7× the previous rate.
     const speed=1.7*(.70+.60*Math.random());
     const easing=.20+.75*Math.random();
-    const weave=edge<0 ? (Math.random()-.5)*.72 : 0;
-    if(edge<0){
-      const clearanceX=Math.min(x,x+dx,1-x,1-x-dx)-padX;
-      const clearanceY=Math.min(y,y+dy,1-y,1-y-dy)-padY;
-      const maxBend=Math.min(clearanceX/Math.max(.001,Math.abs(dy)),
-                            clearanceY/Math.max(.001,Math.abs(dx)))/(1+Math.abs(weave));
-      bend=Math.sign(bend)*Math.max(0,Math.min(Math.abs(bend),maxBend));
-    }
+    const weave=(Math.random()-.5)*.72;
+    // Bound the sideways curve in the direction it actually bends.
+    const clearanceX=(dy*curve>0 ? Math.min(x,x+dx) : 1-Math.max(x,x+dx))-padX;
+    const clearanceY=(dx*curve<0 ? Math.min(y,y+dy) : 1-Math.max(y,y+dy))-padY;
+    const maxBend=Math.min(clearanceX/Math.max(.001,Math.abs(dy)),
+                           clearanceY/Math.max(.001,Math.abs(dx)))/(1+Math.abs(weave));
+    const bend=Math.sign(curve)*Math.max(0,Math.min(Math.abs(curve),maxBend));
     brush.path={x,y,dx,dy,bend,easing,weave,start:time,duration:(420+length*5000)/speed};
     brush.head=brush.leader=null;
   }
@@ -751,14 +749,10 @@ function garden(hero) {
 
     // Paint the base relief before starting the entrance clock.
     if (!firstFrame && !loader?.isConnected) advanceEntrance(dt,t);
-    // Random paths follow the first sweep through the title.
+    // Let the relief and lamp fade before starting another automatic stroke.
     if(ambient && motion && (!entering || nextStroke>0) && t>=nextStroke){
       startWander(wanderers[0],t);
-      const duration=wanderers[0].path.duration;
-      nextStroke=t+duration+900*Math.pow(Math.random(),1.6);
-      if(!wanderers[1].path && Math.random()<.16){
-        startWander(wanderers[1],t+duration*(.5+.4*Math.random()));
-      }
+      nextStroke=t+wanderers[0].path.duration+strokeSettleTime+350*Math.random();
     }
     wanderers.forEach(brush=>{
       advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t,1.7);
