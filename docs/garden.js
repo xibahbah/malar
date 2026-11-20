@@ -436,7 +436,7 @@ function garden(hero) {
   const shapes=makeTexture(4,'shapeMap');
   gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
   const portrait=matchMedia('(max-aspect-ratio:1/1)'), reduce=matchMedia('(prefers-reduced-motion:reduce)');
-  let w,h,energy,field,bytes,source,artSize,frame=0,visible=true,previousTime=0;
+  let w,h,energy,field,bytes,source,artSize,frame=0,visible=true,previousTime=null;
   let lastLamp={x:.31,y:.34};
   let strokeX,strokeY,contactTime;
   let target=null, seed=true, introStart=0;
@@ -658,7 +658,10 @@ function garden(hero) {
   function draw(t){
     frame=0;
     if(!visible || document.hidden) return;
-    const dt=Math.min(.25,(t-previousTime)/1000 || .016);
+    const firstFrame = previousTime === null;
+    const elapsed = firstFrame ? .016 : (t - previousTime) / 1000;
+    // Keep a slow frame during startup from skipping a visible part of the reveal.
+    const dt = Math.min(entering ? .034 : .25, elapsed);
     previousTime=t;
     if(!introStart) introStart=t;
     if(seed && t-introStart>1600){
@@ -670,7 +673,8 @@ function garden(hero) {
     const decay=Math.exp(-dt/(entering ? .19 : .405)), attack=1-Math.exp(-dt/.15);
     for(let i=0;i<energy.length;i++) energy[i]*=decay;
 
-    advanceEntrance(dt,t);
+    // Paint the base relief before starting the entrance clock.
+    if (!firstFrame) advanceEntrance(dt,t);
     // Begin wandering as the lettering settles and the outer relief fades.
     if(ambient && motion && (!entering || entranceTime>=1800) && t>=nextStroke){
       startWander(wanderers[0],t);
