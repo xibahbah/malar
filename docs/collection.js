@@ -14,7 +14,7 @@ malarProducts.forEach((p,i)=>{
  item.innerHTML=`<div class="stone-space"><button class="stone-card" aria-label="View details for ${p.name}" aria-pressed="false" style="--stone-pos:${pos(p.stone)};--art-pos:${pos(p.art)}"><span class="stone-turn"><span class="stone-face stone-front"><svg class="stone-art" viewBox="${crops[p.art]}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${p.name}"><defs><clipPath id="product-crop-${i}"><rect x="${crops[p.art].split(' ')[0]}" y="${crops[p.art].split(' ')[1]}" width="${crops[p.art].split(' ')[2]}" height="${crops[p.art].split(' ')[3]}"/></clipPath></defs><image href="product-objects.png" width="1230" height="1278" clip-path="url(#product-crop-${i})"/></svg></span><span class="stone-face stone-back" aria-hidden="true"><strong>${p.name}</strong><p>${p.detail}</p><p>$${p.price}</p><small>Available soon</small></span></span></button></div><div class="stone-caption"><div><h3>${p.name}</h3></div><span class="stone-price">$${p.price}</span></div>`;
  const card=item.querySelector('button');
  const resetMotion=()=>{['--rx','--ry','--lift'].forEach(key=>card.style.removeProperty(key));};
- card.addEventListener('pointerenter',e=>{if(motionOK&&e.pointerType!=='touch')card.style.setProperty('--lift','-10px')});
+ card.addEventListener('pointerenter',e=>{if(motionOK&&e.pointerType!=='touch')card.style.setProperty('--lift',matchMedia('(min-width:761px)').matches?'-10px':'-6px')});
  card.addEventListener('pointermove',e=>{
   if(!motionOK||e.pointerType==='touch'||!matchMedia('(min-width:761px)').matches)return;
   const r=item.querySelector('.stone-space').getBoundingClientRect();
