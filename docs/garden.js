@@ -480,7 +480,7 @@ function garden(hero) {
   const ambient = document.body.classList.contains('ambient-landing');
   let entranceTime = 0;
   let firstRenderReady = false;
-  let growthArrival, growthHold, growthX, growthY;
+  let revealDistance, revealWidth;
   let entering = ambient && root.classList.contains('relief-intro');
   function finishEntrance() {
     entering = false;
@@ -494,17 +494,23 @@ function garden(hero) {
       return;
     }
     entranceTime += dt * 1000;
-    const growthTime = entranceTime - 100;
-    const fade = Math.max(0, Math.min(1, growthTime / 170, (2000 - growthTime) / 170));
-    for (let i = 0; i < growthArrival.length; i++) {
-      const age = growthTime - growthArrival[i];
-      if (age <= 0 || age >= growthHold[i]) continue;
-      const pulse = Math.min(1, age / 85, (growthHold[i] - age) / 145);
-      const strength = pulse * pulse * (3 - 2 * pulse) * fade;
+    // One outward front follows a deeply uneven arrival map, then settles.
+    const progress = Math.max(0, Math.min(1, (entranceTime - 100) / 2000));
+    const aspect = hero.clientWidth / hero.clientHeight;
+    const reach = Math.hypot(aspect * .5, .5) + .18;
+    const radius = progress * reach * 1.9;
+    const fade = Math.min(1, progress * 12) * Math.min(1, (1 - progress) * 12);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const dx = (x / (w - 1) - .5) * aspect;
+      const dy = y / (h - 1) - .5;
+      const distance = Math.hypot(dx, dy);
+      const i = y * w + x;
+      const band = Math.max(0, 1 - Math.abs(revealDistance[i] - radius) / revealWidth[i]);
+      const strength = band * band * (3 - 2 * band) * fade;
       energy[i] = Math.max(energy[i], strength);
       if (strength > .05) {
-        strokeX[i] = growthX[i] * strength * .55;
-        strokeY[i] = growthY[i] * strength * .55;
+        strokeX[i] = dx / Math.max(.001, distance) * strength * .55;
+        strokeY[i] = dy / Math.max(.001, distance) * strength * .55;
         contactTime[i] = time;
       }
     }
@@ -526,62 +532,6 @@ function garden(hero) {
   function schedule(){
     if(!frame && visible && artSize && !document.hidden) frame=requestAnimationFrame(draw);
   }
-  function prepareGrowth() {
-    const size = w * h;
-    const arrival = new Float32Array(size).fill(Infinity);
-    const resistance = new Float32Array(size);
-    growthHold = new Float32Array(size);
-    growthX = new Float32Array(size);
-    growthY = new Float32Array(size);
-    const aspect = hero.clientWidth / hero.clientHeight;
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const u = (x / (w - 1) - .5) * aspect;
-      const v = y / (h - 1) - .5;
-      const veins = Math.sin(u * 18 + 1.9 * Math.sin(v * 8))
-        + Math.cos(v * 15 - 1.4 * Math.sin(u * 10));
-      const grain = Math.sin(u * 48 - v * 39) * Math.cos(v * 53 + u * 19);
-      const i = y * w + x;
-      resistance[i] = 2 + 16 * Math.pow(.5 + .24 * veins, 2) + 3 * (.5 + .5 * grain);
-      growthHold[i] = 155 + 115 * (.5 + .5 * Math.sin(u * 21 + v * 17 + veins));
-    }
-
-    // Each cell can only start after growth reaches it through a neighbor.
-    // Low-resistance paths advance first and meet around slower pockets.
-    const center = Math.floor(h / 2) * w + Math.floor(w / 2);
-    const pending = [[center]];
-    arrival[center] = 0;
-    let lastArrival = 0;
-    for (let step = 0; step < pending.length; step++) {
-      const cells = pending[step];
-      if (!cells) continue;
-      for (const index of cells) {
-        if (arrival[index] !== step) continue;
-        lastArrival = step;
-        const x = index % w, y = Math.floor(index / w);
-        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-          const nx = x + dx, ny = y + dy;
-          if ((!dx && !dy) || nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
-          const neighbor = ny * w + nx;
-          const cost = (resistance[index] + resistance[neighbor]) * .5;
-          const time = step + Math.round(cost * (dx && dy ? Math.SQRT2 : 1));
-          if (time >= arrival[neighbor]) continue;
-          arrival[neighbor] = time;
-          (pending[time] ??= []).push(neighbor);
-        }
-      }
-    }
-
-    // The arrival gradient points in the direction the edge actually travels.
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const i = y * w + x;
-      const dx = arrival[y * w + Math.min(w - 1, x + 2)] - arrival[y * w + Math.max(0, x - 2)];
-      const dy = arrival[Math.min(h - 1, y + 2) * w + x] - arrival[Math.max(0, y - 2) * w + x];
-      const length = Math.hypot(dx, dy) || 1;
-      growthX[i] = dx / length;
-      growthY[i] = dy / length;
-    }
-    growthArrival = arrival.map(time => time * 1700 / lastArrival);
-  }
   function resize(){
     const d=Math.min(devicePixelRatio,1.6);
     canvas.width=Math.round(hero.clientWidth*d);
@@ -593,7 +543,21 @@ function garden(hero) {
     strokeX=new Float32Array(w*h);
     strokeY=new Float32Array(w*h);
     contactTime=new Float64Array(w*h);
-    if (entering) prepareGrowth();
+    // Cache the asymmetric lobes and torn edge detail once per viewport size.
+    revealDistance = new Float32Array(w*h);
+    revealWidth = new Float32Array(w*h);
+    const aspect = hero.clientWidth / hero.clientHeight;
+    for (let y=0; y<h; y++) for (let x=0; x<w; x++) {
+      const dx=(x/(w-1)-.5)*aspect, dy=y/(h-1)-.5;
+      const angle=Math.atan2(dy,dx), distance=Math.hypot(dx,dy);
+      const lobes=1+.29*Math.sin(3*angle+.8)+.19*Math.cos(5*angle-1.1)
+        +.12*Math.sin(9*angle+.4)+.07*Math.cos(17*angle);
+      const roughness=.055*Math.sin(dx*29+dy*17)*Math.cos(dy*31-dx*11)
+        +.025*Math.sin(dx*67-dy*43);
+      const i=y*w+x;
+      revealDistance[i]=Math.max(0,distance/Math.max(.55,lobes)+roughness*Math.min(1,distance*8));
+      revealWidth[i]=.07+.055*(.5+.5*Math.sin(angle*7+dx*13-dy*19));
+    }
     gl.activeTexture(gl.TEXTURE2);
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,w,h,0,gl.RGB,gl.UNSIGNED_BYTE,bytes);
     userBrush.head=userBrush.leader=null;
