@@ -40,3 +40,13 @@
 .garden-content .footer-logo{font-family:MalarEditorial,Georgia,serif;font-weight:400;letter-spacing:-.035em}
 .garden-content :is(.shop-nav a,.shop-controls,.gift-amounts button,.quiet-button,.newsletter input,.newsletter button){font-family:MalarText,Arial,sans-serif;font-weight:400}
 @media(max-width:760px){.garden-content :is(.editorial h2,.story-copy h2,.gift-copy h2){font-size:64px}.garden-content .stone-back strong{font-size:22px}.garden-content .stone-back p{font-size:11px}.garden-content .stone-caption h3{font-size:23px}}
+
+/* Quiet surfaces: no rules, bevel strips or moving highlights. */
+.garden-content :is(.shop-header,.story-stats,.account-note,.newsletter,.gift-art,.gift-amounts button,.quiet-button,.custom-value){border:0}
+.garden-content a,.garden-content a:hover{border-bottom:0;text-decoration:none}
+.stone-card{transform:translateY(var(--lift,0px));transition:transform .35s ease}
+.stone-face{border:0;border-radius:0;box-shadow:0 8px 24px #0003}
+.stone-front:after{display:none;content:none}
+.stone-art,.stone-card:hover .stone-art{filter:drop-shadow(3px 7px 4px #4b3d324d);transition:none}
+.story-stone{box-shadow:0 8px 24px #0003}
+.gift-status:empty,.newsletter-note:empty{display:none}
