@@ -391,7 +391,7 @@ function garden(hero) {
       vec3 glint=vec3(.023,.016,-.017)*warm+vec3(-.016,.024,-.013)*cool;
       // The opening pulse is fast, so let its directional highlights catch sooner.
       float openingGlint=introDepth*smoothstep(.025,.26,length(sweep));
-      vec3 openingTint=vec3(.065,.039,-.014)*warm+vec3(-.014,.071,-.010)*cool;
+      vec3 openingTint=vec3(.100,.065,-.010)*warm+vec3(-.004,.019,-.003)*cool;
       vec3 illumination=localLift*(vec3(.070)*max(facing,0.)+vec3(.032)*min(facing,0.)
                                   +speedTint*glint+openingGlint*openingTint);
       // Keep mineral specks attached to the wall as the camera scrolls.
