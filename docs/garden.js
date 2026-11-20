@@ -725,7 +725,7 @@ function garden(hero) {
     // Paint the base relief before starting the entrance clock.
     if (!firstFrame && !loader?.isConnected) advanceEntrance(dt,t);
     // Begin wandering as the lettering settles and the outer relief fades.
-    if(ambient && motion && (!entering || entranceTime>=1800) && t>=nextStroke){
+    if(ambient && motion && (!entering || entranceTime>=1500) && t>=nextStroke){
       startWander(wanderers[0],t);
       nextStroke=t+wanderers[0].path.duration+80+1100*Math.pow(Math.random(),1.45);
       if(!wanderers[1].path && Math.random()<.14) startWander(wanderers[1],t+100+350*Math.random());
