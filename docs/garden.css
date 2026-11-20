@@ -242,6 +242,7 @@ canvas.crease-detail {
 
 /* Opening strokes are driven by the same relief field as pointer movement. */
 .ambient-landing .stage > .axis { animation:none }
+.relief-intro .stage > .hero { background-image:none }
 .relief-intro .wordmark > span { opacity:0 }
 /* A brief lift preserves the wordmark size and horizontal stretch. */
 .relief-reveal .wordmark > span {
