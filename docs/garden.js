@@ -520,6 +520,7 @@ function garden(hero) {
     if (entranceTime >= 850) root.classList.add('relief-reveal');
     if (entranceTime >= 2150) {
       finishEntrance();
+      nextStroke = startWordmarkOrbit(wanderers[0], time);
     }
   }
   const userBrush = {head:null, leader:null, light:lastLamp, intensity:0};
@@ -637,6 +638,18 @@ function garden(hero) {
     brush.path={x,y,dx,dy,bend,easing,weave,start:time,duration:(420+length*5000)/speed};
     brush.head=brush.leader=null;
   }
+  function startWordmarkOrbit(brush, time) {
+    const stage = hero.getBoundingClientRect();
+    const wordmark = hero.parentElement.querySelector('.wordmark').getBoundingClientRect();
+    const x = (wordmark.left + wordmark.width / 2 - stage.left) / stage.width;
+    const y = (wordmark.top + wordmark.height / 2 - stage.top) / stage.height;
+    const radiusX = Math.min(.45, Math.max(.33, wordmark.width / (2 * stage.width) + .09));
+    const radiusY = Math.min(.24, Math.max(.14, wordmark.height / (2 * stage.height) + .075));
+    const duration = 1800;
+    brush.head = brush.leader = null;
+    brush.path = {orbit:true, x, y, radiusX, radiusY, start:time, duration};
+    return time + duration;
+  }
   function wanderAim(brush,time){
     const path=brush.path;
     if(!path || time<path.start) return null;
@@ -644,6 +657,10 @@ function garden(hero) {
     if(progress>=1){
       brush.path=null;
       return null;
+    }
+    if (path.orbit) {
+      const angle = Math.PI * (.86 + 2 * progress);
+      return {x:path.x + Math.cos(angle)*path.radiusX, y:path.y + Math.sin(angle)*path.radiusY};
     }
     const eased=progress*progress*(3-2*progress);
     const u=progress+(eased-progress)*path.easing;
@@ -724,14 +741,14 @@ function garden(hero) {
 
     // Paint the base relief before starting the entrance clock.
     if (!firstFrame && !loader?.isConnected) advanceEntrance(dt,t);
-    // Begin wandering as the lettering settles and the outer relief fades.
-    if(ambient && motion && (!entering || entranceTime>=1500) && t>=nextStroke){
+    // Hand off to random paths after the title sweep completes.
+    if(ambient && motion && !entering && t>=nextStroke){
       startWander(wanderers[0],t);
       nextStroke=t+wanderers[0].path.duration+80+1100*Math.pow(Math.random(),1.45);
       if(!wanderers[1].path && Math.random()<.14) startWander(wanderers[1],t+100+350*Math.random());
     }
     wanderers.forEach(brush=>{
-      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t,entering ? 8 : 1.7);
+      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t,brush.path?.orbit ? 8 : 1.7);
     });
     // The native pointer gets its own brush and interacts even during an ambient stroke.
     advanceBrush(userBrush,aim,dt,t);
