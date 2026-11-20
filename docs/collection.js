@@ -67,8 +67,26 @@ if(desktopExhibition.matches && motionOK){
 }
 
 const custom=document.querySelector('#custom-gift');
-document.querySelectorAll('[data-amount]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-amount]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));custom.hidden=b.dataset.amount!=='custom';document.querySelector('#gift-value').textContent=b.dataset.amount==='custom'?'For you':`$${b.dataset.amount}`;if(!custom.hidden)custom.focus()}));
-custom.addEventListener('input',()=>{document.querySelector('#gift-value').textContent=custom.value?`$${custom.value}`:'For you'});
+const giftValue=document.querySelector('#gift-value');
+let giftAnimation=null;
+giftValue.setAttribute('aria-live','polite');
+function updateGiftValue(value){
+ if(giftValue.textContent===value)return;
+ giftAnimation?.cancel();giftValue.textContent=value;
+ if(!motionOK||!matchMedia('(min-width:761px)').matches)return;
+ giftAnimation=giftValue.animate([
+  {opacity:.12,transform:'translate3d(0,2px,0) scale(.97)',textShadow:'0 0 0 transparent'},
+  {opacity:1,transform:'translate3d(0,-1px,0) scale(1.015)',textShadow:'-1px -1px 0 #fff0b8,1px 2px 0 #80521c,3px 6px 6px #4a2c1680',offset:.72},
+  {opacity:1,transform:'translate3d(0,0,0) scale(1)',textShadow:'-.7px -1px 0 #fff0b8,1px 1.5px 0 #80521c,2px 3px 3px #4a2c1660'}
+ ],{duration:650,easing:'cubic-bezier(.2,.65,.25,1)'});
+}
+document.querySelectorAll('[data-amount]').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('[data-amount]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+ custom.hidden=b.dataset.amount!=='custom';
+ updateGiftValue(b.dataset.amount==='custom'?'For you':`$${b.dataset.amount}`);
+ if(!custom.hidden)custom.focus();
+}));
+custom.addEventListener('input',()=>updateGiftValue(custom.value?`$${custom.value}`:'For you'));
 document.querySelector('#gift-action').addEventListener('click',()=>{document.querySelector('#gift-status').textContent='Gift cards coming soon.'});
 document.querySelector('.newsletter').addEventListener('submit',e=>{e.preventDefault();document.querySelector('#newsletter-status').textContent='Sign-up is not open yet.'});
 
