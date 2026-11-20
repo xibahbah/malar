@@ -317,7 +317,7 @@ function garden(hero) {
     varying vec2 uv;
     uniform highp sampler2D mural, field, heightMap, normalMap, shapeMap;
     uniform vec2 cover, pixel, lightPoint;
-    uniform float resting, pan;
+    uniform float resting, pan, introSurface;
     ${localLighting}
     void main(){
       vec2 p=vec2(uv.x,1.-uv.y);
@@ -393,7 +393,9 @@ function garden(hero) {
       float specular=pow(max(dot(normal,halfVector),0.),46.);
       float raisedLip=smoothstep(.008,.068,value-nearby);
       float gold=localLift*warm*specular*(.30+.70*raisedLip)*(.90+.10*seed.x);
-      gl_FragColor=vec4(surfaceColor+gold*vec3(.30,.174,.039),1.);
+      vec3 reliefColor=surfaceColor+gold*vec3(.30,.174,.039);
+      float reveal=max(introSurface,smoothstep(.01,.42,reached));
+      gl_FragColor=vec4(mix(vec3(33.,21.,14.)/255.,reliefColor,reveal),1.);
     }`);
   gl.linkProgram(program);
   if (!gl.getProgramParameter(program,gl.LINK_STATUS)) throw Error(gl.getProgramInfoLog(program));
@@ -420,7 +422,7 @@ function garden(hero) {
   const pos=gl.getAttribLocation(program,'pos');
   gl.enableVertexAttribArray(pos);
   gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
-  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting','userLight','wanderingLight','occasionalLight','entranceLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
+  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting','introSurface','userLight','wanderingLight','occasionalLight','entranceLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
   function makeTexture(unit,name){
     const tex=gl.createTexture();
     gl.activeTexture(gl.TEXTURE0+unit);
@@ -708,6 +710,9 @@ function garden(hero) {
       gl.uniform3f(loc[uniform],brush.light.x,brush.light.y,strength);
     });
     gl.uniform1f(loc.resting,reduce.matches?.76:0);
+    // Restore the ambient surface gradually as the opening ripple clears the frame.
+    const surfaceFade = entering ? Math.max(0, Math.min(1, (entranceTime - 1300) / 800)) : 1;
+    gl.uniform1f(loc.introSurface,surfaceFade*surfaceFade*(3-2*surfaceFade));
     const stage=hero.parentElement;
     const progress=Math.max(0,Math.min(1,-stage.getBoundingClientRect().top/Math.max(1,stage.offsetHeight-hero.offsetHeight)));
     gl.uniform1f(loc.pan,(progress-.5)*(1.-Math.min(1,1/ratio)));
