@@ -520,6 +520,7 @@ function garden(hero) {
     if (entranceTime >= 850) root.classList.add('relief-reveal');
     if (entranceTime >= 2150) {
       finishEntrance();
+      nextStroke = startTitleSweep(wanderers[0], time);
     }
   }
   const userBrush = {head:null, leader:null, light:lastLamp, intensity:0};
@@ -598,6 +599,17 @@ function garden(hero) {
       });
     }
     schedule();
+  }
+  function startTitleSweep(brush, time) {
+    const stage = hero.getBoundingClientRect();
+    const title = hero.parentElement.querySelector('.wordmark-latin').getBoundingClientRect();
+    const x = Math.max(.05, (title.left - stage.left) / stage.width - .07);
+    const end = Math.min(.95, (title.right - stage.left) / stage.width + .07);
+    const y = (title.top + title.height / 2 - stage.top) / stage.height;
+    const duration = 700;
+    brush.head = brush.leader = null;
+    brush.path = {x, y, dx:end - x, dy:0, bend:0, easing:.55, weave:0, start:time, duration, response:7};
+    return time + duration;
   }
   function startWander(brush, time){
     const length=.035+.70*Math.pow(Math.random(),1.55);
@@ -724,14 +736,14 @@ function garden(hero) {
 
     // Paint the base relief before starting the entrance clock.
     if (!firstFrame && !loader?.isConnected) advanceEntrance(dt,t);
-    // Begin wandering as the lettering settles and the outer relief fades.
-    if(ambient && motion && (!entering || entranceTime>=1800) && t>=nextStroke){
+    // Random paths follow the first sweep through the title.
+    if(ambient && motion && !entering && t>=nextStroke){
       startWander(wanderers[0],t);
       nextStroke=t+wanderers[0].path.duration+80+1100*Math.pow(Math.random(),1.45);
       if(!wanderers[1].path && Math.random()<.14) startWander(wanderers[1],t+100+350*Math.random());
     }
     wanderers.forEach(brush=>{
-      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t,entering ? 8 : 1.7);
+      advanceBrush(brush,motion ? wanderAim(brush,t) : null,dt,t,brush.path?.response ?? 1.7);
     });
     // The native pointer gets its own brush and interacts even during an ambient stroke.
     advanceBrush(userBrush,aim,dt,t);
