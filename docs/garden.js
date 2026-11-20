@@ -518,10 +518,10 @@ function garden(hero) {
     lamp.light = {x:.5, y:.5};
     lamp.intensity = fade * .65;
     if (entranceTime >= 850) root.classList.add('relief-reveal');
-    if (entranceTime >= 2150) {
-      finishEntrance();
+    if (entranceTime >= 1650 && nextStroke === 0) {
       nextStroke = startWordmarkOrbit(wanderers[0], time);
     }
+    if (entranceTime >= 2150) finishEntrance();
   }
   const userBrush = {head:null, leader:null, light:lastLamp, intensity:0};
   const wanderers = ambient ? Array.from({length:3},()=>({
@@ -643,9 +643,9 @@ function garden(hero) {
     const wordmark = hero.parentElement.querySelector('.wordmark').getBoundingClientRect();
     const x = (wordmark.left + wordmark.width / 2 - stage.left) / stage.width;
     const y = (wordmark.top + wordmark.height / 2 - stage.top) / stage.height;
-    const radiusX = Math.min(.45, Math.max(.33, wordmark.width / (2 * stage.width) + .09));
-    const radiusY = Math.min(.24, Math.max(.14, wordmark.height / (2 * stage.height) + .075));
-    const duration = 1800;
+    const radiusX = Math.min(.38, Math.max(.24, wordmark.width / (2 * stage.width) + .055));
+    const radiusY = Math.min(.19, Math.max(.11, wordmark.height / (2 * stage.height) + .04));
+    const duration = 1450;
     brush.head = brush.leader = null;
     brush.path = {orbit:true, x, y, radiusX, radiusY, start:time, duration};
     return time + duration;
