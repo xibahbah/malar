@@ -622,7 +622,7 @@ function garden(hero) {
     brush.path = {x, y, dx:end - x, dy:0, bend:0, easing:.55, weave:0, start:time, duration};
     return time + duration;
   }
-  function startWander(brush, time){
+  function makeWanderPath(brush, time){
     const edge=Math.random()<.48 ? Math.floor(Math.random()*4) : -1;
     const corner=edge>=0 && Math.random()<.55;
     // Anchor some paths near a side or corner while leaving room for the brush core.
@@ -661,6 +661,25 @@ function garden(hero) {
     const bend=Math.sign(curve)*Math.max(0,Math.min(Math.abs(curve),maxBend));
     brush.path={x,y,dx,dy,bend,easing,weave,start:time,duration:(420+length*5000)/speed};
     brush.head=brush.leader=null;
+  }
+  function startWander(brush,time){
+    if(hero.clientWidth<=760){makeWanderPath(brush,time);return;}
+    const viewport=hero.getBoundingClientRect();
+    const covers=Array.from(hero.parentElement.querySelectorAll('.stone-front,.material-study,.story-stone,.gift-art'))
+      .filter(node=>getComputedStyle(node).display!=='none')
+      .map(node=>node.getBoundingClientRect())
+      .filter(r=>r.width>0 && r.height>0 && r.bottom>viewport.top && r.top<viewport.bottom && r.right>viewport.left && r.left<viewport.right);
+    let best=null,bestScore=-Infinity;
+    for(let attempt=0;attempt<12;attempt++){
+      makeWanderPath(brush,time);const candidate=brush.path;let score=0;
+      for(let sample=0;sample<9;sample++){
+        const aim=wanderAim(brush,time+candidate.duration*(sample+.5)/9);
+        const x=viewport.left+aim.x*viewport.width,y=viewport.top+aim.y*viewport.height;
+        if(!covers.some(r=>x>r.left-24 && x<r.right+24 && y>r.top-24 && y<r.bottom+24))score++;
+      }
+      if(score>bestScore){bestScore=score;best=candidate;}if(score===9)break;
+    }
+    brush.path=best;brush.head=brush.leader=null;
   }
   function wanderAim(brush,time){
     const path=brush.path;
@@ -847,4 +866,5 @@ function garden(hero) {
   resize();
 }
 garden(document.querySelector('#garden .hero'));
+
 
