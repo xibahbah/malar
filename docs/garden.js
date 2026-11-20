@@ -292,7 +292,13 @@ function garden(hero) {
     dismissLoader();
     const panBackground=()=>{
       const stage=hero.parentElement;
-      const fraction=Math.min(1,Math.max(0,-stage.getBoundingClientRect().top/Math.max(1,stage.offsetHeight-hero.offsetHeight)));
+      const scroll=Math.max(0,-stage.getBoundingClientRect().top);
+      let fraction=Math.min(1,scroll/Math.max(1,stage.offsetHeight-hero.offsetHeight));
+      if(hero.clientWidth>760){
+        const imageAspect=hero.clientWidth/hero.clientHeight<1 ? 640/4567 : 1040/5752;
+        const imageHeight=Math.max(hero.clientHeight,hero.clientWidth/imageAspect);
+        fraction=Math.min(1,scroll*1.05/Math.max(1,imageHeight-hero.clientHeight));
+      }
       hero.style.setProperty('--wall-position',(fraction*100)+'%');
     };
     panBackground();
@@ -792,7 +798,14 @@ function garden(hero) {
     gl.uniform1f(loc.introSurface,ambientSurface);
     const stage=hero.parentElement;
     const progress=Math.max(0,Math.min(1,-stage.getBoundingClientRect().top/Math.max(1,stage.offsetHeight-hero.offsetHeight)));
-    gl.uniform1f(loc.pan,(progress-.5)*(1.-Math.min(1,1/ratio)));
+    const coverY=Math.min(1,1/ratio);
+    const panRange=1-coverY;
+    // Match content travel in CSS pixels; the wall moves only 5% faster.
+    const scrollPixels=Math.max(0,-stage.getBoundingClientRect().top);
+    const wallPan=hero.clientWidth>760
+      ? -panRange*.5+Math.min(panRange,scrollPixels*1.05*coverY/hero.clientHeight)
+      : (progress-.5)*panRange;
+    gl.uniform1f(loc.pan,wallPan);
 
     gl.clear(gl.DEPTH_BUFFER_BIT);
     gl.drawElements(gl.TRIANGLE_STRIP,indices.length,gl.UNSIGNED_SHORT,0);
