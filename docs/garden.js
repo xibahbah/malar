@@ -518,7 +518,7 @@ function garden(hero) {
     lamp.light = {x:.5, y:.5};
     lamp.intensity = fade * .65;
     if (entranceTime >= 850) root.classList.add('relief-reveal');
-    if (entranceTime >= 1800 && nextStroke === 0) {
+    if (entranceTime >= 1300 && nextStroke === 0) {
       nextStroke = startTitleSweep(wanderers[0], time);
     }
     if (entranceTime >= 2150) finishEntrance();
@@ -737,7 +737,7 @@ function garden(hero) {
     // Paint the base relief before starting the entrance clock.
     if (!firstFrame && !loader?.isConnected) advanceEntrance(dt,t);
     // Random paths follow the first sweep through the title.
-    if(ambient && motion && !entering && t>=nextStroke){
+    if(ambient && motion && (!entering || nextStroke>0) && t>=nextStroke){
       startWander(wanderers[0],t);
       nextStroke=t+wanderers[0].path.duration+80+1100*Math.pow(Math.random(),1.45);
       if(!wanderers[1].path && Math.random()<.14) startWander(wanderers[1],t+100+350*Math.random());
