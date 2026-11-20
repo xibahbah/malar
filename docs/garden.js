@@ -257,10 +257,11 @@ sound.onclick = async () => {
 function garden(hero) {
   const canvas = hero.querySelector('canvas');
   const loader = document.getElementById('garden-loader');
+  const loadingStartedAt = performance.now();
   const root = document.documentElement;
   function showProgress(percent) {
     if (!loader?.isConnected) return;
-    loader.querySelector('span').textContent = percent + '%';
+    loader.style.setProperty('--load-progress', percent / 100);
     loader.setAttribute('aria-valuenow', percent);
   }
   function dismissLoader() {
@@ -752,8 +753,13 @@ function garden(hero) {
       if (loader?.isConnected) {
         // The progress reaches 100 only after the GPU finishes the first frame.
         gl.finish();
-        showProgress(100);
-        requestAnimationFrame(dismissLoader);
+        requestAnimationFrame(() => {
+          if (!loader.isConnected || loader.classList.contains('loaded')) return;
+          const fillDuration = reduce.matches ? 0 : Math.max(180, 650 - (performance.now() - loadingStartedAt));
+          loader.style.setProperty('--load-duration', fillDuration + 'ms');
+          showProgress(100);
+          setTimeout(dismissLoader, fillDuration);
+        });
       }
     }
     if(!reduce.matches && (aim||moving||ambient)) schedule();
