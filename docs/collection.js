@@ -47,3 +47,32 @@ document.querySelectorAll('[data-amount]').forEach(b=>b.addEventListener('click'
 custom.addEventListener('input',()=>{document.querySelector('#gift-value').textContent=custom.value?`$${custom.value}`:'For you'});
 document.querySelector('#gift-action').addEventListener('click',()=>{document.querySelector('#gift-status').textContent='Gift cards coming soon.'});
 document.querySelector('.newsletter').addEventListener('submit',e=>{e.preventDefault();document.querySelector('#newsletter-status').textContent='Sign-up is not open yet.'});
+
+
+// A desktop viewing room; close it to return to the exact place on the wall.
+if(desktopExhibition.matches){
+ const room=document.createElement('dialog');room.className='viewing-room';room.setAttribute('aria-label','View piece');
+ room.innerHTML=`<button class="room-close" aria-label="Close product view">Close</button><div class="room-layout"><button class="room-image" aria-label="Enlarge product" aria-pressed="false"></button><div class="room-info"><h2 id="room-title"></h2><p class="room-material"></p><p class="room-price"></p><div class="room-actions"><button class="room-zoom" aria-pressed="false">Enlarge</button><span>Available soon</span></div><div class="room-pagination"><button class="room-prev">Previous</button><span class="room-count" aria-live="polite"></span><button class="room-next">Next</button></div></div></div>`;
+ document.body.append(room);room.setAttribute('aria-labelledby','room-title');
+ const artwork=room.querySelector('.room-image');let selected=0,zoomed=false,origin=null;
+ function setZoom(value){zoomed=value;room.classList.toggle('is-enlarged',value);artwork.setAttribute('aria-pressed',String(value));artwork.setAttribute('aria-label',value?'Reduce product':'Enlarge product');room.querySelector('.room-zoom').setAttribute('aria-pressed',String(value));room.querySelector('.room-zoom').textContent=value?'Reduce':'Enlarge';artwork.style.removeProperty('--detail-x');artwork.style.removeProperty('--detail-y')}
+ function renderPiece(index){
+  selected=(index+malarProducts.length)%malarProducts.length;const p=malarProducts[selected],c=crops[p.art].split(' ');
+  artwork.innerHTML=`<svg viewBox="${crops[p.art]}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${p.name}"><defs><clipPath id="room-object-crop"><rect x="${c[0]}" y="${c[1]}" width="${c[2]}" height="${c[3]}"/></clipPath></defs><image href="product-objects.png" width="1230" height="1278" clip-path="url(#room-object-crop)"/></svg>`;
+  artwork.style.setProperty('--stone-pos',pos(p.stone));room.querySelector('#room-title').textContent=p.name;room.querySelector('.room-material').textContent=p.detail;room.querySelector('.room-price').textContent=`$${p.price}`;room.querySelector('.room-count').textContent=`${selected+1} / ${malarProducts.length}`;setZoom(false);
+ }
+ function openPiece(index,trigger,enlarge=false){origin=trigger;renderPiece(index);room.showModal();document.documentElement.classList.add('viewing-piece');if(enlarge)setZoom(true);room.querySelector('.room-close').focus({preventScroll:true})}
+ room.querySelector('.room-close').addEventListener('click',()=>room.close());
+ room.addEventListener('click',e=>{if(e.target===room)room.close()});
+ room.addEventListener('close',()=>{document.documentElement.classList.remove('viewing-piece');setZoom(false);origin?.focus({preventScroll:true})});
+ room.querySelector('.room-prev').addEventListener('click',()=>renderPiece(selected-1));room.querySelector('.room-next').addEventListener('click',()=>renderPiece(selected+1));
+ room.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();renderPiece(selected+1)}if(e.key==='ArrowLeft'){e.preventDefault();renderPiece(selected-1)}});
+ artwork.addEventListener('click',()=>setZoom(!zoomed));room.querySelector('.room-zoom').addEventListener('click',()=>setZoom(!zoomed));
+ artwork.addEventListener('pointermove',e=>{if(!zoomed||!motionOK)return;const r=artwork.getBoundingClientRect();artwork.style.setProperty('--detail-x',`${20+60*(e.clientX-r.left)/r.width}%`);artwork.style.setProperty('--detail-y',`${20+60*(e.clientY-r.top)/r.height}%`)});
+ document.querySelectorAll('.stone-item').forEach((item,i)=>{const b=document.createElement('button');b.type='button';b.className='view-closely';b.textContent='View closely';b.setAttribute('aria-label',`View ${malarProducts[i].name} closely`);item.querySelector('.piece-details').prepend(b);b.addEventListener('click',()=>openPiece(i,b))});
+ study.removeAttribute('aria-hidden');study.setAttribute('role','button');study.tabIndex=0;study.setAttribute('aria-label','View the marigold detail');study.addEventListener('click',()=>openPiece(0,study,true));study.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openPiece(0,study,true)}});
+ // Section navigation follows the work in view without rules or progress bars.
+ const sectionLinks=[...document.querySelectorAll('.shop-nav a')];
+ const sectionObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(!entry.isIntersecting)return;sectionLinks.forEach(link=>{const active=link.hash===`#${entry.target.id}`;link.classList.toggle('is-current',active);if(active)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current')})})},{rootMargin:'-20% 0px -55% 0px',threshold:0});
+ sectionLinks.forEach(link=>{const section=document.querySelector(link.hash);if(section)sectionObserver.observe(section)});
+}
