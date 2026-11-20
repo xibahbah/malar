@@ -815,11 +815,11 @@ function garden(hero) {
     }
     if(!reduce.matches && (aim||moving||ambient)) schedule();
   }
-  hero.addEventListener('pointermove',mark);
-  hero.addEventListener('pointerdown',mark);
-  hero.addEventListener('pointerleave',release);
-  hero.addEventListener('pointercancel',release);
-  hero.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse') release();});
+  hero.parentElement.addEventListener('pointermove',mark);
+  hero.parentElement.addEventListener('pointerdown',mark);
+  hero.parentElement.addEventListener('pointerleave',release);
+  hero.parentElement.addEventListener('pointercancel',release);
+  hero.parentElement.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse') release();});
   window.addEventListener('blur',release);
   new ResizeObserver(resize).observe(hero);
   new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;if(!visible)release();schedule();}).observe(hero);

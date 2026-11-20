@@ -9,3 +9,14 @@
 .stone-back p{font:400 14px/1.4 Arial,sans-serif;margin:0;max-width:20em}
 .stone-back small{font:400 11px/1.4 Arial,sans-serif;letter-spacing:.03em;margin:4px 0 0}
 @media(max-width:760px){.stone-back{gap:8px;padding:12px}.stone-back strong{font-size:18px}.stone-back p{font-size:12px}.stone-back small{font-size:10px}}
+
+/* A single living wall runs behind the entire collection. */
+.ambient-landing #garden.stage{height:auto;min-height:100svh;isolation:isolate}
+#garden>.hero{position:sticky;top:0;height:100svh;margin-bottom:-100svh;z-index:0}
+#garden>.axis{z-index:1}
+.garden-content{position:relative;z-index:1;padding-top:115svh;color:#f3e9d5}
+.garden-content .shop-header,.garden-content .editorial,.garden-content #studio.story-section,.garden-content .gift-section,.garden-content .account-note,.garden-content .shop-footer{background:transparent}
+.garden-content :is(.collection-intro,.craft-intro,.story-copy,.gift-copy,.stone-caption,.editorial-footer,.account-note){text-shadow:0 1px 4px #100b08a0}
+.garden-content :is(.collection-intro,.craft-intro,.story-copy,.gift-copy) p{color:#d4c6b6}
+.garden-content .stone-caption p{color:#c8b9a7}
+#garden .garden-content :is(#collection,#crafts,#studio,#gift,.shop-header,.shop-footer,.account-note){background:transparent}
