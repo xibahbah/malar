@@ -127,3 +127,18 @@
  .stone-card,.stone-card.flipped{transform:none;transition:none}
  .stone-art,.stone-card:hover .stone-art,.stone-card:focus-visible .stone-art{transform:none;transition:none}
 }
+
+/* Stable hover footprint and frame-smoothed motion; no animated SVG filters. */
+@media(min-width:761px){
+ .stone-space{position:relative}
+ .stone-space::after{content:"";position:absolute;inset:0;pointer-events:none}
+ .stone-card,.stone-card.flipped{transition:none;will-change:transform}
+ .stone-art,.stone-card:hover .stone-art,.stone-card:focus-visible .stone-art,
+ #craft-grid .stone-art,#craft-grid .stone-card:hover .stone-art{
+  filter:drop-shadow(3px 7px 4px #4b3d324d);transform:none;transition:transform .3s ease;will-change:transform
+ }
+ .stone-space.is-hovered .stone-art,.stone-card:focus-visible .stone-art{transform:translate3d(0,-5px,0)}
+}
+@media(min-width:761px) and (prefers-reduced-motion:reduce){
+ .stone-space.is-hovered .stone-art,.stone-card:focus-visible .stone-art{transform:none;transition:none}
+}
