@@ -518,10 +518,10 @@ function garden(hero) {
     lamp.light = {x:.5, y:.5};
     lamp.intensity = fade * .65;
     if (entranceTime >= 850) root.classList.add('relief-reveal');
-    if (entranceTime >= 2150) {
-      finishEntrance();
+    if (entranceTime >= 1800 && nextStroke === 0) {
       nextStroke = startTitleSweep(wanderers[0], time);
     }
+    if (entranceTime >= 2150) finishEntrance();
   }
   const userBrush = {head:null, leader:null, light:lastLamp, intensity:0};
   const wanderers = ambient ? Array.from({length:3},()=>({
