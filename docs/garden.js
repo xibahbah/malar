@@ -329,16 +329,16 @@ function garden(hero) {
     varying vec2 uv;
     uniform highp sampler2D field,heightMap;
     uniform vec2 cover,lightPoint;
-    uniform float pan,resting;
+    uniform float pan,resting,introDepth;
     ${localLighting}
     void main(){
       uv=pos*.5+.5;
       vec2 p=vec2(uv.x,1.-uv.y);
       vec2 tex=(p-.5)*cover+.5+vec2(0.,pan);
       float h=texture2D(heightMap,tex).r;
-      float rise=max(resting,smoothstep(.025,.78,texture2D(field,p).r));
+      float rise=max(resting,smoothstep(.025,mix(.78,.53,introDepth),texture2D(field,p).r));
       float rim=1.-smoothstep(.965,1.,max(abs(pos.x),abs(pos.y)));
-      float z=.060*h*rise*rim;
+      float z=mix(.060,.096,introDepth)*h*rise*rim;
       vec2 localLamp=lightFor(p);
       vec2 gaze=vec2((localLamp.x-.5)*.52,.31+(.5-localLamp.y)*.40);
       gl_Position=vec4(pos+gaze*z,-z,1.-z);
@@ -348,7 +348,7 @@ function garden(hero) {
     varying vec2 uv;
     uniform highp sampler2D mural, field, heightMap, normalMap, shapeMap;
     uniform vec2 cover, pixel, lightPoint;
-    uniform float resting, pan, introSurface;
+    uniform float resting, pan, introSurface, introDepth;
     ${localLighting}
     void main(){
       vec2 p=vec2(uv.x,1.-uv.y);
@@ -368,8 +368,8 @@ function garden(hero) {
       float reached=.62*brush+.27*wick+.21*shared;
       // As pressure falls, a contact plane passes through the relief from back to front.
       float depth=smoothstep(.06,.92,h);
-      float plane=mix(.52,.032,depth)+.025*(shape.a-.5);
-      float lift=smoothstep(plane,plane+mix(.37,.49,depth),reached)
+      float plane=mix(mix(.52,.29,introDepth),.032,depth)+.025*(shape.a-.5);
+      float lift=smoothstep(plane,plane+mix(.37,.49,depth),reached*(1.+.32*introDepth))
                  *max(mix(.015,.94,carved),.96*depth);
       float localLift=lift;
       lift=max(lift,resting);
@@ -415,8 +415,8 @@ function garden(hero) {
       float castDark=max(0.,.84-dot(texture2D(mural,shadowProbe).rgb,vec3(.299,.587,.114)));
       float broad=.32*min(darkness-crease,castDark)*pow(lift,1.65);
       float contactShade=.58*crease*lift;
-      float shadow=-min(.095*lift,broad+contactShade);
-      float light=max(value-.84,0.)*pow(lift,.88);
+      float shadow=-min(.095*lift,broad+contactShade)*(1.+.28*introDepth);
+      float light=max(value-.84,0.)*pow(lift,.88)*(1.+.18*introDepth);
       vec3 surfaceColor=wallTone+wall*mix(1.,.35,lift)+shadow*.66
                         +vec3(1.55,1.12,.75)*light+illumination*vec3(1.35,1.12,.88);
       // The half-vector picks out individual relief facets within the active brush.
@@ -453,7 +453,7 @@ function garden(hero) {
   const pos=gl.getAttribLocation(program,'pos');
   gl.enableVertexAttribArray(pos);
   gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
-  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting','introSurface','userLight','wanderingLight','occasionalLight','entranceLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
+  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting','introSurface','introDepth','userLight','wanderingLight','occasionalLight','entranceLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
   function makeTexture(unit,name){
     const tex=gl.createTexture();
     gl.activeTexture(gl.TEXTURE0+unit);
@@ -755,7 +755,9 @@ function garden(hero) {
     gl.uniform1f(loc.resting,reduce.matches?.76:0);
     // Restore the ambient surface gradually as the opening ripple clears the frame.
     const surfaceFade = entering ? Math.max(0, Math.min(1, (entranceTime - 1300) / 800)) : 1;
-    gl.uniform1f(loc.introSurface,surfaceFade*surfaceFade*(3-2*surfaceFade));
+    const ambientSurface = surfaceFade*surfaceFade*(3-2*surfaceFade);
+    gl.uniform1f(loc.introSurface,ambientSurface);
+    gl.uniform1f(loc.introDepth,1-ambientSurface);
     const stage=hero.parentElement;
     const progress=Math.max(0,Math.min(1,-stage.getBoundingClientRect().top/Math.max(1,stage.offsetHeight-hero.offsetHeight)));
     gl.uniform1f(loc.pan,(progress-.5)*(1.-Math.min(1,1/ratio)));
