@@ -162,3 +162,46 @@ test('reversing a live coast immediately moves in the new direction and fast tra
   assert.equal(chapterAt(centers, 100), 0);
   assert.equal(chapterAt(centers, 9000), 5);
 });
+
+test('the overview scales all six pictures and their spacing around the reading point', async () => {
+  const {projectCollection} = await import('../docs/proto/viewing-room/collection-camera.js');
+  const position = 2900, height = 800, compact = .18, pivot = position + height / 2;
+  let previousScale = 1;
+  for (let frame = 0; frame <= 100; frame++) {
+    const {scale, translateY} = projectCollection(frame / 100, position, height, compact);
+    const screenY = y => y * scale + translateY;
+    assert.ok(Math.abs(screenY(pivot) - height / 2) < 1e-9);
+    assert.ok(Math.abs(screenY(3550) - screenY(3100) - 450 * scale) < 1e-9);
+    assert.ok(scale <= previousScale && previousScale - scale < .02);
+    previousScale = scale;
+  }
+  assert.equal(projectCollection(-.1, position, height, compact).scale, 1);
+  assert.ok(Math.abs(projectCollection(1.1, position, height, compact).scale - compact) < 1e-9);
+});
+
+test('index labels arrive after the pullback and both directions pass through intermediate sizes', async () => {
+  const {projectCollection, advanceZoom} = await import('../docs/proto/viewing-room/collection-camera.js');
+  const view = progress => projectCollection(progress, 2800, 800, .18);
+  assert.deepEqual(view(0), {scale:1, translateY:-2800, align:0, captions:1, labels:0});
+  assert.ok(view(.6).scale < .4);
+  assert.equal(view(.6).labels, 0);
+  assert.ok(view(.8).labels > 0 && view(.8).labels < 1);
+  assert.equal(view(1).labels, 1);
+  assert.equal(view(1).captions, 0);
+  const run = hz => {
+    let lens = {position:0, velocity:0};
+    const scales = [];
+    for (const target of [1, 0]) {
+      for (let frame = 1; frame <= hz; frame++) {
+        lens = advanceZoom(lens.position, lens.velocity, target, 1 / hz);
+        if (frame % (hz / 4) === 0) scales.push(view(lens.position).scale);
+      }
+    }
+    return scales;
+  };
+  const series = run(60);
+  assert.ok(series[0] > .35 && series[0] < .8);
+  assert.ok(series[1] < series[0] && series[2] < series[1]);
+  assert.ok(series[4] > series[3] && series[5] > series[4] && series[7] > .97);
+  run(120).forEach((s,i) => assert.ok(Math.abs(series[i] - s) < 1e-8));
+});

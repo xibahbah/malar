@@ -4,7 +4,8 @@ const here = new URL('./', import.meta.url);
 import {layers,scrollPose,follow,clamp,smooth,endingPose} from './scroll-motion.js?v=3';
 import {createMomentum} from './momentum.js?v=4';
 import {mountGiftCard,giftCardMarkup} from './metal.js?v=3';
-import {mountCollectionCamera} from './collection-camera.js?v=1';
+import {mountCollectionCamera} from './collection-camera.js?v=2';
+import {mountBronze} from './bronze.js?v=1';
 import {mountBotanical} from './botanical.js?v=3';
 const $ = s => document.querySelector(s);
 const money = cents => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
@@ -41,16 +42,17 @@ const pieces = products.filter(p=>!p.gift).map((p, i) => {
   if (i === 3) content.insertAdjacentHTML('beforeend','<h2 class="room-heading objects reveal" id="crafts">Objects</h2>');
   const el = document.createElement('article');
   el.className = `piece v${i + 1}`;
+  el.id = 'piece-' + p.id;
   el.setAttribute('aria-labelledby', 'name-' + p.id);
   el.innerHTML = `
     <div class="plate stone-front${WIDE.has(p.id) ? ' wide' : ''}" tabindex="0" role="group" aria-label="${p.name} presentation" style="--stone-pos:${[2,0,1,4,3,5][i]%3*50}% ${i<3?0:100}%">
       <div class="plate-motion"><div class="plate-stone"></div>
         <div class="object-shadow" aria-hidden="true"><img src="${p.image}" alt="" decoding="async" loading="lazy"></div>
-        <div class="object-layer"><img src="${p.image}" alt="${p.name}" decoding="async" loading="lazy"></div>
+        <div class="object-layer"><img src="${p.image}" alt="${p.name}" decoding="async" fetchpriority="low"></div>
       </div></div>
     <div class="text">
       <p class="no">${pad(i + 1)}</p>
-      <h3 id="name-${p.id}">${p.name}</h3>
+      <h3 id="name-${p.id}" tabindex="-1">${p.name}</h3>
       <p class="spec">${p.spec}</p>
       <p class="buy"><span class="price">${money(p.price)}</span><button class="add" type="button">Add to bag</button><span class="in-bag" aria-live="polite"></span></p>
     </div>`;
@@ -75,6 +77,7 @@ document.querySelectorAll('.reveal').forEach(el => seen.observe(el));
 const bar = $('.bar'), nav = $('.drawer-nav');
 let drawerTrigger = null;
 const bag = $('#bag'), lines = $('#bag-lines'), note = $('#bag-note'), checkout = $('#bag-checkout');
+mountBronze(bag, reduce);
 function renderBag() {
   const focused = lines.contains(document.activeElement) ? document.activeElement.getAttribute('aria-label') : null;
   $('#bag-count').textContent = count();
@@ -114,6 +117,7 @@ function renderBag() {
 }
 function openDrawer(view, trigger) {
   const menuView = view === 'Menu';
+  camera.dismiss();
   momentum.stop();
   if (!bag.open) drawerTrigger = trigger;
   note.textContent = '';
@@ -192,7 +196,7 @@ const fine=matchMedia('(min-width:761px) and (pointer:fine)');
 const root=document.documentElement,finale=document.querySelector('.night-garden');
 const models=pieces.map(({el},i)=>({el,plate:el.querySelector('.plate'),motion:el.querySelector('.plate-motion'),text:el.querySelector('.text'),layer:layers[i],i,center:0,rect:null,x:0,y:0,focus:false,hover:false,pitch:0,yaw:0,lift:0,travel:0,textTravel:0,objectPitch:0,initialized:false}));
 let frame=0,last=0,finaleTop=0,viewHeight=innerHeight,finaleHeight=0,endingStarted=null,wallHidden=false;
-const camera=mountCollectionCamera(room.querySelector('.collection-track'),pieces);
+const camera=mountCollectionCamera(room.querySelector('.collection-track'),pieces,{wake:schedule,stopNavigation:momentum.stop});
 const hero=document.querySelector('.hero'), axis=document.querySelector('.axis');
 const flowerGarden=finale.querySelector('.night-flowers');
 const botanical=mountBotanical(flowerGarden,here,reduce,schedule);
@@ -208,7 +212,11 @@ function measure(){
    m.initialized=false;m.travel=m.lift=0;
   }
  }
- models.forEach(m=>{const r=m.plate.getBoundingClientRect();const pageTop=camera.pageTop(m.plate);m.center=pageTop+r.height/2;m.rect={x:r.left,top:pageTop,width:r.width,height:r.height};});
+ models.forEach(m=>{
+  const pageTop=camera.pageTop(m.plate);
+  m.center=pageTop+m.plate.offsetHeight/2;
+  m.rect={x:m.plate.getBoundingClientRect().left,top:pageTop,width:m.plate.offsetWidth,height:m.plate.offsetHeight};
+ });
  finaleTop=scrollY+finale.getBoundingClientRect().top;finaleHeight=finale.offsetHeight;botanical.measure();schedule();
 }
 models.forEach(m=>{
@@ -254,16 +262,16 @@ function paint(now){
   if(!reduce.matches&&(entering||stemsMoving))unsettled=true;
  }
  if(enabled)for(const m of models){
-  if(Math.abs(m.center-y-viewHeight*.5)>viewHeight*1.3+m.rect.height*.5){m.initialized=false;continue;}
+  if(cameraFrame.detail===1&&Math.abs(m.center-y-viewHeight*.5)>viewHeight*1.3+m.rect.height*.5){m.initialized=false;continue;}
   const pose=scrollPose(m.layer,y,m.center,viewHeight,m.rect.height);
   const phase=pose.phase;
-  m.travel=pose.travel;
-  m.textTravel=pose.textTravel;
+  m.travel=pose.travel*cameraFrame.detail;
+  m.textTravel=pose.textTravel*cameraFrame.detail;
   const targets={
-   pitch:pose.pitch-m.y*5,
-   yaw:phase*(m.i%2?1.6:-1.6)+m.x*7,
-   lift:m.hover||m.focus?-8:0,
-   objectPitch:-phase*3
+   pitch:(pose.pitch-m.y*5)*cameraFrame.detail,
+   yaw:(phase*(m.i%2?1.6:-1.6)+m.x*7)*cameraFrame.detail,
+   lift:(m.hover||m.focus?-8:0)*cameraFrame.detail,
+   objectPitch:-phase*3*cameraFrame.detail
   };
   for(const key in targets){
    const target=targets[key];
@@ -291,6 +299,8 @@ const initialId=location.hash.slice(1);
 if(initialId==='bag')openDrawer('Bag',$('#bag-open'));
 else if(initialId && document.getElementById(initialId)){
  const section=document.getElementById(initialId);
- window.scrollTo({top:Math.max(0,camera.pageTop(section)-90),behavior:'instant'});
+ const anchor=section.matches('.piece') ? section.querySelector('.plate') : section;
+ const inset=anchor===section ? 90 : (innerHeight-anchor.offsetHeight)/2;
+ window.scrollTo({top:Math.max(0,camera.pageTop(anchor)-inset),behavior:'instant'});
  camera.snap(scrollY);schedule();
 }

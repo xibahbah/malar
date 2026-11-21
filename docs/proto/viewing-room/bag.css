@@ -1,12 +1,23 @@
-/* A single cast surface for the navigation and shopping drawer. */
+/* One continuous planished bronze sheet for the drawer. */
 .viewing-room #bag{
   box-sizing:border-box;position:fixed;inset:0 0 0 auto;margin:0;
   width:min(440px,100vw);height:100dvh;max-width:100vw;max-height:100dvh;
   padding:32px;border:0;border-left:1px solid rgba(201,163,92,.45);
-  --bronze-plane:color-mix(in srgb,#c9a35c 30%,#140e0a);
+  --bronze-plane:#312820;isolation:isolate;
   background-color:var(--bronze-plane);color:#efe3cc;
   box-shadow:inset 1px 0 rgba(239,227,204,.12),-14px 0 34px rgba(20,14,10,.24);overflow:hidden;
   font-family:MalarText;grid-template-rows:auto minmax(0,1fr) auto;gap:0;align-content:stretch;
+}
+#bag::before,#bag::after{content:"";position:absolute;pointer-events:none;z-index:-1}
+#bag::before{
+  inset:0;background:#312820 url('./bronze-sheet.webp') 48% 50%/cover no-repeat;
+  filter:saturate(.77) brightness(.78);
+  box-shadow:inset 1px 0 #e5c3998a,inset 3px 0 #302a2277,inset -1px 0 #251e1b8c
+}
+#bag::after{
+  inset:0;mix-blend-mode:soft-light;
+  background:linear-gradient(115deg,transparent 26%,#f1e2d32b 40%,#fff4dd74 49%,#a6b2b626 56%,transparent 67%) no-repeat;
+  background-size:180% 100%;background-position:calc(50% - var(--reflection-x,0%)) center
 }
 .viewing-room #bag[open]{display:grid;animation:bag-slide-in 400ms cubic-bezier(.22,.61,.36,1)}
 #bag::backdrop{background:rgba(10,6,3,.6);backdrop-filter:none}

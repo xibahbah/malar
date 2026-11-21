@@ -2,9 +2,13 @@
 
 On Immersive Garden's Cartier sequence at 1280 × 800, the lower image edge rose about 150 CSS pixels and the adjacent caption rose about 134. In a separate slow pass, the image moved about 381 pixels while a wall feature moved 54. A rapid sweep in either direction briefly showed neighboring project titles and smaller images.
 
-The desktop collection uses native document scroll with a bounded presentation camera. It spends about half of each new displacement immediately and eases the remainder with a 155 ms time constant. The six pieces share their travel with their captions. The bronze wall moves 0.185 pixels per displayed scroll pixel. Its overscanned canvas reuses the previous relief frame between lighting updates. A fast sustained sweep shows an index aligned to the actual centers of the pieces. Touch and reduced-motion layouts use normal document flow.
+Consecutive frames from upward and downward gestures on Immersive Garden show the same project image shrinking while its neighbors enter the viewport. The central names become legible once the pictures begin to gather. On release the picture grows back through intermediate sizes.
 
-Menu and Bag open two views of the same untextured bronze drawer. The gold-leaf material belongs to the gift card and its thumbnail. The denomination and the gift-card inscription have separate space on the foil.
+Native document scrolling owns wheel and trackpad inertia. During ordinary scrolling the collection follows about half of a new displacement immediately and eases the rest with a 155 ms time constant. Each piece travels with its caption. The wall moves 0.185 pixels per displayed scroll pixel.
+
+A fast sustained gesture pulls the existing collection back around the viewport center. The same six pictures and their spacing scale together. As the pictures approach their index positions, linked product names appear between them. The Index button keeps the overview open. Choosing a piece moves its thumbnail to the reading point before it expands and receives keyboard focus. Touch and reduced-motion layouts use native scroll and a static version of the same menu.
+
+The drawer uses a single bronze-sheet image with burnishing marks, uneven patina and a narrow edge highlight. A soft reflection follows the pointer over the fixed grain. The gift card and its thumbnail use their own gold leaf.
 
 ---
 
