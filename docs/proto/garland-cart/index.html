@@ -4,55 +4,78 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#21150e">
+<base href="../../">
 <title>Malar / Garland cart study</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manjari:wght@400&display=swap">
-<link rel="stylesheet" href="garland.css">
+<!-- The homepage's own garden: same stylesheet, same WebGL relief engine. -->
+<link rel="stylesheet" href="garden.css?v=title-shadow">
+<link rel="stylesheet" href="collection.css?v=12">
+<script src="garden.js?v=ambient-viewing-room" defer></script>
+<link rel="stylesheet" href="proto/garland-cart/garland.css">
 </head>
-<body>
-<div class="wall" aria-hidden="true"><div class="wall-dark"></div><div class="wall-lit"></div></div>
+<body class="ambient-landing cart-page">
+<button id="menu" aria-controls="site-menu" aria-expanded="false" aria-haspopup="dialog">Menu <i></i></button>
 
-<header class="top">
-  <a class="mark" href="../../">malar <span lang="ml">മലർ</span></a>
-  <nav><a href="../lit-product/">Shared light study</a></nav>
-</header>
+<dialog id="site-menu" class="site-menu" aria-label="Menu">
+  <form method="dialog"><button>Close ×</button></form>
+  <nav aria-label="Site">
+    <a href="./">The Garden</a>
+    <a href="./#collection">Jewelry</a>
+    <a href="proto/lit-product/">Light study</a>
+  </nav>
+</dialog>
 
 <main>
-  <section class="collection" aria-labelledby="title">
-    <div class="intro">
-      <p class="kicker">Collection</p>
-      <h1 id="title">A thread, collected.</h1>
-      <p class="lede">Each piece hangs on one cotton thread. Tie the ones you want onto your own strand.</p>
-    </div>
-    <div class="hang" id="pieces">
-      <div class="thread" aria-hidden="true"></div>
-      <p id="load">Loading pieces…</p>
-    </div>
-  </section>
+<section class="stage" id="garden" aria-label="Collection on the garden relief">
+  <div class="hero"><canvas aria-hidden="true"></canvas></div>
+  <div class="axis" aria-hidden="true"><h1 class="wordmark"><span class="wordmark-latin">MALAR</span></h1></div>
 
-  <aside class="strand-panel" id="strand-panel" aria-labelledby="strand-title">
-    <div class="strand-head">
-      <h2 id="strand-title">Your strand</h2>
-      <span class="count" id="count">0</span>
+  <div class="garden-content cart-content">
+    <header class="top">
+      <a class="mark" href="./">malar <span lang="ml">മലർ</span></a>
+      <button id="sound" aria-pressed="false">Sound off</button>
+    </header>
+
+    <div class="cart-grid">
+      <section class="collection" aria-labelledby="title">
+        <div class="intro">
+          <p class="kicker">Collection</p>
+          <h2 id="title">A thread, collected.</h2>
+          <p class="lede">Each piece hangs on one cotton thread. Tie the ones you want onto your own strand.</p>
+        </div>
+        <div class="hang" id="pieces">
+          <div class="thread" aria-hidden="true"></div>
+          <p id="load">Loading pieces…</p>
+        </div>
+      </section>
+
+      <aside class="strand-panel" id="strand-panel" aria-labelledby="strand-title">
+        <div class="strand-head">
+          <h2 id="strand-title">Your strand</h2>
+          <span class="count" id="count">0</span>
+        </div>
+        <ol class="strand" id="strand"></ol>
+        <div class="strand-foot">
+          <p class="total"><span>Total</span><span id="total">$0.00</span></p>
+          <button class="tie" id="checkout" disabled>Tie off</button>
+          <p id="status" class="status" role="status"></p>
+        </div>
+      </aside>
     </div>
-    <ol class="strand" id="strand"></ol>
-    <div class="strand-foot">
-      <p class="total"><span>Total</span><span id="total">$0.00</span></p>
-      <button class="tie" id="checkout" disabled>Tie off</button>
-      <p id="status" class="status" role="status"></p>
-    </div>
-  </aside>
+
+    <footer class="foot"><p>Prototype · mock checkout, nothing is charged. Product images are placeholders until the studio shoot.</p></footer>
+  </div>
+</section>
 </main>
 
 <div class="mobile-bar" id="mobile-bar">
   <div class="mini-strand" id="mini" aria-hidden="true"></div>
-  <a href="#strand-panel" id="mobile-link">Your strand · <span id="mobile-count">0</span></a>
+  <a href="proto/garland-cart/#strand-panel" id="mobile-link">Your strand · <span id="mobile-count">0</span></a>
 </div>
 
-<footer class="foot"><p>Prototype · mock checkout, nothing is charged. Product images are placeholders until the studio shoot.</p></footer>
-
-<dialog id="checkout-dialog" aria-labelledby="checkout-title">
+<dialog id="checkout-dialog" class="checkout" aria-labelledby="checkout-title">
   <form id="order">
     <button type="button" class="close" id="close" aria-label="Close">×</button>
     <p class="kicker">Checkout</p>
@@ -72,6 +95,6 @@
   </section>
 </dialog>
 
-<script src="garland.js" type="module"></script>
+<script src="proto/garland-cart/garland.js" type="module"></script>
 </body>
 </html>

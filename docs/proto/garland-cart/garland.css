@@ -8,35 +8,30 @@
   --twist:repeating-linear-gradient(172deg,#d8bd85 0 3px,#8e7044 3px 5px,#c4a46b 5px 7px);
 }
 *{box-sizing:border-box}
-html{background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
-body{margin:0;min-height:100vh}
+body.cart-page{margin:0;min-height:100vh;color:var(--ink);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
 a{color:inherit}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,a:focus-visible,textarea:focus-visible{outline:1px solid var(--gold);outline-offset:6px}
 [lang=ml]{font-family:Manjari,var(--sans)}
 
-/* The wall: one dark layer, one lit layer revealed around the lamp. */
-.wall{position:fixed;inset:0;z-index:0;pointer-events:none}
-.wall>div{position:absolute;inset:0;background:url(../../wall-water.jpg) center/cover}
-.wall-dark{filter:brightness(.26) saturate(.7)}
-.wall-lit{filter:brightness(.78) saturate(.95) sepia(.15);
-  -webkit-mask:radial-gradient(circle 34vmax at var(--lx) var(--ly),#000 0,rgba(0,0,0,.55) 28%,transparent 72%);
-          mask:radial-gradient(circle 34vmax at var(--lx) var(--ly),#000 0,rgba(0,0,0,.55) 28%,transparent 72%)}
-.wall::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,transparent 40%,rgba(12,7,4,.75))}
 
-.top,main,.foot{position:relative;z-index:1}
 .top{display:flex;justify-content:space-between;align-items:baseline;padding:28px 5vw}
 .mark{font:400 26px/1 var(--serif);text-decoration:none;letter-spacing:.02em}
 .mark span{font-size:.62em;margin-left:.5em;color:var(--ink-dim)}
-.top nav a{font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:var(--ink-dim)}
-.top nav a:hover{color:var(--ink)}
+.top #sound{margin-right:clamp(70px,8vw,130px);padding:0;font:12px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim)}
+.top #sound:hover{color:var(--ink)}
 
-main{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:4vw;padding:0 5vw 120px;align-items:start;max-width:1720px;margin:0 auto}
+/* Sit on the homepage's garden: no extra top padding, hero stays sticky behind. */
+#garden .garden-content.cart-content{padding-top:0;color:var(--ink)}
+.cart-page #garden.stage{min-height:100svh}
+.cart-page .axis{display:none}
+.cart-page :is(h2,h3,p,article){max-width:none;letter-spacing:normal}
+.cart-grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:4vw;padding:0 5vw 120px;align-items:start;max-width:1720px;margin:0 auto}
 .top{max-width:1720px;margin:0 auto}
-@media (min-width:1800px){:root{--hang:520px}.pendant img{height:clamp(260px,30vh,400px)}main{grid-template-columns:minmax(0,1fr) 360px}}
+@media (min-width:1800px){:root{--hang:520px}.pendant img{height:clamp(260px,30vh,400px)}.cart-grid{grid-template-columns:minmax(0,1fr) 360px}}
 .kicker{margin:0 0 10px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
 .intro{text-align:center;padding:6vh 0 8vh}
-.intro h1{font:400 clamp(48px,7vw,104px)/.95 var(--serif);margin:0;letter-spacing:-.01em}
+.intro h2{font:400 clamp(48px,7vw,104px)/.95 var(--serif);margin:0;letter-spacing:-.01em}
 .lede{max-width:30em;margin:22px auto 0;color:var(--ink-dim)}
 
 /* One thread. Every piece is centred on it; text never crosses it. */
@@ -99,10 +94,11 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:4vw;padding:0 5v
 .mobile-bar{display:none}
 .foot{padding:0 5vw 40px;color:var(--ink-dim);font-size:12px;text-align:center}
 
-dialog{width:min(520px,92vw);padding:40px 36px 32px;border:1px solid rgba(212,174,103,.4);color:var(--ink);
+dialog.checkout{position:fixed;inset:0;margin:auto;height:auto;max-height:92vh;overflow:auto;width:min(520px,92vw);max-width:none;padding:40px 36px 32px;border:1px solid rgba(212,174,103,.4);color:var(--ink);
   background:linear-gradient(rgba(24,15,10,.94),rgba(24,15,10,.97)),url(../../wall-water.jpg) center/cover}
+dialog.checkout[open]{display:block}
 dialog::backdrop{background:rgba(10,6,3,.78);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
-dialog h2{font:400 40px/1 var(--serif);margin:0 0 24px}
+dialog.checkout h2{font:400 40px/1 var(--serif);margin:0 0 24px;letter-spacing:0}
 .close{position:absolute;top:14px;right:16px;width:36px;height:36px;background:none;border:0;font-size:26px;color:var(--ink-dim)}
 .review{position:relative;list-style:none;margin:0 0 22px;padding:0}
 .review::before{content:"";position:absolute;left:21px;top:0;bottom:0;width:2px;background:var(--twist)}
@@ -127,7 +123,7 @@ dialog h2{font:400 40px/1 var(--serif);margin:0 0 24px}
 .debug .hang::after{content:"";position:absolute;top:0;bottom:0;left:calc(var(--thread-x) - var(--hang)/2);width:var(--hang);outline:1px dashed yellow;pointer-events:none}
 
 @media (max-width:1100px){
-  main{grid-template-columns:1fr;padding:0 0 140px}
+  .cart-grid{grid-template-columns:1fr;padding:0 0 140px}
   .intro{padding:4vh 6vw 6vh}
   .hang{grid-template-columns:1fr;row-gap:9vh;--hang:100%}
   .pendant{grid-column:1;grid-row:1}
@@ -147,3 +143,8 @@ dialog h2{font:400 40px/1 var(--serif);margin:0 0 24px}
   .bead.tied .stone,.knot-draw path{animation:none;stroke-dashoffset:0}
   .pendant img{transition:none}
 }
+
+/* Site menu: same dark garden palette as the homepage overlay */
+dialog.site-menu{background:rgba(27,18,12,.97);color:var(--ink)}
+dialog.site-menu nav a{font-family:var(--serif);color:var(--ink)}
+dialog.site-menu form button{color:var(--ink-dim);font:13px var(--sans)}

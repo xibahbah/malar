@@ -9,10 +9,12 @@ if (new URLSearchParams(location.search).has('debug')) document.body.classList.a
 let products, cart, state, justAdded = null, flyFrom = null;
 
 try {
-  const res = await fetch('./products.json');
+  const here = new URL('./', import.meta.url);
+  const res = await fetch(new URL('products.json', here));
   if (!res.ok) throw Error('data');
   products = await res.json();
   if (!Array.isArray(products) || !products.length) throw Error('empty');
+  for (const p of products) p.image = new URL(p.image, here).href;
   cart = createCart(products);
 } catch {
   $('#load').textContent = 'Could not load the collection. ';
@@ -29,8 +31,10 @@ const hang = $('#pieces');
 $('#load').remove();
 const pendants = [];
 for (const p of products) {
-  const el = document.createElement('article');
+  const el = document.createElement('div');
   el.className = 'piece';
+  el.setAttribute('role', 'group');
+  el.setAttribute('aria-label', p.name);
   el.dataset.material = p.material;
   el.innerHTML = `
     <div class="pendant"><span class="knot"></span><span class="drop"></span>
