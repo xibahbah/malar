@@ -3,7 +3,7 @@
 
 :root{
   --ink:#efe3cc;--ink-dim:#b9a88c;--ground:#1b120c;--gold:#d4ae67;--gold-deep:#8a6a3c;
-  --thread-x:50%;--hang:min(400px,34vw);--lx:50vw;--ly:30vh;
+  --thread-x:50%;--hang:clamp(260px,26vw,420px);--lx:50vw;--ly:30vh;
   --serif:MalarEditorial,"Cormorant Garamond",Georgia,serif;--sans:MalarText,system-ui,sans-serif;
   --twist:repeating-linear-gradient(172deg,#d8bd85 0 3px,#8e7044 3px 5px,#c4a46b 5px 7px);
 }
@@ -31,14 +31,14 @@ button:focus-visible,a:focus-visible,textarea:focus-visible{outline:1px solid va
 .top nav a{font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:var(--ink-dim)}
 .top nav a:hover{color:var(--ink)}
 
-main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:4vw;padding:0 5vw 120px;align-items:start}
+main{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:4vw;padding:0 5vw 120px;align-items:start}
 .kicker{margin:0 0 10px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
 .intro{text-align:center;padding:6vh 0 8vh}
 .intro h1{font:400 clamp(48px,7vw,104px)/.95 var(--serif);margin:0;letter-spacing:-.01em}
 .lede{max-width:30em;margin:22px auto 0;color:var(--ink-dim)}
 
 /* One thread. Every piece is centred on it; text never crosses it. */
-.hang{position:relative;display:grid;grid-template-columns:1fr var(--hang) 1fr;row-gap:12vh;padding:40px 0 14vh}
+.hang{position:relative;display:grid;grid-template-columns:minmax(0,1fr) var(--hang) minmax(0,1fr);row-gap:12vh;padding:40px 0 14vh}
 .thread{position:absolute;top:-8vh;bottom:0;left:var(--thread-x);width:2px;margin-left:-1px;background:var(--twist);
   box-shadow:0 0 12px rgba(212,174,103,.18);
   -webkit-mask:linear-gradient(transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(transparent,#000 8%,#000 92%,transparent)}
@@ -51,12 +51,12 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:4vw;padding:0 5v
 .pendant img{display:block;max-width:100%;height:clamp(200px,28vh,300px);width:auto;object-fit:contain;
   filter:brightness(var(--lit,.8)) drop-shadow(var(--sx,6px) var(--sy,14px) 14px rgba(0,0,0,.6));transition:filter .2s linear}
 .label{align-self:center;max-width:22em}
-.piece:nth-child(odd) .label{grid-column:1;text-align:right;padding-right:48px;justify-self:end}
-.piece:nth-child(even) .label{grid-column:3;text-align:left;padding-left:48px;justify-self:start}
-.label h2{font:400 clamp(28px,2.6vw,40px)/1.05 var(--serif);margin:0 0 8px}
+.piece:nth-child(odd) .label{grid-column:1;text-align:right;padding-right:40px;justify-self:end}
+.piece:nth-child(even) .label{grid-column:3;text-align:left;padding-left:40px;justify-self:start}
+.label h2{font:400 clamp(26px,2.3vw,40px)/1.05 var(--serif);margin:0 0 8px}
 .label .detail{margin:0;color:var(--ink-dim);font-size:13px}
 .label .price{display:block;margin:14px 0 18px;font-size:16px;font-variant-numeric:tabular-nums}
-.add{display:inline-flex;align-items:center;gap:10px;background:none;border:1px solid rgba(212,174,103,.55);border-radius:999px;padding:10px 20px;
+.add{display:inline-flex;align-items:center;gap:10px;background:none;border:1px solid rgba(212,174,103,.55);border-radius:999px;padding:10px 20px;white-space:nowrap;
   font-size:12px;letter-spacing:.12em;text-transform:uppercase;transition:background .25s,border-color .25s}
 .add::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}
 .add:hover{background:rgba(212,174,103,.12);border-color:var(--gold)}
@@ -125,7 +125,7 @@ dialog h2{font:400 40px/1 var(--serif);margin:0 0 24px}
 .debug .pendant img{outline:1px dashed cyan}
 .debug .hang::after{content:"";position:absolute;top:0;bottom:0;left:calc(var(--thread-x) - var(--hang)/2);width:var(--hang);outline:1px dashed yellow;pointer-events:none}
 
-@media (max-width:1000px){
+@media (max-width:1100px){
   main{grid-template-columns:1fr;padding:0 0 140px}
   .intro{padding:4vh 6vw 6vh}
   .hang{grid-template-columns:1fr;row-gap:9vh;--hang:100%}
