@@ -9,11 +9,11 @@ export function coastStep(position,velocity,target,dt,frequency=9){
   velocity:(velocity-frequency*c*dt)*decay};
 }
 export function createMomentum(reduced){
- const pointer=matchMedia('(pointer:fine)');
+ const pointer=matchMedia('(min-width:761px) and (pointer:fine)');
  let target=scrollY,current=scrollY,velocity=0,frame=0,last=0,limit=0;
  const measure=()=>{limit=Math.max(0,document.documentElement.scrollHeight-innerHeight);};
  const enabled=()=>pointer.matches&&!reduced.matches;
- function stop(){cancelAnimationFrame(frame);frame=0;last=0;velocity=0;current=target=scrollY;}
+ function stop(){if(!frame)return;cancelAnimationFrame(frame);frame=0;last=0;velocity=0;current=target=scrollY;}
  function tick(now){
   if(!enabled()||document.querySelector('dialog[open]')){stop();return;}
   const dt=last?Math.min(.08,(now-last)/1000):1/60;last=now;
@@ -44,5 +44,5 @@ export function createMomentum(reduced){
  addEventListener('resize',()=>{measure();target=clamp(target,0,limit);},{passive:true});
  document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
  reduced.addEventListener('change',stop);pointer.addEventListener('change',stop);
- measure();return {go,stop};
+ measure();return {go,stop,get active(){return Boolean(frame);}};
 }

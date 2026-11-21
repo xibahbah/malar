@@ -69,32 +69,6 @@ a{color:inherit;text-decoration:none}
 
 .end{margin:0;padding:0 0 40px;color:var(--ink-2);font-size:12px}
 
-/* Bag: a plain drawer */
-#bag{position:fixed;inset:0 0 0 auto;margin:0;width:min(420px,100vw);height:100dvh;max-height:none;max-width:none;
-  padding:28px clamp(20px,3vw,32px);background:#1a110b;color:var(--ink);border:0;border-left:1px solid rgba(201,163,92,.25);overflow:auto}
-#bag::backdrop{background:rgba(10,6,3,.62)}
-.bag-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px}
-.bag-head h2{margin:0;font:400 34px/1 var(--serif)}
-.plain{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
-.plain:hover{color:var(--ink)}
-#bag-lines{list-style:none;margin:0;padding:0}
-#bag-lines li{display:grid;grid-template-columns:56px 1fr auto;gap:6px 16px;align-items:center;padding:16px 0;border-top:1px solid rgba(239,227,204,.12)}
-#bag-lines img{grid-row:1/3;width:56px;height:56px;object-fit:contain}
-#bag-lines .name{font:400 20px/1.15 var(--serif)}
-#bag-lines .line{font-variant-numeric:tabular-nums}
-#bag-lines .qty{display:flex;align-items:center;gap:14px;font-variant-numeric:tabular-nums}
-#bag-lines .qty button{width:28px;height:28px;border:1px solid rgba(239,227,204,.3);border-radius:50%;line-height:1}
-#bag-lines .qty button:hover{border-color:var(--ink)}
-#bag-lines .remove{justify-self:end;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);text-decoration:underline;text-underline-offset:4px}
-#bag-lines .empty{display:block;border:0;padding:0;color:var(--ink-2)}
-.bag-total{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0;padding-top:18px;border-top:1px solid rgba(239,227,204,.12)}
-.bag-total span:first-child{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
-.bag-total span:last-child{font:400 26px/1 var(--serif);font-variant-numeric:tabular-nums}
-.solid{width:100%;padding:16px;background:var(--ink);color:#1a110b;font-size:12px;letter-spacing:.18em;text-transform:uppercase}
-.solid:hover{background:#fff6e2}
-.solid:disabled{background:none;color:var(--ink-2);border:1px solid rgba(239,227,204,.2);cursor:not-allowed}
-.bag-note{min-height:3em;margin:14px 0 0;color:var(--ink-2);font-size:13px}
-
 @media (max-width:760px){
   .piece{display:block;width:100%;margin-bottom:28vh}
   .plate,.plate.wide{width:min(100%,55svh);margin:0 auto 22px}.plate:not(.wide){width:min(100%,35svh)}
@@ -114,10 +88,16 @@ a{color:inherit;text-decoration:none}
 .viewing-room .hero:after{content:"";position:absolute;inset:0;background:#050505;opacity:var(--night,0);pointer-events:none;z-index:1}
 .viewing-room .hero canvas{z-index:0}
 .viewing-room .stage>.axis{z-index:2}
-.viewing-room #menu{position:fixed;z-index:7;top:24px;right:var(--pad);font:14px var(--sans);color:var(--ink)}
-.viewing-room .bar{padding-right:calc(var(--pad) + 110px);z-index:6;opacity:var(--bar-visible,0)}
-.viewing-room .bar a{font-family:var(--serif)}
-.viewing-room .room{padding-top:116svh}
+.viewing-room .bar{z-index:6;align-items:center;justify-content:flex-end;gap:clamp(20px,3vw,46px);padding-block:16px}
+.viewing-room .mark{margin-right:auto;visibility:hidden}
+.viewing-room .bar.show-mark .mark{visibility:visible}
+.viewing-room .bar button{min-height:44px}
+.viewing-room .bar #menu{position:static;display:inline-flex;align-items:center;gap:10px;padding:0;font:14px var(--sans)}
+.collection-content{position:relative;display:flow-root;padding-top:116svh}
+.collection-track.with-camera{height:var(--track-height);position:relative}
+.with-camera .collection-window{position:sticky;top:0;height:100svh;overflow:clip;isolation:isolate}
+.with-camera .collection-gallery{position:absolute;inset:0;overflow:clip;contain:strict;will-change:opacity}
+.with-camera .collection-content{will-change:transform}
 .viewing-room .piece{scroll-margin-top:100px}
 .room-heading{font:400 clamp(32px,4vw,56px)/1.08 var(--serif);margin:0 0 5vh 8%;color:var(--ink);scroll-margin-top:120px}
 .viewing-room #crafts.room-heading.objects{background:transparent;margin:6vh 0 5vh 51%}
@@ -140,16 +120,13 @@ a{color:inherit;text-decoration:none}
 .viewing-room .text{position:relative;z-index:2;transform:translate3d(0,var(--text-travel,0px),0)}
 .viewing-room .text h3{color:var(--ink)}
 .viewing-room .buy{flex-wrap:wrap}
-.viewing-room #bag[open]{display:block}
-.viewing-room #bag p{max-width:none}
-.viewing-room .leaf-menu nav a:hover{text-decoration:none}
 .night-garden{position:relative;height:280svh;margin:0 calc(-1 * var(--pad));isolation:isolate;scroll-margin-top:0}
 .night-stage{position:sticky;top:0;height:100svh;overflow:hidden;overflow:clip;display:grid;place-items:center;isolation:isolate}
 .night-flowers{position:absolute;inset:0;pointer-events:none;contain:layout paint}
-.flower-place{position:absolute;left:var(--x);top:var(--y);width:var(--w);height:var(--h);z-index:var(--layer);transform:translate3d(var(--push-x,0px),var(--push-y,0px),0) rotate(calc(var(--stem-angle) + var(--bend,0deg))) scale(var(--lift-scale,1));transform-origin:50% 50%;pointer-events:none;cursor:grab;will-change:transform}
+.flower-place{position:absolute;left:var(--x);top:var(--y);width:var(--w);height:var(--h);z-index:var(--layer);transform:translate3d(var(--push-x,0px),var(--push-y,0px),0) rotate(calc(var(--stem-angle) + var(--bend,0deg))) scale(var(--lift-scale,1));transform-origin:50% 50%;pointer-events:none;cursor:grab;will-change:auto}
 .flower-place.picked{z-index:20;cursor:grabbing}
-.flower-reveal{height:100%;opacity:var(--bloom,0);transform:translate3d(var(--enter-x,0px),var(--enter-y,95px),0) rotate(var(--enter-turn,0deg)) scale(var(--bloom-scale,.76));transform-origin:50% var(--growth-origin,90%);will-change:transform,opacity}
-.night-flower{display:block;width:100%;height:100%;object-fit:contain;filter:saturate(.62) brightness(var(--light,.65)) contrast(1.06);transform-origin:50% 90%;will-change:transform;user-select:none;-webkit-user-drag:none;transition:filter .5s}
+.flower-reveal{height:100%;opacity:var(--bloom,0);transform:translate3d(var(--enter-x,0px),var(--enter-y,95px),0) rotate(var(--enter-turn,0deg)) scale(var(--bloom-scale,.76));transform-origin:50% var(--growth-origin,90%);will-change:auto}
+.night-flower{display:block;width:100%;height:100%;object-fit:contain;filter:saturate(.62) brightness(var(--light,.65)) contrast(1.06);transform-origin:50% 90%;will-change:auto;user-select:none;-webkit-user-drag:none;transition:filter .5s}
 
 .flower-place.picked .night-flower{filter:saturate(.78) brightness(.94) drop-shadow(0 16px 25px #0008)}
 .night-copy{position:relative;z-index:1;text-align:center;padding:24px;max-width:600px;opacity:var(--copy-presence,0);transform:translateY(calc((1 - var(--copy-presence,0))*14px))}
@@ -160,9 +137,9 @@ a{color:inherit;text-decoration:none}
 .night-note button{padding:0;font:inherit}
 .viewing-room .end{font-size:11px;opacity:.7;padding:0 0 14vh}
 @media(max-width:760px){
- .viewing-room #menu{top:24px;font-size:12px}.viewing-room .bar{padding-right:calc(var(--pad) + 85px)}
+ .viewing-room .bar #menu{font-size:12px}
  .viewing-room .plate{transform-style:flat}.plate-motion{will-change:auto}
- .viewing-room .room{padding-top:115svh}.room-heading{margin-left:0}.viewing-room #crafts.room-heading.objects{margin-left:0}
+ .collection-content{padding-top:115svh}.room-heading{margin-left:0}.viewing-room #crafts.room-heading.objects{margin-left:0}
  .flower-place{left:var(--mx);top:var(--my);width:var(--mw);height:var(--mh);--stem-angle:var(--ma)!important}
  .night-copy{max-width:90vw;margin-top:-9svh}.night-note{font-size:10px}.night-garden{height:260svh}
 }
@@ -174,9 +151,23 @@ a{color:inherit;text-decoration:none}
 .viewing-room #studio.room-story{display:block;min-height:0;padding:0;background:transparent;max-width:700px;margin:8vh auto 24vh;text-align:center;scroll-margin-top:120px}
 .room-story h2,.room-gift h2{font:400 clamp(36px,4vw,60px)/1.1 var(--serif);margin:0 0 24px;letter-spacing:-.012em}
 .room-story p{font:400 clamp(24px,3vw,40px)/1.3 var(--serif);max-width:24em;color:var(--ink-2);margin:auto}
-.viewing-room #gift.room-gift{background:transparent;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:10vw;margin:0 8% 22vh;scroll-margin-top:120px}
-.gift-plate{aspect-ratio:1.6;background:#c89d4e url('../../gift-gold.svg') center/cover;display:flex;align-items:flex-end;justify-content:space-between;padding:7%;color:#503914;box-shadow:0 15px 32px #0003}
-.gift-plate span{font:400 clamp(32px,4vw,60px)/1 var(--serif)}.gift-plate output{font:400 24px var(--serif)}
-.gift-values{display:flex;gap:22px;margin:0 0 26px}.gift-values button{padding:5px 0;border-bottom:1px solid transparent;font-size:14px}.gift-values button[aria-pressed=true]{border-color:var(--ink)}
-#gift-added{min-height:1.5em;font-size:12px;color:var(--ink-2)}
-@media(max-width:760px){.viewing-room #gift.room-gift{grid-template-columns:1fr;margin:0 0 18vh;gap:32px}.viewing-room #studio.room-story{margin-block:4vh 18vh}.night-copy p{max-width:100%}}
+@media(max-width:760px){.viewing-room #studio.room-story{margin-block:4vh 18vh}.night-copy p{max-width:100%}}
+
+.chapter-index{display:none}
+.with-camera .chapter-index{
+  display:block;position:absolute;inset:0;overflow:clip;pointer-events:none;
+  opacity:0;visibility:hidden;transition:opacity 260ms ease,visibility 0s 260ms
+}
+.with-camera .collection-gallery{transition:opacity 260ms ease}
+.with-camera.show-index .collection-gallery{opacity:0;transition-duration:180ms}
+.show-index .chapter-index{visibility:visible;opacity:1;transition:opacity 200ms ease}
+.chapter-rail{position:absolute;top:50%;width:100%}
+.chapter-row{height:var(--row-height);position:relative;display:flex;justify-content:center;align-items:center}
+.chapter-row span{width:55%;text-align:center;font:400 clamp(27px,3.5vw,57px)/1 var(--serif);letter-spacing:-.035em}
+.chapter-row img{position:absolute;left:10%;width:clamp(55px,7vw,106px);height:80%;object-fit:contain}
+.chapter-row:nth-child(even) img{left:auto;right:10%}
+
+@media(prefers-reduced-motion:no-preference){
+  .night-flowers.in-view .night-flower{animation:stem-sway var(--sway-time) ease-in-out var(--sway-delay) infinite alternate}
+  @keyframes stem-sway{from{transform:rotate(calc(-1 * var(--sway-angle)))}to{transform:rotate(var(--sway-angle))}}
+}

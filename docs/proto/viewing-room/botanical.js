@@ -34,9 +34,9 @@ export function springStep(position,velocity,target,dt){
  const decay=Math.exp(-damping*dt),s=Math.sin(frequency*dt),c=Math.cos(frequency*dt);
  return {position:target+decay*(x*c+b*s),velocity:decay*((-damping*x+frequency*b)*c+(-damping*b-frequency*x)*s)};
 }
-export function mountBotanical(container,base,reduced){
- container.innerHTML=stems.map(([asset,x,y,w,h,angle,order,mobile,light],i)=>`<div class="flower-place stem-${i}" style="--x:${x}%;--y:${y}%;--w:${w}%;--h:${h}%;--stem-angle:${angle}deg;--layer:${order%3};--growth-origin:${y<0?0:100}%;--light:${light};--mx:${mobile[0]}%;--my:${mobile[1]}%;--mw:${mobile[2]}%;--mh:${mobile[3]}%;--ma:${mobile[4]}deg"><div class="flower-reveal"><img class="night-flower" src="${new URL('flowers/'+asset+'.webp',base)}" alt="" draggable="false" decoding="async"></div></div>`).join('');
- const flowers=[...container.children].map((el,i)=>({el,img:el.querySelector('img'),i,x:0,y:0,vx:0,vy:0,lift:0,tx:0,ty:0,cx:0,cy:0}));
+export function mountBotanical(container,base,reduced,wake){
+ container.innerHTML=stems.map(([asset,x,y,w,h,angle,order,mobile,light],i)=>`<div class="flower-place stem-${i}" style="--x:${x}%;--y:${y}%;--w:${w}%;--h:${h}%;--stem-angle:${angle}deg;--layer:${order%3};--growth-origin:${y<0?0:100}%;--light:${light};--sway-time:${(9+i*.53).toFixed(2)}s;--sway-delay:-${(i*1.37).toFixed(2)}s;--sway-angle:${1.3+i%3*.4}deg;--mx:${mobile[0]}%;--my:${mobile[1]}%;--mw:${mobile[2]}%;--mh:${mobile[3]}%;--ma:${mobile[4]}deg"><div class="flower-reveal"><img class="night-flower" src="${new URL('flowers/'+asset+'.webp',base)}" alt="" draggable="false" decoding="async" loading="lazy"></div></div>`).join('');
+ const flowers=[...container.children].map((el,i)=>({el,i,progress:-1,interactive:false,x:0,y:0,vx:0,vy:0,lift:0,tx:0,ty:0,cx:0,cy:0}));
  let pointer=null,drag=null,stageRect=null;
  function measure(){
   stageRect=container.getBoundingClientRect();
@@ -44,30 +44,34 @@ export function mountBotanical(container,base,reduced){
  }
  container.parentElement.addEventListener('pointermove',e=>{
   if(reduced.matches||e.pointerType!=='mouse')return;
-  pointer={x:e.clientX,y:e.clientY};
+  pointer={x:e.clientX,y:e.clientY};wake();
   if(drag){drag.f.tx=clamp(drag.x+e.clientX-drag.px,-240,240);drag.f.ty=clamp(drag.y+e.clientY-drag.py,-180,180);}
  });
- container.parentElement.addEventListener('pointerleave',()=>{pointer=null;});
- function release(){if(!drag)return;drag.f.el.classList.remove('picked');drag.f.tx=drag.f.ty=0;drag=null;}
+ container.parentElement.addEventListener('pointerleave',()=>{pointer=null;wake();});
+ function release(){if(!drag)return;drag.f.el.classList.remove('picked');drag.f.tx=drag.f.ty=0;drag=null;wake();}
  flowers.forEach(f=>{
   f.el.addEventListener('pointerdown',e=>{
    if(e.pointerType!=='mouse'||reduced.matches)return;
-   e.preventDefault();pointer=null;drag={f,px:e.clientX,py:e.clientY,x:f.x,y:f.y};f.el.classList.add('picked');f.el.setPointerCapture(e.pointerId);
+   e.preventDefault();pointer=null;drag={f,px:e.clientX,py:e.clientY,x:f.x,y:f.y};f.el.classList.add('picked');f.el.setPointerCapture(e.pointerId);wake();
   });
   f.el.addEventListener('pointerup',()=>{pointer=null;release();});
   f.el.addEventListener('pointercancel',release);f.el.addEventListener('lostpointercapture',release);
  });
  return {measure,paint(elapsed,gate,dt){
   if(!stageRect)measure();
+  let moving=false;
   flowers.forEach(f=>{
    const progress=reduced.matches?1:bloomProgress(elapsed,stems[f.i][6]);
-   const visible=progress*gate;
-   f.el.style.setProperty('--bloom',visible.toFixed(4));
-   f.el.style.setProperty('--enter-y',((1-progress)*(stems[f.i][2]<0?-95:95)).toFixed(2)+'px');
-   f.el.style.setProperty('--enter-x',((1-progress)*(stems[f.i][1]<20?-55:stems[f.i][1]>70?55:0)).toFixed(2)+'px');
-   f.el.style.setProperty('--enter-turn',((1-progress)*(f.i%2?16:-16)).toFixed(2)+'deg');
-   f.el.style.setProperty('--bloom-scale',(.76+.24*progress).toFixed(4));
-   f.el.style.pointerEvents=visible>.4?'auto':'none';
+   if(f.progress!==progress){
+    f.progress=progress;
+    f.el.style.setProperty('--bloom',progress.toFixed(4));
+    f.el.style.setProperty('--enter-y',((1-progress)*(stems[f.i][2]<0?-95:95)).toFixed(2)+'px');
+    f.el.style.setProperty('--enter-x',((1-progress)*(stems[f.i][1]<20?-55:stems[f.i][1]>70?55:0)).toFixed(2)+'px');
+    f.el.style.setProperty('--enter-turn',((1-progress)*(f.i%2?16:-16)).toFixed(2)+'deg');
+    f.el.style.setProperty('--bloom-scale',(.76+.24*progress).toFixed(4));
+   }
+   const interactive=progress*gate>.4;
+   if(interactive!==f.interactive){f.interactive=interactive;f.el.style.pointerEvents=interactive?'auto':'none';}
    const picked=drag?.f===f;
    let tx=picked?f.tx:0,ty=picked?f.ty:0;
    if(pointer&&!drag&&gate>.8){
@@ -75,15 +79,17 @@ export function mountBotanical(container,base,reduced){
     const dx=f.cx-pointer.x,dy=f.cy-pointer.y,distance=Math.hypot(dx,dy),strength=Math.max(0,1-distance/230);
     tx=dx/Math.max(distance,1)*strength*95;ty=dy/Math.max(distance,1)*strength*65;
    }
-   if(reduced.matches){f.x=f.y=f.vx=f.vy=0;}else{
+   const distance=Math.abs(tx-f.x)+Math.abs(ty-f.y)+Math.abs(f.vx)+Math.abs(f.vy)+Math.abs(Number(picked)-f.lift);
+   if(distance===0)return;
+   if(distance<.012||reduced.matches){f.x=tx;f.y=ty;f.vx=f.vy=0;f.lift=Number(picked);}else{
+    moving=true;
     const sx=springStep(f.x,f.vx,tx,dt/1000),sy=springStep(f.y,f.vy,ty,dt/1000);
     f.x=sx.position;f.vx=sx.velocity;f.y=sy.position;f.vy=sy.velocity;
    }
    f.lift+=(Number(picked)-f.lift)*(1-Math.exp(-dt/160));
    f.el.style.setProperty('--push-x',f.x.toFixed(2)+'px');f.el.style.setProperty('--push-y',f.y.toFixed(2)+'px');
    f.el.style.setProperty('--bend',(f.x*.055).toFixed(3)+'deg');f.el.style.setProperty('--lift-scale',(1+f.lift*.13).toFixed(4));
-   const sway=reduced.matches?0:Math.sin(elapsed/(2900+f.i*170)+f.i*1.7)*(1.3+f.i%3*.4);
-   f.img.style.transform=`rotate(${sway.toFixed(3)}deg)`;
   });
+  return moving;
  }};
 }

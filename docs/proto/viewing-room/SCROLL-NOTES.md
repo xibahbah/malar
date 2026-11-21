@@ -1,4 +1,14 @@
-# Mirror gift and bronze bag — current
+# Current collection motion
+
+On Immersive Garden's Cartier sequence at 1280 × 800, the lower image edge rose about 150 CSS pixels and the adjacent caption rose about 134. In a separate slow pass, the image moved about 381 pixels while a wall feature moved 54. A rapid sweep in either direction briefly showed neighboring project titles and smaller images.
+
+The desktop collection uses native document scroll with a bounded presentation camera. It spends about half of each new displacement immediately and eases the remainder with a 155 ms time constant. The six pieces share their travel with their captions. The bronze wall moves 0.185 pixels per displayed scroll pixel. Its overscanned canvas reuses the previous relief frame between lighting updates. A fast sustained sweep shows an index aligned to the actual centers of the pieces. Touch and reduced-motion layouts use normal document flow.
+
+Menu and Bag open two views of the same untextured bronze drawer. The gold-leaf material belongs to the gift card and its thumbnail. The denomination and the gift-card inscription have separate space on the foil.
+
+---
+
+# Earlier mirror gift and bronze bag
 
 - Gift presentation is a polished metal hand mirror, with an oval rim, short handle, restrained botanical engraving, and cool/warm reflective bands. Light position follows the mouse through a short eased response and a small tilt. Materials use CSS and a lightweight inline line engraving, with no new raster texture payload.
 - Selecting $25 / $50 / $100 updates the accessible amount immediately; a reflective sweep and 620ms amount reveal make the change legible. Rapid changes cancel previous value/sweep animations. Adding a gift retains the large mirror and sends a small reflective token toward the bag; it does not block subsequent interactions. Reduced-motion users receive immediate state changes.

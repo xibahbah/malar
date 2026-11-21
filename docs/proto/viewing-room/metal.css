@@ -1,76 +1,48 @@
-/* The gift is polished metal; the collection drawer is aged bronze. */
-.viewing-room #gift.room-gift{max-width:1100px;margin:5vh auto 23vh;gap:clamp(50px,10vw,150px);grid-template-columns:1fr 1fr;padding:0 5%;perspective:1200px}
-.gift-mirror{position:relative;isolation:isolate;width:min(100%,43svh);justify-self:center;padding:23px 0 73px;transform:rotateX(var(--mirror-pitch,0deg)) rotateY(var(--mirror-yaw,0deg));--light-x:50%;--light-y:35%}
-.mirror-rim{position:relative;padding:9px;border-radius:49% 49% 47% 47%;background:linear-gradient(125deg,#372b1a 3%,#a68b55 14%,#e0c895 20%,#74603d 30%,#29251d 52%,#bca36f 78%,#efe0ad 82%,#5d492b 95%);box-shadow:inset 0 0 0 1px #e9d4a06b,inset -2px -3px 4px #130e09,1px 7px 0 #31291c,0 24px 38px #0005}
-.mirror-rim:after{content:"";position:absolute;inset:5px;border:1px solid #1b1d1966;border-radius:inherit;box-shadow:0 0 0 1px #e4cd9a42;pointer-events:none}
-.mirror-face{position:relative;isolation:isolate;overflow:hidden;aspect-ratio:.88;border-radius:49% 49% 47% 47%;background:#b7b8aa;box-shadow:inset 0 0 0 1px #171d1c,inset 2px 3px 12px #1c262951,inset -3px -3px 15px #fff3c648}
-.mirror-reflection{position:absolute;inset:-20%;background:radial-gradient(ellipse at var(--light-x) var(--light-y),#ffffedb3 0,transparent 34%),linear-gradient(122deg,#222d30 4%,#607071 15%,#bbc5bc 28%,#eff0df 35%,#d8dacf 39%,#727e7a 49%,#a8afa6 52%,#e4dfc4 68%,#8a958e 86%,#374541 100%);transform:translate(calc((var(--light-x) - 50%) * .12),calc((var(--light-y) - 35%) * .1));z-index:-2}
-.mirror-face:after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:repeating-linear-gradient(4deg,#fff1 0,transparent 1px,transparent 4px),radial-gradient(ellipse at 55% 30%,transparent 40%,#14221a2b 100%);opacity:.25;z-index:3}
-.mirror-sweep{position:absolute;inset:-40% -20%;background:linear-gradient(90deg,transparent 32%,#fffde7a1 49%,#ffffffab 50%,transparent 66%);opacity:0;pointer-events:none;z-index:2}
-.mirror-inscription{position:absolute;inset:15% 12% 12%;display:flex;align-items:center;flex-direction:column;color:#29352f;text-shadow:0 1px 0 #f9f4df6b}
-.mirror-brand{font:400 clamp(34px,4vw,52px)/1 var(--serif);letter-spacing:-.035em}
-.mirror-type{margin-top:11px;font:9px var(--sans);letter-spacing:.1em}
-.mirror-flower{width:43px;margin:auto;color:#3b493d;opacity:.7}
-.mirror-flower svg,.mirror-crown svg{display:block;width:100%;height:auto}
-#gift-value{font:400 clamp(48px,5.5vw,76px)/1 var(--serif);letter-spacing:-.045em;font-variant-numeric:lining-nums;margin-top:4px}
-.mirror-foot{font:8px var(--sans);letter-spacing:.25em;margin-top:13px;opacity:.8}
-.mirror-crown{position:absolute;left:calc(50% - 19px);top:0;width:38px;height:40px;color:#b7a071;z-index:-1;filter:drop-shadow(0 1px 1px #080a08)}
-.mirror-handle{position:absolute;left:calc(50% - 19px);bottom:6px;width:38px;height:90px;border-radius:30% 30% 46% 46%;background:linear-gradient(90deg,#2c271d,#a58d59 28%,#d8c18d 45%,#817048 67%,#3d3324);box-shadow:inset 0 0 0 1px #cbb17b66,1px 4px 0 #2a241b,0 16px 25px #0006;z-index:-1}
-.mirror-handle:before{content:"";position:absolute;inset:19px 9px 12px;border:1px solid #2c2d2370;border-radius:44%;box-shadow:1px 0 0 #e5cd934d}
-.mirror-handle span{position:absolute;width:9px;height:9px;border-radius:50%;bottom:18px;left:14px;background:#171b17;box-shadow:0 1px 1px #e5cd93a0}
-.gift-eyebrow,.gift-amount-label{font:10px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
-.gift-eyebrow{margin:0 0 19px}.gift-details h2{font-size:clamp(40px,4.7vw,66px);margin:0 0 17px}
-.gift-description{font:400 clamp(24px,2.4vw,32px)/1.25 var(--serif);color:#c9bfae;margin:0 0 32px}
-.gift-amount-label{margin:0 0 13px;font-size:9px}
-.gift-values{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:300px;padding:4px;border:1px solid #b8ac8d40;border-radius:3px;background:#110e0b55;margin:0 0 29px;box-shadow:inset 0 1px 5px #0004}
-.gift-values button{border:1px solid transparent;border-radius:1px;padding:12px 10px;font:16px var(--serif);color:#bdb4a2;transition:background .3s,color .3s,box-shadow .3s}
-.gift-values button[aria-pressed=true]{border-color:#d6d5bc66;background:linear-gradient(130deg,#a9b1a3,#d9d9c4 45%,#839084);color:#25352b;box-shadow:0 2px 5px #0006,inset 0 1px 0 #fff8}
-.gift-values button:hover:not([aria-pressed=true]){background:#d8ceaf0c;color:#ede5d4}
-#gift-add{display:flex;justify-content:space-between;width:min(300px,100%);padding-bottom:12px;font-size:11px}#gift-add span{font-size:20px;line-height:1}
-.gift-confirmation{min-height:51px;margin-top:14px}#gift-added{margin:0;font-size:11px;min-height:0}.gift-view-bag{margin-top:6px;font:10px var(--sans);letter-spacing:.09em;text-decoration:underline;text-underline-offset:4px;color:var(--ink-2)}
-.gift-confirmation:has(#gift-added:empty) .gift-view-bag{visibility:hidden}
-.gift-flight{position:fixed;z-index:20;width:64px;height:76px;display:grid;place-items:center;border-radius:48%;border:3px solid #a28d5e;background:linear-gradient(125deg,#6a7771,#e4e5d4 42%,#8d9c94);color:#27372c;font:24px var(--serif);box-shadow:0 8px 18px #0006;pointer-events:none}
-
-/* A patinated bronze cabinet: dark recesses, quiet directional grain, lit edges. */
-.viewing-room #bag{width:min(485px,100vw);padding:38px clamp(22px,4vw,38px) 28px;border-left:1px solid #d2b27a85;background:radial-gradient(ellipse at 0 10%,#9e794039,transparent 48%),repeating-linear-gradient(92deg,#e5bc7510 0,transparent .7px,transparent 3px),linear-gradient(112deg,#57442d 0%,#443827 21%,#272820 61%,#3d3323 100%);color:#eee0c7;box-shadow:inset 4px 0 0 #33291c,inset 5px 0 0 #aa8a554d,-24px 0 60px #0005}
-#bag[open]{animation:bronze-open .5s cubic-bezier(.16,1,.3,1)}
-#bag::backdrop{background:#0b0b09a6;backdrop-filter:blur(5px)}
-.bag-head{align-items:center;margin-bottom:37px}.bag-eyebrow{margin:0 0 14px;font:8px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:#c2aa80}.bag-head h2{font-size:47px;line-height:1}
-#bag-close{font-size:9px;padding:12px 0 12px 12px;color:#d4c1a1}
-#bag-lines li{grid-template-columns:70px 1fr auto;gap:9px 16px;padding:22px 0;border-top:1px solid #d2b78632;box-shadow:0 -1px 0 #12160e5c}
-.bag-object{grid-row:1/3;width:70px;height:80px;display:grid;place-items:center;background:linear-gradient(135deg,#a18a6352,#181d143b);border:1px solid #c7a97024;box-shadow:inset 0 2px 8px #0002}
-#bag-lines .bag-object img{width:56px;height:65px;filter:drop-shadow(0 3px 4px #0006)}
-#bag-lines .name{font-size:21px}#bag-lines .line{font:17px var(--serif);color:#e6d0a7}#bag-lines .remove{font-size:8px;letter-spacing:.09em;color:#c3b08e}
-#bag-lines .qty{gap:12px;font-size:11px;color:#e3d0ae}#bag-lines .qty button{width:29px;height:29px;border-color:#b59b695c;background:linear-gradient(135deg,#876b414d,#2b2b20);box-shadow:inset 0 1px 0 #d4b37828,0 1px 2px #1116;transition:background .2s}#bag-lines .qty button:hover{background:#a48b594a}
-.bag-gift-mirror{grid-row:1/3;width:63px;height:76px;border:3px solid #a99264;border-radius:48%;background:linear-gradient(125deg,#63726b,#dcdfc9 43%,#aab5a4 61%,#768779);box-shadow:0 3px 0 #2d2b1f,0 5px 7px #0003;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#263a2c;text-shadow:0 1px 0 #e9eed18a}.bag-gift-mirror span{font:13px var(--serif)}.bag-gift-mirror strong{font:24px/1.15 var(--serif);font-weight:400}
-#bag .bag-total{margin-top:32px;border:1px solid #b7986138;padding:20px 17px;background:linear-gradient(110deg,#b8965933,#141d142b);box-shadow:inset 0 1px 0 #dac1961a,inset 0 -2px 6px #171a142b}#bag .bag-total span:first-child{font-size:9px;color:#c9b58f}#bag-total{font-size:33px}
-#bag-checkout{border:1px solid #d5b67c7a;background:linear-gradient(120deg,#b49a69,#d0b581 44%,#a78d5f);color:#272a20;box-shadow:inset 0 1px 0 #f7dfaa77,0 3px 0 #27291c;font-size:10px;transition:filter .2s}#bag-checkout:hover{filter:brightness(1.1)}#bag-checkout:disabled{background:#272a2040;color:#a18f70;border-color:#b69b5f33;box-shadow:none;filter:none}
-#bag-note{font-size:11px;color:#c9b693}.bag-note:empty{min-height:0;margin:0}#bag-lines .empty{padding:24px 0 40px;font:23px var(--serif);color:#cfbd9c;box-shadow:none}
-@keyframes bronze-open{from{opacity:.5;transform:translateX(55px)}to{opacity:1;transform:translateX(0)}}
-@media(max-width:760px){.viewing-room #gift.room-gift{padding:0;gap:28px;margin:0 0 18vh;grid-template-columns:1fr}.gift-mirror{width:min(68vw,34svh);padding-bottom:61px}.mirror-handle{height:76px}.mirror-inscription{inset:15% 12% 12%}.mirror-brand{font-size:36px}.mirror-type{font-size:8px}.mirror-flower{width:30px}#gift-value{font-size:55px}.mirror-foot{font-size:7px;margin-top:8px}.gift-details{max-width:340px;width:100%;margin:auto}.gift-description{font-size:25px;margin-bottom:24px}.gift-details h2{font-size:42px}.gift-eyebrow{margin-bottom:12px}.gift-values,#gift-add{max-width:none;width:100%}.viewing-room #bag{padding-top:28px}.bag-head{margin-bottom:27px}}
-@media(prefers-reduced-motion:reduce){.gift-mirror{transform:none!important}#bag[open]{animation:none}.gift-values button{transition:none}}
-/* Scope out the original fullscreen menu's div spacing. */
-#bag div{margin-top:0}#bag .bag-head{margin:0 0 37px}
-@media(max-width:760px){
- .viewing-room #gift.room-gift{gap:20px}.gift-mirror{width:min(60vw,28svh)}
- .gift-details h2{font-size:36px;margin-bottom:10px}.gift-eyebrow{font-size:8px;margin-bottom:8px}
- .gift-description{font-size:21px;margin:0 0 18px}.gift-amount-label{margin-bottom:9px}
- .gift-values{margin-bottom:20px}.gift-values button{padding:9px 10px}
- .gift-confirmation{min-height:41px;margin-top:10px}
+.viewing-room #gift.room-gift {
+  display:grid;
+  grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);
+  align-items:center;
+  gap:clamp(32px,7vw,100px);
+  max-width:1080px;
+  margin:5vh auto 20vh;
+  padding-inline:clamp(12px,3vw,46px);
+  scroll-margin-top:90px;
 }
-.viewing-room #bag{align-content:start}
-
-/* The original gold leaf, now a locally folding rectangular sheet. */
-.viewing-room #gift .gift-foil{width:100%;max-width:470px;padding:0;transform:rotate(-4deg);filter:drop-shadow(0 15px 20px #0003)}
-.gift-foil .mirror-face{aspect-ratio:1.5;border-radius:0;overflow:visible;background:transparent;box-shadow:none}
-.gift-foil .mirror-face:after{display:none}
-.gift-foil .mirror-face:before{content:"";position:absolute;inset:3%;background:#c9a35c url('../../gift-gold.svg') center/cover;z-index:-1}
-.gift-foil .foil-ready:before{display:none}
-.gift-foil .foil-canvas{position:absolute;inset:0;width:100%;height:100%;opacity:1;z-index:0;pointer-events:none}
-.gift-foil .mirror-inscription{inset:14% 10%;color:#624315;pointer-events:none;justify-content:center}
-.gift-foil .mirror-inscription #gift-value{margin-top:auto}
-.gift-foil .foil-ready .mirror-inscription{opacity:0}
-.gift-foil .mirror-sweep{display:none}
-.gift-values button[aria-pressed=true]{border-color:#d9b77399;background:linear-gradient(130deg,#a77a36,#ddbd77 45%,#a37c3e);color:#36240e}
-.gift-flight{width:76px;height:51px;border-radius:0;border:1px solid #c9a35c;background:#c9a35c url('../../gift-gold.svg') center/cover;color:#503914}
-@media(max-width:760px){.viewing-room #gift .gift-foil{width:min(88vw,390px);max-width:100%}.gift-foil .mirror-inscription{inset:12%}.gift-foil .mirror-brand{font-size:38px}.gift-foil #gift-value{font-size:48px}}
+.gift-stage {display:grid;place-items:center;min-width:0;padding:5% 4%}
+.gift-foil {position:relative;isolation:isolate;width:min(100%,470px);aspect-ratio:1.5;transform:rotate(-3deg);container-type:inline-size}
+.gift-foil::before {content:"";position:absolute;inset:3%;background:#b78d43 url('../../gift-gold.svg') center/cover;box-shadow:0 10px 18px #120c0738}
+.gift-foil.foil-ready::before {visibility:hidden}
+.gift-foil .foil-canvas {position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:1;pointer-events:none}
+.foil-inscription {position:absolute;inset:14% 12%;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 1fr auto;align-items:end;line-height:1;color:#51380f;pointer-events:none}
+.foil-ready .foil-inscription {opacity:0}
+.foil-brand {grid-column:1/-1;align-self:start;text-align:center;font:400 12cqw/.96 var(--serif);letter-spacing:-.035em}
+.foil-gesture {grid-column:1/-1;align-self:start;text-align:center;margin-top:1.7cqw;font:2.25cqw/1.2 var(--sans);letter-spacing:.12em;text-transform:uppercase}
+.foil-foot {font:2.35cqw/1.5 var(--sans);letter-spacing:.16em;text-transform:uppercase}
+#gift-value {font:400 13cqw/.95 var(--serif);letter-spacing:-.035em}
+.gift-details {min-width:0;width:100%;max-width:370px}
+.gift-eyebrow,.gift-amount-label {font:10px/1.5 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
+.gift-eyebrow {margin:0 0 17px}
+.gift-details h2 {font-size:clamp(38px,4.7vw,66px);margin:0 0 16px}
+.gift-description {font:400 clamp(23px,2.4vw,32px)/1.24 var(--serif);color:#c9bfae;margin:0 0 26px}
+.gift-amount-label {margin:0 0 9px}
+.gift-values {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;width:min(100%,300px);padding:3px;border:1px solid #b8ac8d40;margin:0 0 22px}
+.gift-values button {min-height:44px;font:18px/1 var(--serif);color:var(--ink-2);transition:background-color .2s,color .2s}
+.gift-values button[aria-pressed=true] {background:#c9a35c;color:#322312}
+.gift-values button:hover:not([aria-pressed=true]) {color:var(--ink);background:#c9a35c14}
+#gift-add {display:flex;justify-content:space-between;align-items:center;min-height:44px;width:min(300px,100%);font-size:11px}
+#gift-add span {font-size:18px}
+#gift-added {margin:9px 0 0;font:11px/1.4 var(--sans);color:var(--ink-2)}
+#gift-added:empty {display:none}
+@media(max-width:760px) {
+  .viewing-room #gift.room-gift {grid-template-columns:minmax(0,1fr);gap:clamp(12px,2.5svh,24px);margin:0 auto 16vh;padding:0;max-width:400px}
+  .gift-stage {width:100%;padding:4%}
+  .gift-foil {width:min(100%,44svh)}
+  .gift-details h2 {font-size:36px;margin-bottom:8px}
+  .gift-eyebrow,.gift-amount-label {margin-bottom:6px}
+  .gift-description {font-size:22px;margin:0 0 14px}
+  .gift-values,#gift-add {width:100%}
+  .gift-values {margin-bottom:10px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .gift-values button {transition:none}
+}

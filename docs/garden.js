@@ -227,7 +227,7 @@ if (dialog.id === 'garden-menu') {
     document.body.classList.remove('menu-open');
   };
   new ResizeObserver(()=>{ if(dialog.open) prepare(); }).observe(panel);
-} else {
+} else if (dialog.id !== 'bag') {
   menu.onclick = () => dialog.showModal();
   dialog.querySelectorAll('a').forEach(link => link.onclick = () => dialog.close());
 }
@@ -257,8 +257,8 @@ sound.onclick = async () => {
 function garden(hero) {
   const reduce=matchMedia('(prefers-reduced-motion:reduce)');
   const layeredGallery = document.body.classList.contains('viewing-room');
-  const wallSpeed = () => layeredGallery && !reduce.matches ? (hero.clientWidth > 760 ? .24 : .42) : 1.05;
-  let wallScroll = null;
+  const wallSpeed = () => layeredGallery && !reduce.matches ? (hero.clientWidth > 760 ? .185 : .42) : 1.05;
+  let galleryY = null;
   const canvas = hero.querySelector('canvas');
   const loader = document.getElementById('garden-loader');
   const loadingStartedAt = performance.now();
@@ -296,7 +296,7 @@ function garden(hero) {
     dismissLoader();
     const panBackground=()=>{
       const stage=hero.parentElement;
-      const scroll=Math.max(0,-stage.getBoundingClientRect().top);
+      const scroll=galleryY ?? Math.max(0,-stage.getBoundingClientRect().top);
       let fraction=Math.min(1,scroll/Math.max(1,stage.offsetHeight-hero.offsetHeight));
       if(hero.clientWidth>760 || layeredGallery){
         const imageAspect=hero.clientWidth/hero.clientHeight<1 ? 640/4567 : 1040/5752;
@@ -305,6 +305,7 @@ function garden(hero) {
       }
       hero.style.setProperty('--wall-position',(fraction*100)+'%');
     };
+    if(layeredGallery)hero.setGalleryScroll=y=>{if(y!==galleryY){galleryY=y;panBackground();}};
     panBackground();
     addEventListener('scroll',panBackground,{passive:true});
     addEventListener('resize',panBackground);
@@ -339,11 +340,11 @@ function garden(hero) {
     varying vec2 uv;
     uniform highp sampler2D field,heightMap;
     uniform vec2 cover,lightPoint;
-    uniform float pan,resting;
+    uniform float pan,resting,verticalExtent;
     ${localLighting}
     void main(){
       uv=pos*.5+.5;
-      vec2 p=vec2(uv.x,1.-uv.y);
+      vec2 p=vec2(uv.x,(.5-uv.y)*verticalExtent+.5);
       vec2 tex=(p-.5)*cover+.5+vec2(0.,pan);
       float h=texture2D(heightMap,tex).r;
       vec4 contact=texture2D(field,p);
@@ -360,10 +361,10 @@ function garden(hero) {
     varying vec2 uv;
     uniform highp sampler2D mural, field, heightMap, normalMap, shapeMap;
     uniform vec2 cover, pixel, lightPoint;
-    uniform float resting, pan, introSurface;
+    uniform float resting, pan, introSurface, verticalExtent;
     ${localLighting}
     void main(){
-      vec2 p=vec2(uv.x,1.-uv.y);
+      vec2 p=vec2(uv.x,(.5-uv.y)*verticalExtent+.5);
       vec2 tex=(p-.5)*cover+.5+vec2(0.,pan);
       float h=texture2D(heightMap,tex).r;
       vec4 contact=texture2D(field,p);
@@ -386,6 +387,24 @@ function garden(hero) {
                  *max(mix(.015,.94,carved),.96*depth);
       float localLift=lift;
       lift=max(lift,resting);
+      // Keep mineral specks attached to the wall as the camera scrolls.
+      vec2 stone=tex/pixel;
+      vec2 cell=floor(stone*.46);
+      vec3 hash=fract(vec3(cell.xyx)*vec3(.1031,.1030,.0973));
+      hash+=dot(hash,hash.yzx+33.33);
+      vec2 seed=fract((hash.xx+hash.yz)*hash.zy);
+      vec2 offset=fract(stone*.46)-(.22+.56*seed);
+      float pore=1.-smoothstep(.055,.26,length(offset));
+      float fleck=smoothstep(.69,.92,seed.x)-smoothstep(.63,.88,seed.y);
+      vec3 wallTone=vec3(33.,21.,14.)/255.;
+      float wall=(shape.a-.5)*.010+pore*fleck*.033;
+      float reveal=max(introSurface,smoothstep(.01,.42,reached));
+      // Unlit stone is exactly wallTone + wall. Skip the relief's mural,
+      // neighbor and normal samples over the unilluminated part of the viewport.
+      if(lift==0.){
+        gl_FragColor=vec4(wallTone+wall*reveal,1.);
+        return;
+      }
       vec2 surface=tex;
       vec3 art=texture2D(mural,surface).rgb;
       float value=dot(art,vec3(.299,.587,.114));
@@ -407,17 +426,6 @@ function garden(hero) {
       vec3 openingTint=vec3(.100,.065,-.010)*warm+vec3(-.004,.019,-.003)*cool;
       vec3 illumination=localLift*(vec3(.070)*max(facing,0.)+vec3(.032)*min(facing,0.)
                                   +speedTint*glint+openingGlint*openingTint);
-      // Keep mineral specks attached to the wall as the camera scrolls.
-      vec2 stone=tex/pixel;
-      vec2 cell=floor(stone*.46);
-      vec3 hash=fract(vec3(cell.xyx)*vec3(.1031,.1030,.0973));
-      hash+=dot(hash,hash.yzx+33.33);
-      vec2 seed=fract((hash.xx+hash.yz)*hash.zy);
-      vec2 offset=fract(stone*.46)-(.22+.56*seed);
-      float pore=1.-smoothstep(.055,.26,length(offset));
-      float fleck=smoothstep(.69,.92,seed.x)-smoothstep(.63,.88,seed.y);
-      vec3 wallTone=vec3(33.,21.,14.)/255.;
-      float wall=(shape.a-.5)*.010+pore*fleck*.033;
       // Separate the wide baked shadow from the fine creases that describe the carving.
       vec2 span=pixel*8.;
       vec3 surroundings=texture2D(mural,surface+vec2(span.x,0.)).rgb
@@ -442,7 +450,6 @@ function garden(hero) {
       float raisedLip=smoothstep(.008,.068,value-nearby);
       float gold=localLift*warm*specular*(.30+.70*raisedLip)*(.90+.10*seed.x);
       vec3 reliefColor=surfaceColor+gold*vec3(.30,.174,.039);
-      float reveal=max(introSurface,smoothstep(.01,.42,reached));
       gl_FragColor=vec4(mix(vec3(33.,21.,14.)/255.,reliefColor,reveal),1.);
     }`);
   gl.linkProgram(program);
@@ -450,7 +457,7 @@ function garden(hero) {
   gl.useProgram(program);
   const buff=gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER,buff);
-  const cells=248, side=cells+1;
+  const cells=layeredGallery ? 128 : 248, side=cells+1;
   const vertices=new Float32Array(side*side*2);
   const indices=new Uint16Array((2*side+2)*cells-2);
   let i=0;
@@ -470,7 +477,7 @@ function garden(hero) {
   const pos=gl.getAttribLocation(program,'pos');
   gl.enableVertexAttribArray(pos);
   gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
-  const loc=Object.fromEntries(['cover','pan','pixel','lightPoint','resting','introSurface','userLight','wanderingLight','entranceLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
+  const loc=Object.fromEntries(['cover','pan','verticalExtent','pixel','lightPoint','resting','introSurface','userLight','wanderingLight','entranceLight'].map(k=>[k,gl.getUniformLocation(program,k)]));
   function makeTexture(unit,name){
     const tex=gl.createTexture();
     gl.activeTexture(gl.TEXTURE0+unit);
@@ -547,11 +554,22 @@ function garden(hero) {
   function schedule(){
     if(!frame && visible && artSize && !document.hidden) frame=requestAnimationFrame(draw);
   }
+  // Render beyond the viewport so the compositor can move an existing wall
+  // frame while the much faster foreground and the native scroll keep updating.
+  let gutter=0, renderedOffset=null, panLimit=0, travelTime=-Infinity, wallShift=0;
   function resize(){
-    const area=hero.clientWidth*hero.clientHeight;
-    const d=Math.min(devicePixelRatio,1.25,Math.sqrt(1600000/Math.max(1,area)));
-    canvas.width=Math.round(hero.clientWidth*d);
-    canvas.height=Math.round(hero.clientHeight*d);
+    const width=hero.clientWidth,height=hero.clientHeight,area=width*height;
+    gutter=layeredGallery && width>760 ? Math.ceil(height*.18) : 0;
+    const renderHeight=height+2*gutter;
+    if(layeredGallery){
+      canvas.style.top=-gutter+'px';canvas.style.height=renderHeight+'px';
+      canvas.style.transform='none';renderedOffset=null;wallShift=0;
+    }
+    const pixelBudget=layeredGallery ? 1200000 : 1600000;
+    const d=Math.min(devicePixelRatio,1.25,Math.sqrt(pixelBudget/Math.max(1,width*renderHeight)));
+    canvas.width=Math.round(width*d);
+    canvas.height=Math.round(renderHeight*d);
+    gl.uniform1f(loc.verticalExtent,renderHeight/height);
     gl.viewport(0,0,canvas.width,canvas.height);
     const fieldScale=Math.min(1/6,Math.sqrt(28000/Math.max(1,area)));
     w=Math.max(32,Math.round(hero.clientWidth*fieldScale));
@@ -758,10 +776,28 @@ function garden(hero) {
       }
     }
   }
+  const drawer = layeredGallery ? document.getElementById('bag') : null;
+  let lastFieldTime = null, fieldMoving = false;
+  if(layeredGallery)hero.setGalleryScroll = y => {
+    if(y===galleryY)return;
+    galleryY=y;
+    if(gutter && renderedOffset!==null && !reduce.matches){
+      const offset=Math.min(panLimit,Math.max(0,y)*wallSpeed());
+      wallShift=renderedOffset-offset;
+      const shift=Math.min(gutter,Math.max(-gutter,wallShift));
+      canvas.style.transform='translate3d(0,'+shift.toFixed(2)+'px,0)';
+      travelTime=performance.now();
+    }
+    schedule();
+  };
   function draw(t){
     frame=0;
-    if(!visible || document.hidden) return;
+    if(!visible || document.hidden || drawer?.open){previousTime=lastFieldTime=null;return;}
     if(layeredGallery&&Number(root.style.getPropertyValue('--night'))>=.999){previousTime=null;return;}
+    if(gutter && !entering && renderedOffset!==null && t-travelTime<100 &&
+        previousTime!==null && t-previousTime<70 && Math.abs(wallShift)<gutter*.92){
+      schedule();return;
+    }
     const firstFrame = previousTime === null;
     const elapsed = firstFrame ? .016 : (t - previousTime) / 1000;
     // Keep a slow frame during startup from skipping a visible part of the reveal.
@@ -774,11 +810,6 @@ function garden(hero) {
     }
     const motion=!reduce.matches;
     const aim=motion ? target||(!ambient&&seed ? {x:.31,y:.34} : null) : null;
-    const decay=Math.exp(-dt/.405), revealDecay=Math.exp(-dt/.19), attack=1-Math.exp(-dt/.15);
-    for(let i=0;i<energy.length;i++){
-      energy[i]*=decay;
-      revealEnergy[i]*=revealDecay;
-    }
 
     // Paint the base relief before starting the entrance clock.
     if (!firstFrame && !loader?.isConnected) advanceEntrance(dt,t);
@@ -795,24 +826,32 @@ function garden(hero) {
     // Keep the opening ripple's extra depth off the ordinary hover strokes.
     const surfaceFade = entering ? Math.max(0, Math.min(1, (entranceTime - 1300) / 800)) : 1;
     const ambientSurface = surfaceFade*surfaceFade*(3-2*surfaceFade);
-    let moving=false;
-    for(let i=0;i<field.length;i++){
-      field[i]+=(energy[i]-field[i])*attack;
-      revealField[i]+=(revealEnergy[i]-revealField[i])*attack;
-      const age=(t-contactTime[i])*.001;
-      const spring=age<1.25 ? Math.exp(-6*age) : 0;
-      const coverage=Math.max(field[i],revealField[i]);
-      const openingShare=Math.max(0,revealField[i]-field[i])/Math.max(.01,revealField[i]);
-      const offset=i*4;
-      bytes[offset]=Math.round(coverage*255);
-      bytes[offset+1]=128+Math.round(126*strokeX[i]*spring);
-      bytes[offset+2]=128+Math.round(126*strokeY[i]*spring);
-      bytes[offset+3]=Math.round((1-ambientSurface)*openingShare*255);
-      if(bytes[offset]>0) moving=true;
+    const elapsedField = lastFieldTime === null ? .016 : Math.min(.25,(t-lastFieldTime)/1000);
+    // The bronze lighting has a 150 ms attack. Update its CPU field at 30 Hz
+    // in the collection, independently from the per-frame camera pan.
+    if(!layeredGallery || entering || galleryY < hero.clientHeight*.7 || elapsedField >= .031 || lastFieldTime === null){
+      lastFieldTime=t;
+      const decay=Math.exp(-elapsedField/.405),revealDecay=Math.exp(-elapsedField/.19),attack=1-Math.exp(-elapsedField/.15);
+      fieldMoving=false;
+      for(let i=0;i<field.length;i++){
+        energy[i]*=decay;revealEnergy[i]*=revealDecay;
+        field[i]+=(energy[i]-field[i])*attack;
+        revealField[i]+=(revealEnergy[i]-revealField[i])*attack;
+        const age=(t-contactTime[i])*.001;
+        const spring=age<1.25 ? Math.exp(-6*age) : 0;
+        const coverage=Math.max(field[i],revealField[i]);
+        const openingShare=Math.max(0,revealField[i]-field[i])/Math.max(.01,revealField[i]);
+        const offset=i*4;
+        bytes[offset]=Math.round(coverage*255);
+        bytes[offset+1]=128+Math.round(126*strokeX[i]*spring);
+        bytes[offset+2]=128+Math.round(126*strokeY[i]*spring);
+        bytes[offset+3]=Math.round((1-ambientSurface)*openingShare*255);
+        if(bytes[offset]>0) fieldMoving=true;
+      }
+      gl.activeTexture(gl.TEXTURE2);
+      gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,w,h,gl.RGBA,gl.UNSIGNED_BYTE,bytes);
     }
-    gl.activeTexture(gl.TEXTURE2);
-    gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,w,h,gl.RGBA,gl.UNSIGNED_BYTE,bytes);
-    const ratio=canvas.width/canvas.height/(artSize[0]/artSize[1]);
+    const ratio=hero.clientWidth/hero.clientHeight/(artSize[0]/artSize[1]);
     gl.uniform2f(loc.cover,Math.min(1,ratio),Math.min(1,1/ratio));
     gl.uniform2f(loc.pixel,1/artSize[0],1/artSize[1]);
     if(aim) lastLamp=userBrush.light;
@@ -824,18 +863,17 @@ function garden(hero) {
     gl.uniform1f(loc.resting,reduce.matches?.76:0);
     gl.uniform1f(loc.introSurface,ambientSurface);
     const stage=hero.parentElement;
-    const progress=Math.max(0,Math.min(1,-stage.getBoundingClientRect().top/Math.max(1,stage.offsetHeight-hero.offsetHeight)));
-    const coverY=Math.min(1,1/ratio);
-    const panRange=1-coverY;
-    // A distant wall moves much less than the independently paced foreground.
-    const scrollPixels=Math.max(0,-stage.getBoundingClientRect().top);
-    const wallTarget=layeredGallery&&reduce.matches?0:scrollPixels;
-    wallScroll=wallScroll===null||!layeredGallery||reduce.matches ? wallTarget : wallScroll+(wallTarget-wallScroll)*(1-Math.exp(-dt/.22));
-    if(Math.abs(wallTarget-wallScroll)<.05)wallScroll=wallTarget;
+    const wallY=layeredGallery && reduce.matches ? 0 : galleryY ?? Math.max(0,-stage.getBoundingClientRect().top);
+    const coverY=Math.min(1,1/ratio),panRange=1-coverY;
     const wallPan=hero.clientWidth>760 || layeredGallery
-      ? -panRange*.5+Math.min(panRange,wallScroll*wallSpeed()*coverY/hero.clientHeight)
-      : (progress-.5)*panRange;
+      ? -panRange*.5+Math.min(panRange,wallY*wallSpeed()*coverY/hero.clientHeight)
+      : (Math.min(1,wallY/Math.max(1,stage.offsetHeight-hero.offsetHeight))-.5)*panRange;
     gl.uniform1f(loc.pan,wallPan);
+    if(gutter){
+      panLimit=panRange*hero.clientHeight/coverY;
+      renderedOffset=Math.min(panLimit,wallY*wallSpeed());
+      wallShift=0;canvas.style.transform='translate3d(0,0,0)';
+    }
 
     gl.clear(gl.DEPTH_BUFFER_BIT);
     gl.drawElements(gl.TRIANGLE_STRIP,indices.length,gl.UNSIGNED_SHORT,0);
@@ -856,7 +894,7 @@ function garden(hero) {
         });
       }
     }
-    if(!reduce.matches && (aim||moving||ambient||Math.abs(wallTarget-wallScroll)>.05)) schedule();
+    if(!reduce.matches && (aim||fieldMoving||ambient)) schedule();
   }
   hero.parentElement.addEventListener('pointermove',mark);
   hero.parentElement.addEventListener('pointerdown',mark);

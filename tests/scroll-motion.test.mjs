@@ -125,3 +125,40 @@ test('picked flower springs overshoot and settle without frame-rate dependence',
  const simulate=fps=>{let p=180,v=0,crossed=false;for(let i=0;i<fps*3;i++){const n=springStep(p,v,0,1/fps);p=n.position;v=n.velocity;if(p<0)crossed=true;}return {p,v,crossed};};
  const a=simulate(60),b=simulate(120);assert.equal(a.crossed,true);assert.ok(Math.abs(a.p)<.001);assert.ok(Math.abs(a.p-b.p)<1e-8);
 });
+
+test('a packet after a long rest moves immediately and keeps a monotone release tail at 60 and 120 Hz', async () => {
+  const {advanceCamera} = await import('../docs/proto/viewing-room/collection-camera.js');
+  for (const distance of [-176, 176]) {
+    const start = 1600, target = start + distance;
+    const first = advanceCamera(start, start, target, 3000, 800);
+    const immediate = (first - start) / distance;
+    assert.ok(immediate > .5 && immediate < .65);
+    const settle = fps => {
+      let position = first;
+      for (let i = 0; i < fps / 2; i++) {
+        const next = advanceCamera(position, target, target, 1000 / fps, 800);
+        assert.ok((next - position) * distance > 0);
+        assert.ok(Math.abs(next - target) < Math.abs(position - target));
+        position = next;
+      }
+      return position;
+    };
+    assert.ok(Math.abs(settle(60) - settle(120)) < 1e-8);
+    assert.ok(Math.abs(settle(60) - target) < 3);
+  }
+});
+
+test('reversing a live coast immediately moves in the new direction and fast travel remains bounded', async () => {
+  const {advanceCamera, chapterAt} = await import('../docs/proto/viewing-room/collection-camera.js');
+  const first = advanceCamera(0, 0, 1400, 16, 800);
+  assert.ok(1400 - first <= 800 * .43);
+  const reverse = advanceCamera(first, 1400, 1394, 16, 800);
+  assert.ok(reverse < first);
+  const centers = [1100, 1830, 2450, 3700, 4360, 4850];
+  for (let i = 0; i < centers.length; i++) {
+    assert.equal(chapterAt(centers, centers[i]), i);
+    if (i) assert.equal(chapterAt(centers, (centers[i-1] + centers[i]) / 2), i - .5);
+  }
+  assert.equal(chapterAt(centers, 100), 0);
+  assert.equal(chapterAt(centers, 9000), 5);
+});

@@ -48,10 +48,18 @@ export function mountFoil(face,reduced){
  let amount=50,ready=false,visible=false,frame=0,last=0,x=.5,y=.5,tx=.5,ty=.5,p=0,tp=0;
  function stamp(){
    if(!ready)return;
-   ctx.drawImage(art,0,0,1200,800);ctx.textAlign='center';
-   const engrave=(text,y,size,font)=>{ctx.font=`${size}px ${font}`;ctx.fillStyle='rgba(255,237,179,.65)';ctx.fillText(text,601,y+2);ctx.fillStyle='#624315';ctx.fillText(text,600,y);};
-   engrave('malar',235,146,'MalarEditorial');engrave('A SMALL GESTURE',300,28,'MalarText');
-   engrave('$'+amount,590,170,'MalarEditorial');engrave('GIFT CARD',653,28,'MalarText');
+   ctx.drawImage(art,0,0,sheet.width,sheet.height);
+   // Place the ink, including Cormorant's descending numerals, inside its own line.
+   function engrave(text,x,bottom,size,font,align,spacing=0){
+     ctx.font=size+'px '+font;ctx.textAlign=align;ctx.letterSpacing=spacing+'px';
+     const baseline=bottom-ctx.measureText(text).actualBoundingBoxDescent;
+     ctx.fillStyle='rgba(255,237,179,.64)';ctx.fillText(text,x+1,baseline+2);
+     ctx.fillStyle='#51380f';ctx.fillText(text,x,baseline);
+   }
+   engrave('malar',600,285,150,'MalarEditorial','center',-3);
+   engrave('A SMALL GESTURE',600,350,25,'MalarText','center',3);
+   engrave('GIFT CARD',145,665,28,'MalarText','left',4);
+   engrave('$'+amount,1055,675,158,'MalarEditorial','right',-3);
    gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,sheet);schedule();
  }
  function schedule(){if(ready&&visible&&!frame&&!document.hidden)frame=requestAnimationFrame(draw);}
@@ -72,5 +80,9 @@ export function mountFoil(face,reduced){
  reduced.addEventListener('change',()=>{tp=p=0;schedule();});document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;last=0;}else schedule();});
  canvas.addEventListener('webglcontextlost',()=>{ready=false;cancelAnimationFrame(frame);face.classList.remove('foil-ready');});
  art.onload=async()=>{await document.fonts.ready;ready=true;resize();stamp();};art.src=new URL('../../gift-gold.svg',import.meta.url).href;
- return {amount(next){amount=next;stamp();}};
+ return {amount(next){
+   amount=next;
+   if(!reduced.matches){x=tx=.72;y=ty=.22;p=.85;tp=0;}
+   stamp();
+ }};
 }
