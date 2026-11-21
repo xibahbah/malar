@@ -255,6 +255,10 @@ sound.onclick = async () => {
 };
 
 function garden(hero) {
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)');
+  const layeredGallery = document.body.classList.contains('viewing-room');
+  const wallSpeed = () => layeredGallery && !reduce.matches ? (hero.clientWidth > 760 ? .24 : .42) : 1.05;
+  let wallScroll = null;
   const canvas = hero.querySelector('canvas');
   const loader = document.getElementById('garden-loader');
   const loadingStartedAt = performance.now();
@@ -294,16 +298,17 @@ function garden(hero) {
       const stage=hero.parentElement;
       const scroll=Math.max(0,-stage.getBoundingClientRect().top);
       let fraction=Math.min(1,scroll/Math.max(1,stage.offsetHeight-hero.offsetHeight));
-      if(hero.clientWidth>760){
+      if(hero.clientWidth>760 || layeredGallery){
         const imageAspect=hero.clientWidth/hero.clientHeight<1 ? 640/4567 : 1040/5752;
         const imageHeight=Math.max(hero.clientHeight,hero.clientWidth/imageAspect);
-        fraction=Math.min(1,scroll*1.05/Math.max(1,imageHeight-hero.clientHeight));
+        fraction=reduce.matches&&layeredGallery ? 0 : Math.min(1,scroll*wallSpeed()/Math.max(1,imageHeight-hero.clientHeight));
       }
       hero.style.setProperty('--wall-position',(fraction*100)+'%');
     };
     panBackground();
     addEventListener('scroll',panBackground,{passive:true});
     addEventListener('resize',panBackground);
+    reduce.addEventListener('change',panBackground);
     return;
   }
   const program = gl.createProgram();
@@ -480,7 +485,7 @@ function garden(hero) {
   const normals=makeTexture(3,'normalMap');
   const shapes=makeTexture(4,'shapeMap');
   gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
-  const portrait=matchMedia('(max-aspect-ratio:1/1)'), reduce=matchMedia('(prefers-reduced-motion:reduce)');
+  const portrait=matchMedia('(max-aspect-ratio:1/1)');
   let w,h,energy,field,revealEnergy,revealField,bytes,source,artSize,frame=0,visible=true,previousTime=null;
   let lastLamp={x:.31,y:.34};
   let strokeX,strokeY,contactTime;
@@ -819,10 +824,13 @@ function garden(hero) {
     const progress=Math.max(0,Math.min(1,-stage.getBoundingClientRect().top/Math.max(1,stage.offsetHeight-hero.offsetHeight)));
     const coverY=Math.min(1,1/ratio);
     const panRange=1-coverY;
-    // Match content travel in CSS pixels; the wall moves only 5% faster.
+    // A distant wall moves much less than the independently paced foreground.
     const scrollPixels=Math.max(0,-stage.getBoundingClientRect().top);
-    const wallPan=hero.clientWidth>760
-      ? -panRange*.5+Math.min(panRange,scrollPixels*1.05*coverY/hero.clientHeight)
+    const wallTarget=layeredGallery&&reduce.matches?0:scrollPixels;
+    wallScroll=wallScroll===null||!layeredGallery||reduce.matches ? wallTarget : wallScroll+(wallTarget-wallScroll)*(1-Math.exp(-dt/.22));
+    if(Math.abs(wallTarget-wallScroll)<.05)wallScroll=wallTarget;
+    const wallPan=hero.clientWidth>760 || layeredGallery
+      ? -panRange*.5+Math.min(panRange,wallScroll*wallSpeed()*coverY/hero.clientHeight)
       : (progress-.5)*panRange;
     gl.uniform1f(loc.pan,wallPan);
 
@@ -845,7 +853,7 @@ function garden(hero) {
         });
       }
     }
-    if(!reduce.matches && (aim||moving||ambient)) schedule();
+    if(!reduce.matches && (aim||moving||ambient||Math.abs(wallTarget-wallScroll)>.05)) schedule();
   }
   hero.parentElement.addEventListener('pointermove',mark);
   hero.parentElement.addEventListener('pointerdown',mark);

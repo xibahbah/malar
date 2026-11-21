@@ -132,8 +132,10 @@ a{color:inherit;text-decoration:none}
 .viewing-room .object-layer img,.viewing-room .object-shadow img{width:70%;height:72%;object-fit:contain;max-width:none;max-height:none;filter:none;user-select:none;-webkit-user-drag:none}
 .object-shadow{transform:translate3d(var(--shadow-x,5px),var(--shadow-y,9px),1px)}
 .viewing-room .object-shadow img{filter:brightness(0) blur(8px);opacity:.23}
-.plate:focus-visible{outline:1px solid var(--gold);outline-offset:10px}
-.plate:focus-visible .plate-motion{outline:1px solid #fff4}
+.viewing-room .plate{pointer-events:none}
+.plate-motion{pointer-events:auto}
+.plate:focus-visible{outline:none}
+.plate:focus-visible .plate-motion{outline:1px solid var(--gold);outline-offset:10px}
 .viewing-room .text{position:relative;z-index:2;transform:translate3d(0,var(--text-travel,0px),0)}
 .viewing-room .text h3{color:var(--ink)}
 .viewing-room .buy{flex-wrap:wrap}

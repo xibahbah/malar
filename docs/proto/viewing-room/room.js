@@ -1,6 +1,7 @@
 // Continuous gallery: shallow stone planes and raised photographic cutouts.
 // Data lives in products.json; the bag is a small local module (no payment yet).
 const here = new URL('./', import.meta.url);
+import {layers, scrollPose, follow} from './scroll-motion.js?v=1';
 const $ = s => document.querySelector(s);
 const money = cents => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
@@ -135,7 +136,7 @@ document.querySelectorAll('[data-scroll]').forEach(el=>el.addEventListener('clic
 /* ---------- shared scroll clock, no wheel interception or scroll hijack ---------- */
 const fine=matchMedia('(min-width:761px) and (pointer:fine)');
 const root=document.documentElement,finale=document.querySelector('.night-garden');
-const models=pieces.map(({el},i)=>({el,plate:el.querySelector('.plate'),motion:el.querySelector('.plate-motion'),text:el.querySelector('.text'),i,center:0,rect:null,x:0,y:0,focus:false,hover:false,pitch:0,yaw:0,lift:0,travel:0,objectPitch:0}));
+const models=pieces.map(({el},i)=>({el,plate:el.querySelector('.plate'),motion:el.querySelector('.plate-motion'),text:el.querySelector('.text'),layer:layers[i],i,center:0,rect:null,x:0,y:0,focus:false,hover:false,pitch:0,yaw:0,lift:0,travel:0,textTravel:0,objectPitch:0,initialized:false}));
 let frame=0,last=0,finaleTop=0,viewHeight=innerHeight,visibleModels=new Set(models);
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const smooth=x=>{x=clamp(x,0,1);return x*x*(3-2*x)};
@@ -145,18 +146,18 @@ function measure(){
  models.forEach(m=>{const r=m.plate.getBoundingClientRect();m.center=scrollY+r.top+r.height/2;m.rect={x:r.left,top:scrollY+r.top,width:r.width,height:r.height};});
  finaleTop=scrollY+finale.getBoundingClientRect().top;schedule();
 }
-const visibility=new IntersectionObserver(entries=>{for(const entry of entries){const m=models.find(x=>x.el===entry.target);if(entry.isIntersecting)visibleModels.add(m);else visibleModels.delete(m);}schedule();},{rootMargin:'200px'});
+const visibility=new IntersectionObserver(entries=>{for(const entry of entries){const m=models.find(x=>x.el===entry.target);if(entry.isIntersecting)visibleModels.add(m);else{visibleModels.delete(m);m.initialized=false;}}schedule();},{rootMargin:'100% 0px'});
 models.forEach(m=>{
  visibility.observe(m.el);
- m.plate.addEventListener('pointerenter',e=>{if(e.pointerType!=='mouse')return;m.hover=true;schedule();});
- m.plate.addEventListener('pointermove',e=>{if(!fine.matches||reduce.matches)return;m.x=clamp((e.clientX-m.rect.x)/m.rect.width-.5,-.5,.5);m.y=clamp((e.clientY+scrollY-m.rect.top)/m.rect.height-.5,-.5,.5);schedule();});
+ m.motion.addEventListener('pointerenter',e=>{if(e.pointerType!=='mouse')return;m.hover=true;schedule();});
+ m.motion.addEventListener('pointermove',e=>{if(!fine.matches||reduce.matches)return;m.x=clamp((e.clientX-m.rect.x)/m.rect.width-.5,-.5,.5);m.y=clamp((e.clientY+scrollY-m.rect.top-m.travel-m.lift)/m.rect.height-.5,-.5,.5);schedule();});
  const leave=()=>{m.hover=false;m.x=m.y=0;schedule();};
- m.plate.addEventListener('pointerleave',leave);m.plate.addEventListener('pointercancel',leave);
+ m.motion.addEventListener('pointerleave',leave);m.motion.addEventListener('pointercancel',leave);
  m.plate.addEventListener('focus',()=>{m.focus=true;schedule();});m.plate.addEventListener('blur',()=>{m.focus=false;schedule();});
  m.el.querySelector('.add').addEventListener('focus',()=>{m.focus=true;schedule();});m.el.querySelector('.add').addEventListener('blur',()=>{m.focus=false;schedule();});
 });
 function paint(now){
- frame=0;const dt=last?Math.min(50,now-last):16.67;last=now;const ease=1-Math.exp(-dt/95);let unsettled=false;
+ frame=0;const dt=last?Math.min(50,now-last):16.67;last=now;let unsettled=false;
  const y=scrollY;document.querySelector('.bar').inert=y<viewHeight*.52;root.style.setProperty('--bar-visible',smooth((y-viewHeight*.5)/(viewHeight*.3)).toFixed(3));
  const dark=smooth((y+viewHeight*.88-finaleTop)/(viewHeight*.8));
  root.style.setProperty('--night',dark.toFixed(4));
@@ -165,17 +166,24 @@ function paint(now){
  finale.style.setProperty('--flower-rise',(reduce.matches?0:(1-bloom)*85).toFixed(2)+'px');
  const drift=reduce.matches?0:clamp((y-finaleTop)/viewHeight,-1,1);
  finale.style.setProperty('--rose-drift',(-drift*30).toFixed(2)+'px');finale.style.setProperty('--lily-drift',(-drift*60).toFixed(2)+'px');finale.style.setProperty('--mauve-drift',(drift*18).toFixed(2)+'px');
- for(const m of visibleModels){
-  const p=clamp((y+viewHeight*.52-m.center)/(viewHeight*.85),-1,1),enabled=fine.matches&&!reduce.matches;
+ for(const m of models){
+  const enabled=fine.matches&&!reduce.matches;
+  if(enabled&&!visibleModels.has(m))continue;
+  const pose=scrollPose(m.layer,y,m.center,viewHeight,m.rect.height),p=pose.phase;
   const raised=enabled&&(m.hover||m.focus);
-  const targets={pitch:enabled?-p*7-m.y*5:0,yaw:enabled?p*(m.i%2?1.6:-1.6)+m.x*7:0,lift:raised?-8:0,travel:enabled?p*38:0,objectPitch:enabled?-p*3:0};
-  for(const key in targets){m[key]+=(targets[key]-m[key])*ease;if(Math.abs(targets[key]-m[key])>.015)unsettled=true;else m[key]=targets[key];}
+  const targets={pitch:enabled?pose.pitch-m.y*5:0,yaw:enabled?p*(m.i%2?1.6:-1.6)+m.x*7:0,lift:raised?-8:0,travel:enabled?pose.travel:0,textTravel:enabled?pose.textTravel:0,objectPitch:enabled?-p*3:0};
+  for(const key in targets){
+   const settle=key==='travel'?m.layer.settle:key==='textTravel'?180:95;
+   m[key]=!enabled||!m.initialized?targets[key]:follow(m[key],targets[key],dt,settle);
+   if(Math.abs(targets[key]-m[key])>.015)unsettled=true;else m[key]=targets[key];
+  }
+  m.initialized=true;
   m.motion.style.setProperty('--card-travel',(m.travel+m.lift).toFixed(3)+'px');
   m.motion.style.setProperty('--card-pitch',m.pitch.toFixed(3)+'deg');m.motion.style.setProperty('--card-yaw',m.yaw.toFixed(3)+'deg');
   m.motion.style.setProperty('--object-pitch',m.objectPitch.toFixed(3)+'deg');m.motion.style.setProperty('--object-yaw',(-m.yaw*.35).toFixed(3)+'deg');
   m.motion.style.setProperty('--object-height',(25-m.lift*1.8).toFixed(3)+'px');
   m.motion.style.setProperty('--shadow-x',(5-m.yaw*.65).toFixed(3)+'px');m.motion.style.setProperty('--shadow-y',(9+m.pitch*.55-m.lift*.45).toFixed(3)+'px');
-  m.text.style.setProperty('--text-travel',enabled?(-p*8).toFixed(3)+'px':'0px');
+  m.text.style.setProperty('--text-travel',m.textTravel.toFixed(3)+'px');
  }
  if(unsettled)schedule();else last=0;
 }
