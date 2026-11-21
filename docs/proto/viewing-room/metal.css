@@ -59,3 +59,18 @@
  .gift-confirmation{min-height:41px;margin-top:10px}
 }
 .viewing-room #bag{align-content:start}
+
+/* The original gold leaf, now a locally folding rectangular sheet. */
+.viewing-room #gift .gift-foil{width:100%;max-width:470px;padding:0;transform:rotate(-4deg);filter:drop-shadow(0 15px 20px #0003)}
+.gift-foil .mirror-face{aspect-ratio:1.5;border-radius:0;overflow:visible;background:transparent;box-shadow:none}
+.gift-foil .mirror-face:after{display:none}
+.gift-foil .mirror-face:before{content:"";position:absolute;inset:3%;background:#c9a35c url('../../gift-gold.svg') center/cover;z-index:-1}
+.gift-foil .foil-ready:before{display:none}
+.gift-foil .foil-canvas{position:absolute;inset:0;width:100%;height:100%;opacity:1;z-index:0;pointer-events:none}
+.gift-foil .mirror-inscription{inset:14% 10%;color:#624315;pointer-events:none;justify-content:center}
+.gift-foil .mirror-inscription #gift-value{margin-top:auto}
+.gift-foil .foil-ready .mirror-inscription{opacity:0}
+.gift-foil .mirror-sweep{display:none}
+.gift-values button[aria-pressed=true]{border-color:#d9b77399;background:linear-gradient(130deg,#a77a36,#ddbd77 45%,#a37c3e);color:#36240e}
+.gift-flight{width:76px;height:51px;border-radius:0;border:1px solid #c9a35c;background:#c9a35c url('../../gift-gold.svg') center/cover;color:#503914}
+@media(max-width:760px){.viewing-room #gift .gift-foil{width:min(88vw,390px);max-width:100%}.gift-foil .mirror-inscription{inset:12%}.gift-foil .mirror-brand{font-size:38px}.gift-foil #gift-value{font-size:48px}}

@@ -83,7 +83,7 @@ test('ending separates black, typography, and flowers; flowers develop without f
  assert.ok(endingPose(top,top,h,0).dark>0&&endingPose(top,top,h,0).dark<1);
 });
 
-test('wheel motion coasts, reverses promptly, and releases keyboard/dialog scrolling',async()=>{
+test('native wheel inertia is untouched and immediately interrupts programmatic navigation',async()=>{
  const {createMomentum}=await import('../docs/proto/viewing-room/momentum.js');
  const saved=new Map(),set=(k,v)=>{saved.set(k,Object.getOwnPropertyDescriptor(globalThis,k));Object.defineProperty(globalThis,k,{value:v,writable:true,configurable:true});};
  const events={},frames=new Map();let seq=0,time=0,modal=false;
@@ -99,11 +99,13 @@ test('wheel motion coasts, reverses promptly, and releases keyboard/dialog scrol
   const controller=createMomentum({matches:false,addEventListener(){}});
   const step=()=>{time+=1000/60;const list=[...frames.values()];frames.clear();for(const f of list)f(time);};
   const wheel=delta=>{let prevented=false;events.wheel({deltaX:0,deltaY:delta,deltaMode:0,target:null,preventDefault(){prevented=true;}});return prevented;};
-  assert.equal(wheel(700),true);step();const first=scrollY;for(let i=0;i<15;i++)step();
-  assert.ok(scrollY>first+200&&scrollY<700); // Input has stopped but travel continues.
-  const oldPosition=scrollY;globalThis.scrollY=oldPosition-8;events.scroll();globalThis.scrollY=oldPosition;assert.ok(frames.size>0);
-  const before=scrollY;wheel(-200);for(let i=0;i<12;i++)step();assert.ok(scrollY<before);
-  events.keydown({key:'PageUp'});const stopped=scrollY;step();assert.equal(scrollY,stopped);
+  assert.equal(wheel(700),false);step();assert.equal(scrollY,0);
+  assert.equal(frames.size,0); // Browser owns wheel position and its momentum tail.
+  globalThis.scrollY=700;events.scroll();
+  controller.go(1600);for(let i=0;i<8;i++)step();assert.ok(scrollY>700);
+  assert.equal(wheel(-200),false);assert.equal(frames.size,0);
+  const stopped=scrollY;step();assert.equal(scrollY,stopped);
+  controller.go(1800);events.keydown({key:'PageUp'});assert.equal(frames.size,0);
   modal=true;assert.equal(wheel(300),false);assert.equal(frames.size,0);
   modal=false;controller.go(99999);for(let i=0;i<220;i++)step();assert.equal(scrollY,5200);
  }finally{for(const [k,d]of saved){if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}

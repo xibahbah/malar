@@ -2,8 +2,8 @@
 // Data lives in products.json; the bag is a small local module (no payment yet).
 const here = new URL('./', import.meta.url);
 import {layers,scrollPose,follow,clamp,smooth,endingPose} from './scroll-motion.js?v=3';
-import {createMomentum} from './momentum.js?v=2';
-import {mountGiftMirror,giftMirrorMarkup} from './metal.js?v=1';
+import {createMomentum} from './momentum.js?v=3';
+import {mountGiftMirror,giftMirrorMarkup} from './metal.js?v=2';
 import {mountBotanical} from './botanical.js?v=2';
 const $ = s => document.querySelector(s);
 const money = cents => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
@@ -147,7 +147,7 @@ document.querySelectorAll('[data-scroll]').forEach(el=>el.addEventListener('clic
 const fine=matchMedia('(min-width:761px) and (pointer:fine)');
 const root=document.documentElement,finale=document.querySelector('.night-garden');
 const models=pieces.map(({el},i)=>({el,plate:el.querySelector('.plate'),motion:el.querySelector('.plate-motion'),text:el.querySelector('.text'),layer:layers[i],i,center:0,rect:null,x:0,y:0,focus:false,hover:false,pitch:0,yaw:0,lift:0,travel:0,textTravel:0,objectPitch:0,initialized:false}));
-let frame=0,last=0,finaleTop=0,viewHeight=innerHeight,visibleModels=new Set(models),endingStarted=null,wallHidden=false;
+let frame=0,last=0,finaleTop=0,viewHeight=innerHeight,finaleHeight=0,visibleModels=new Set(models),endingStarted=null,wallHidden=false;
 const flowerGarden=finale.querySelector('.night-flowers');
 const botanical=mountBotanical(flowerGarden,here,reduce);
 const nightCopy=finale.querySelector('.night-copy'),nightNote=finale.querySelector('.night-note');
@@ -155,7 +155,7 @@ function schedule(){if(!frame&&!document.hidden)frame=requestAnimationFrame(pain
 function measure(){
  viewHeight=innerHeight;
  models.forEach(m=>{const r=m.plate.getBoundingClientRect();m.center=scrollY+r.top+r.height/2;m.rect={x:r.left,top:scrollY+r.top,width:r.width,height:r.height};});
- finaleTop=scrollY+finale.getBoundingClientRect().top;botanical.measure();schedule();
+ finaleTop=scrollY+finale.getBoundingClientRect().top;finaleHeight=finale.offsetHeight;botanical.measure();schedule();
 }
 const visibility=new IntersectionObserver(entries=>{for(const entry of entries){const m=models.find(x=>x.el===entry.target);if(entry.isIntersecting)visibleModels.add(m);else{visibleModels.delete(m);m.initialized=false;}}schedule();},{rootMargin:'100% 0px'});
 models.forEach(m=>{
@@ -181,7 +181,7 @@ function paint(now){
  finale.style.setProperty('--copy-presence',ending.copy.toFixed(4));
  finale.style.setProperty('--note-presence',ending.note.toFixed(4));
  flowerGarden.style.opacity=ending.gate.toFixed(4);flowerGarden.inert=ending.gate<.05;
- const inEnding=entry>viewHeight*.3&&entry<finale.offsetHeight;
+ const inEnding=entry>viewHeight*.3&&entry<finaleHeight;
  nightCopy.inert=ending.copy<.05;nightNote.inert=ending.note<.05;
  if(inEnding||ending.gate>0)botanical.paint(elapsed,ending.gate,dt);
  if(inEnding&&!reduce.matches&&endingStarted!==null)unsettled=true;
@@ -193,7 +193,7 @@ function paint(now){
   const targets={pitch:enabled?pose.pitch-m.y*5:0,yaw:enabled?p*(m.i%2?1.6:-1.6)+m.x*7:0,lift:raised?-8:0,travel:enabled?pose.travel:0,textTravel:enabled?pose.textTravel:0,objectPitch:enabled?-p*3:0};
   for(const key in targets){
    const settle=key==='travel'||key==='textTravel'?m.layer.settle:95;
-   m[key]=!enabled||!m.initialized?targets[key]:follow(m[key],targets[key],dt,settle);
+   m[key]=!enabled||!m.initialized||key==='travel'||key==='textTravel'?targets[key]:follow(m[key],targets[key],dt,settle);
    if(Math.abs(targets[key]-m[key])>.015)unsettled=true;else m[key]=targets[key];
   }
   m.initialized=true;

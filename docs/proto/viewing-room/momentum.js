@@ -10,10 +10,10 @@ export function coastStep(position,velocity,target,dt,frequency=9){
 }
 export function createMomentum(reduced){
  const pointer=matchMedia('(pointer:fine)');
- let target=scrollY,current=scrollY,velocity=0,frame=0,last=0,direction=0,limit=0;
+ let target=scrollY,current=scrollY,velocity=0,frame=0,last=0,limit=0;
  const measure=()=>{limit=Math.max(0,document.documentElement.scrollHeight-innerHeight);};
  const enabled=()=>pointer.matches&&!reduced.matches;
- function stop(){cancelAnimationFrame(frame);frame=0;last=0;direction=0;velocity=0;current=target=scrollY;}
+ function stop(){cancelAnimationFrame(frame);frame=0;last=0;velocity=0;current=target=scrollY;}
  function tick(now){
   if(!enabled()||document.querySelector('dialog[open]')){stop();return;}
   const dt=last?Math.min(.08,(now-last)/1000):1/60;last=now;
@@ -22,7 +22,7 @@ export function createMomentum(reduced){
   current=clamp(next.position,0,limit);velocity=next.velocity;
   if(Math.abs(target-current)<.45&&Math.abs(velocity)<4){current=target;velocity=0;}
   window.scrollTo({top:current,behavior:'instant'});
-  if(current!==target||velocity)frame=requestAnimationFrame(tick);else{frame=0;last=0;direction=0;}
+  if(current!==target||velocity)frame=requestAnimationFrame(tick);else{frame=0;last=0;}
  }
  function go(top){
   measure();
@@ -31,25 +31,10 @@ export function createMomentum(reduced){
   target=clamp(top,0,limit);
   if(!frame)frame=requestAnimationFrame(tick);
  }
- function ownsScroll(node){
-  for(let el=node instanceof Element?node:null;el&&el!==document.body;el=el.parentElement){
-   if(el.matches('dialog,[contenteditable="true"],textarea,select,input'))return true;
-   const style=getComputedStyle(el);
-   if(/auto|scroll/.test(style.overflowY)&&el.scrollHeight>el.clientHeight+1)return true;
-  }
-  return false;
- }
- addEventListener('wheel',e=>{
-  if(!enabled()||e.ctrlKey||e.metaKey||e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY)||document.querySelector('dialog[open]')||ownsScroll(e.target)){stop();return;}
-  if(!e.deltaY)return;
-  e.preventDefault();
-  const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1);
-  const nextDirection=Math.sign(delta);
-  if(!frame)target=current=scrollY;
-  // Brake towards the new direction without resetting position or velocity.
-  if(direction&&direction!==nextDirection)target=current;
-  direction=nextDirection;go(target+delta);
- },{passive:false});
+ // Trackpads already deliver OS inertia, including the decaying release tail.
+ // Never intercept it or route it through a second spring/main-thread scrollTo.
+ // Only explicit navigation uses the spring; real input immediately takes over.
+ addEventListener('wheel',stop,{passive:true});
  addEventListener('pointerdown',stop,{passive:true});
  addEventListener('touchstart',stop,{passive:true});
  addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' ','Tab'].includes(e.key))stop();});
