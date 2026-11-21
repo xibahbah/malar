@@ -3,11 +3,11 @@
 Status: code prototypes ready for visual review; NOT approved for integration.
 
 ## Run
-Serve `docs` over HTTP. Open `/proto/carpet/` and `/proto/lit-product/`.
-No dependencies, build step, accounts, credentials or remote writes.
+Serve `docs` over HTTP. Open `/proto/garland-cart/` and `/proto/lit-product/`.
+No dependencies, build step, accounts, credentials or visitor data uploads.
 The prototype branch is `prototype/ritual-phase-1`. Only additive `/proto/` files are published for review; existing homepage and collection are unchanged.
 
-## Carpet
+## Deferred carpet (superseded brief; Phase 4 only)
 Chosen: a gesture becomes a narrow petal ribbon, repeated around an eightfold sector. Each day adds a ring and its own color; the day slider preserves earlier rings. 500 deterministic synthetic visitor records, 200 points each. Synthetic records and up to 50 actual local contributions are kept under namespaced localStorage keys. No claim of real shared participation.
 Drag, release to preview, then Place. Keyboard alternative makes a petal without requiring drawing. Day scrub is immediate; no automatic motion. Stress toggles continuous rendering of exactly 5,000 petal instances when the device's texture-size limit permits it. Normal rendering happens only on input. Background tabs stop the benchmark.
 Cut: backend, real cycle rollover/archives, dusk rotation and purchase snapshot. These depend on approving the core gesture first. No database deployment in Phase 1.
@@ -30,3 +30,25 @@ Only pookalam's concentric floral arrangement and progressive day structure from
 No deities, Mahabali narrative, puja scenes, lamp ritual, sacred symbols or invented Malayalam labels have been introduced. Time/lamp/jasmine, garland cart, five-wick navigation and material rituals remain future proposals, not implemented or culturally validated.
 
 STOP after Phase 1. Do not integrate or start Phase 2 until reviewed.
+
+
+## Updated Phase 1: garland cart
+products.json owns IDs, cents, currency and crop metadata. cart.js owns validation, limits, subscriptions and localStorage. garland.js owns presentation and the mock checkout adapter boundary. Add, +/- quantity (0 removes, max 20), Remove, empty state, total, review, confirmation, receipt, focus return, Escape and reduced motion are implemented. Checkout collects no PII, creates no charge, clears the strand only on explicit mock confirmation. Payment integration remains TODO: payment provider.
+
+## BLOCKERS (updated brief)
+- 15-second screen recording NOT delivered: no browser/screen recording tools are available in this session. No synthetic animation is substituted for a real recording.
+- Visual QA, actual shader compilation, keyboard/touch browser walkthrough and Android 60fps NOT VERIFIED. Syntax and cart state tests are not substitutes.
+- Cart pictures are existing photo crops, and garland uses DOM transforms; only the one-earring lighting prototype uses the shared wall pass. No claim that the full cart is in WebGL.
+- All prices and stock are demo data. Mock checkout only. No payment, shipping, account, email or stock service exists.
+- Luminance-derived normals contain baked-light artifacts. Real photometric inputs needed for material fidelity.
+- No foley or gyroscope, no KTX2/Basis conversion, no time system or five-wick nav. They belong to later phases.
+
+## CUT LOG (updated brief)
+- Shared backend and 10-day carpet moved out of the active work; personal carpet is Phase 4.
+- No new site-wide effects or main storefront replacement.
+- No physical thread simulation: a fixed thread plus one restrained scroll swing tests the collection metaphor without scroll hijacking.
+- No checkout personal data fields: a mock order needs no real address or card number.
+- No fake recording, fake FPS or unrun user-study results.
+
+## 15-second manual recording script (not evidence)
+0-3s scroll the thread; 3-6s add earrings then ring; 6-9s increase earrings and remove ring; 9-12s open checkout; 12-15s complete mock order, show receipt. Record on the target device with reduced motion off, then separately verify reduced motion and keyboard.
