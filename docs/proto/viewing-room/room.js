@@ -3,6 +3,7 @@
 const here = new URL('./', import.meta.url);
 import {layers,scrollPose,follow,clamp,smooth,endingPose} from './scroll-motion.js?v=3';
 import {createMomentum} from './momentum.js?v=2';
+import {mountGiftMirror,giftMirrorMarkup} from './metal.js?v=1';
 import {mountBotanical} from './botanical.js?v=2';
 const $ = s => document.querySelector(s);
 const money = cents => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
@@ -59,10 +60,8 @@ const end = document.createElement('p');
 end.className = 'end';
 end.textContent = 'Collection study · photographs are placeholders. Checkout is a demo.';
 room.insertAdjacentHTML('beforeend', `<section class="room-story" id="studio"><h2>A small studio.</h2><p>Malar means flower. Jewelry and objects, made by hand in small batches.</p></section>
-<section class="room-gift" id="gift" aria-labelledby="gift-title"><div class="gift-plate"><span>malar</span><output id="gift-value">$50</output></div><div><h2 id="gift-title">Gift cards</h2><div class="gift-values" role="group" aria-label="Gift card amount"><button type="button" data-gift="25" aria-pressed="false">$25</button><button type="button" data-gift="50" aria-pressed="true">$50</button><button type="button" data-gift="100" aria-pressed="false">$100</button></div><button class="add" type="button" id="gift-add">Add to bag</button><p id="gift-added" role="status"></p></div></section>`);
-let giftAmount=50;
-document.querySelectorAll('[data-gift]').forEach(button=>button.addEventListener('click',()=>{giftAmount=Number(button.dataset.gift);document.querySelectorAll('[data-gift]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));$('#gift-value').textContent='$'+giftAmount;$('#gift-added').textContent='';}));
-$('#gift-add').addEventListener('click',()=>{setQty('gift-'+giftAmount,(items['gift-'+giftAmount]||0)+1);$('#gift-added').textContent='$'+giftAmount+' gift card added';});
+<section class="room-gift" id="gift" aria-labelledby="gift-title">${giftMirrorMarkup}<div class="gift-details"><p class="gift-eyebrow">A small gesture</p><h2 id="gift-title">Gift cards</h2><p class="gift-description">Something beautiful.<br>Chosen by them.</p><p class="gift-amount-label" id="gift-amount-label">Choose an amount</p><div class="gift-values" role="group" aria-labelledby="gift-amount-label"><button type="button" data-gift="25" aria-pressed="false">$25</button><button type="button" data-gift="50" aria-pressed="true">$50</button><button type="button" data-gift="100" aria-pressed="false">$100</button></div><button class="add" type="button" id="gift-add">Add to bag <span aria-hidden="true">↗</span></button><div class="gift-confirmation"><p id="gift-added" role="status"></p><button type="button" class="gift-view-bag">View bag</button></div></div></section>`);
+mountGiftMirror($('#gift'),{reduced:reduce,onAdd:amount=>{const id='gift-'+amount;if((items[id]||0)>=20)return false;setQty(id,(items[id]||0)+1);return true;},openBag:()=>openBag()});
 room.append(end);
 
 const seen = new IntersectionObserver(entries => {
@@ -92,7 +91,7 @@ function renderBag() {
     if (!q) continue;
     const li = document.createElement('li');
     li.innerHTML = `
-      <img src="${p.image}" alt="">
+      ${p.gift?`<div class="bag-gift-mirror" aria-hidden="true"><span>malar</span><strong>${money(p.price)}</strong></div>`:`<div class="bag-object"><img src="${p.image}" alt=""></div>`}
       <span class="name">${p.name}</span>
       <span class="line">${money(p.price * q)}</span>
       <span class="qty">

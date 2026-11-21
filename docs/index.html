@@ -39,9 +39,10 @@
 </script>
 <link rel="stylesheet" href="garden.css?v=title-shadow">
 <link rel="stylesheet" href="proto/viewing-room/room.css?v=10">
+<link rel="stylesheet" href="proto/viewing-room/metal.css?v=1">
 <!-- Original relief and lighting, with a separate background scroll rate. -->
 <script src="garden.js?v=continuous-scroll-2" defer></script>
-<script type="module" src="proto/viewing-room/room.js?v=10"></script>
+<script type="module" src="proto/viewing-room/room.js?v=11"></script>
 </head>
 <body class="ambient-landing viewing-room">
 <div id="garden-loader" role="progressbar" aria-label="Loading the garden" aria-valuemin="1" aria-valuemax="100" aria-valuenow="1"><span class="garden-loader-number" aria-hidden="true">1</span></div>
@@ -94,7 +95,7 @@
 
 <dialog id="bag" aria-labelledby="bag-title">
   <div class="bag-head">
-    <h2 id="bag-title">Bag</h2>
+    <div><p class="bag-eyebrow">Malar · Your collection</p><h2 id="bag-title">Bag</h2></div>
     <button type="button" id="bag-close" class="plain">Close</button>
   </div>
   <ul id="bag-lines"></ul>

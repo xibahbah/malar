@@ -1,4 +1,14 @@
-# Kerala botanical collection — current
+# Mirror gift and bronze bag — current
+
+- Gift presentation is a polished metal hand mirror, with an oval rim, short handle, restrained botanical engraving, and cool/warm reflective bands. Light position follows the mouse through a short eased response and a small tilt. Materials use CSS and a lightweight inline line engraving, with no new raster texture payload.
+- Selecting $25 / $50 / $100 updates the accessible amount immediately; a reflective sweep and 620ms amount reveal make the change legible. Rapid changes cancel previous value/sweep animations. Adding a gift retains the large mirror and sends a small reflective token toward the bag; it does not block subsequent interactions. Reduced-motion users receive immediate state changes.
+- Bag uses a separate dark patinated bronze surface, recessed object thumbnails, fine lit dividers, bronze quantity controls and total. Gift thumbnails use miniature mirrors with their correct denomination. Removed inherited full-screen-menu spacing and centering from the bag.
+- Existing bag persistence, quantity limits, focus restoration, and demo-only checkout remain. No purchase or payment integration added. Uruli and the lamp loader are separate future concepts and were not part of this material pass.
+- Browser verification: $100 × 2 = $200; removal returns $0; $25 + $100 = $125. Narrow 390×844 gift presentation fits from y110 to y791, including the add control. Desktop and narrow screenshots inspected. Existing nine motion tests and module import syntax pass.
+
+---
+
+# Previous Kerala botanical revision
 
 - Replaced the repeated rose/lily composition with six newly generated transparent photographic assets: Chemparathy (hibiscus), Chethi (Ixora), Mulla (jasmine), Kanikonna (Cassia fistula), Sankhupushpam (butterfly pea), and Chendumalli (Tagetes marigold). Source direction and complete prompts are in flowers/GENERATED-ASSETS.md. These are illustrative assets, not scientific identification plates.
 - Twenty-two independently animated branches create a cascading canopy, large low focal blooms, small clustered flowers, and fine connecting vines. Placement is asymmetric, with separate narrow-screen coordinates for every branch. Six WebP files total approximately 1.4 MB, retaining generated alpha.
