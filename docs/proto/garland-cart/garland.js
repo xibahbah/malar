@@ -1,4 +1,4 @@
-import {createCart} from './cart.js';
+import {createCart} from './cart.js?v=r2';
 
 const $ = s => document.querySelector(s);
 const money = n => new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(n / 100);
@@ -10,7 +10,7 @@ let products, cart, state, justAdded = null, flyFrom = null;
 
 try {
   const here = new URL('./', import.meta.url);
-  const res = await fetch(new URL('products.json', here));
+  const res = await fetch(new URL('products.json?v=r2', here));
   if (!res.ok) throw Error('data');
   products = await res.json();
   if (!Array.isArray(products) || !products.length) throw Error('empty');
