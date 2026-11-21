@@ -6,7 +6,7 @@ const money = cents => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 const pad = n => String(n).padStart(2, '0');
 
-const products = await (await fetch(new URL('products.json?v=4', here))).json();
+const products = await (await fetch(new URL('products.json?v=5', here))).json();
 for (const p of products) p.image = new URL(p.image, here).href;
 
 /* ---------- bag ---------- */
