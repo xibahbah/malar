@@ -77,7 +77,7 @@ function garden(hero) {
     attribute vec2 pos;
     varying vec2 uv;
     uniform highp sampler2D field,heightMap;
-    uniform sampler2D productArt, productNormal; uniform float productReady;
+    uniform sampler2D productArt, productNormal; uniform float productReady; uniform vec4 productRect;
     uniform vec2 cover,lightPoint;
     uniform float pan,resting;
     ${localLighting}
@@ -91,7 +91,7 @@ function garden(hero) {
       float rise=max(resting,smoothstep(.025,mix(.78,.53,introDepth),contact.r));
       float rim=1.-smoothstep(.965,1.,max(abs(pos.x),abs(pos.y)));
       float z=mix(.060,.096,introDepth)*h*rise*rim;
-      vec2 puv=(p-vec2(.31,.15))/vec2(.38,.70);
+      vec2 puv=(p-productRect.xy)/productRect.zw;
       float pin=step(0.,puv.x)*step(puv.x,1.)*step(0.,puv.y)*step(puv.y,1.);
       float ph=texture2D(productNormal,puv).a*texture2D(productArt,puv).a*pin*productReady;
       z+=ph*.018;
@@ -104,7 +104,7 @@ function garden(hero) {
     varying vec2 uv;
     uniform highp sampler2D mural, field, heightMap, normalMap, shapeMap;
     uniform vec2 cover, pixel, lightPoint;
-    uniform float resting, pan, introSurface; uniform sampler2D productArt, productNormal; uniform float productReady;
+    uniform float resting, pan, introSurface; uniform sampler2D productArt, productNormal; uniform float productReady; uniform vec4 productRect;
     ${localLighting}
     void main(){
       vec2 p=vec2(uv.x,1.-uv.y);
@@ -188,7 +188,7 @@ function garden(hero) {
       vec3 reliefColor=surfaceColor+gold*vec3(.30,.174,.039);
       float reveal=max(introSurface,smoothstep(.01,.42,reached));
       vec3 wallResult=mix(vec3(33.,21.,14.)/255.,reliefColor,reveal);
-      vec2 productUV=(p-vec2(.31,.15))/vec2(.38,.70);
+      vec2 productUV=(p-productRect.xy)/productRect.zw;
       vec4 piece=texture2D(productArt,productUV);
       float inside=step(0.,productUV.x)*step(productUV.x,1.)*step(0.,productUV.y)*step(productUV.y,1.);
       vec4 detail=texture2D(productNormal,productUV);
@@ -323,6 +323,8 @@ function garden(hero) {
     canvas.width=Math.round(hero.clientWidth*d);
     canvas.height=Math.round(hero.clientHeight*d);
     gl.viewport(0,0,canvas.width,canvas.height);
+    const pieceH=Math.min(hero.clientHeight*.7,hero.clientWidth*.38*450/350),pieceW=pieceH*350/450;
+    gl.uniform4f(gl.getUniformLocation(program,'productRect'),(.5-pieceW/hero.clientWidth/2),(.5-pieceH/hero.clientHeight/2),pieceW/hero.clientWidth,pieceH/hero.clientHeight);
     w=Math.max(32,Math.round(hero.clientWidth/6));
     h=Math.max(32,Math.round(hero.clientHeight/6));
     energy=new Float32Array(w*h); field=new Float32Array(w*h);
