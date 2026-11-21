@@ -1,1 +1,77 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Malar / Garland cart study</title><link rel="stylesheet" href="../proto.css"><link rel="stylesheet" href="garland.css"><header><h1>A thread, collected.</h1><a href="../lit-product/">Shared light study</a><span class="note">PHASE 1 / MOCK CHECKOUT / no charge</span></header><main><section id="pieces" aria-label="Jewelry"><p id="load">Loading pieces...</p></section><aside aria-label="Your garland"><h2>Your strand <span id="count">0</span></h2><div id="strand"></div><p id="total"></p><button id="checkout" disabled>Tie off / Checkout</button><p id="status" role="status"></p></aside></main><dialog id="checkout-dialog" aria-labelledby="checkout-title"><form id="order"><button type="button" id="close">Close</button><h2 id="checkout-title">Tie off your strand</h2><p>Prototype checkout. No payment or shipping details are collected.</p><div id="review"></div><label>Gift message (optional)<textarea id="message" maxlength="200"></textarea></label><p id="checkout-total"></p><button id="confirm" type="submit">Complete mock order</button></form><section id="receipt" hidden><h2>Strand tied.</h2><p>Your mock order is complete. Nothing was charged or sent.</p><p id="receipt-total"></p><button id="continue">Continue exploring</button></section></dialog><script src="garland.js" type="module"></script></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#21150e">
+<title>Malar / Garland cart study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manjari:wght@400&display=swap">
+<link rel="stylesheet" href="garland.css">
+</head>
+<body>
+<div class="wall" aria-hidden="true"><div class="wall-dark"></div><div class="wall-lit"></div></div>
+
+<header class="top">
+  <a class="mark" href="../../">malar <span lang="ml">മലർ</span></a>
+  <nav><a href="../lit-product/">Shared light study</a></nav>
+</header>
+
+<main>
+  <section class="collection" aria-labelledby="title">
+    <div class="intro">
+      <p class="kicker">Collection</p>
+      <h1 id="title">A thread, collected.</h1>
+      <p class="lede">Each piece hangs on one cotton thread. Tie the ones you want onto your own strand.</p>
+    </div>
+    <div class="hang" id="pieces">
+      <div class="thread" aria-hidden="true"></div>
+      <p id="load">Loading pieces…</p>
+    </div>
+  </section>
+
+  <aside class="strand-panel" id="strand-panel" aria-labelledby="strand-title">
+    <div class="strand-head">
+      <h2 id="strand-title">Your strand</h2>
+      <span class="count" id="count">0</span>
+    </div>
+    <ol class="strand" id="strand"></ol>
+    <div class="strand-foot">
+      <p class="total"><span>Total</span><span id="total">$0.00</span></p>
+      <button class="tie" id="checkout" disabled>Tie off</button>
+      <p id="status" class="status" role="status"></p>
+    </div>
+  </aside>
+</main>
+
+<div class="mobile-bar" id="mobile-bar">
+  <div class="mini-strand" id="mini" aria-hidden="true"></div>
+  <a href="#strand-panel" id="mobile-link">Your strand · <span id="mobile-count">0</span></a>
+</div>
+
+<footer class="foot"><p>Prototype · mock checkout, nothing is charged. Product images are placeholders until the studio shoot.</p></footer>
+
+<dialog id="checkout-dialog" aria-labelledby="checkout-title">
+  <form id="order">
+    <button type="button" class="close" id="close" aria-label="Close">×</button>
+    <p class="kicker">Checkout</p>
+    <h2 id="checkout-title">Tie off your strand</h2>
+    <ol class="review" id="review"></ol>
+    <label class="message">Gift note <span>(optional)</span><textarea id="message" maxlength="200" rows="3"></textarea></label>
+    <p class="total"><span>Total</span><span id="checkout-total"></span></p>
+    <p class="fine">Mock order. No payment or shipping details are collected.</p>
+    <button class="tie" id="confirm" type="submit">Tie the knot</button>
+  </form>
+  <section id="receipt" class="receipt" hidden>
+    <svg class="knot-draw" viewBox="0 0 120 120" aria-hidden="true"><path d="M60 8 C60 40 30 46 34 66 C38 86 76 84 80 64 C84 44 54 44 52 62 C50 80 60 92 60 112"/></svg>
+    <h2>Tied.</h2>
+    <p>Your strand is set aside. This was a mock order, so nothing was charged or sent.</p>
+    <p class="total"><span>Total</span><span id="receipt-total"></span></p>
+    <button class="tie" id="continue" type="button">Keep looking</button>
+  </section>
+</dialog>
+
+<script src="garland.js" type="module"></script>
+</body>
+</html>
