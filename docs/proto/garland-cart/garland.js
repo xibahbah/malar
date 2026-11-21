@@ -88,12 +88,11 @@ cart.subscribe(next => {
     li.dataset.bead = p.id;
     li.innerHTML = `
       <span class="stone"><img src="${p.image}" alt=""><span class="qty-badge" aria-hidden="true">${q}</span></span>
-      <div><h3>${p.name}</h3>
+      <div><div class="bead-head"><h3>${p.name}</h3><span class="line">${money(p.price * q)}</span></div>
         <div class="controls">
           <button data-id="${p.id}" data-action="less" aria-label="One fewer ${p.name}">−</button>
           <output aria-label="Quantity">${q}</output>
           <button data-id="${p.id}" data-action="more" aria-label="One more ${p.name}" ${q >= 20 ? 'disabled' : ''}>+</button>
-          <span class="line">${money(p.price * q)}</span>
           <button class="remove" data-id="${p.id}" data-action="remove" aria-label="Remove ${p.name}">Remove</button>
         </div></div>`;
     li.querySelectorAll('button').forEach(b => b.onclick = () =>

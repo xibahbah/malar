@@ -77,13 +77,12 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:4vw;padding:0 5v
   border:1px solid rgba(212,174,103,.45);display:grid;place-items:center;box-shadow:0 6px 14px rgba(0,0,0,.5)}
 .bead .stone img{width:46px;height:46px;object-fit:contain}
 .bead .qty-badge{position:absolute;right:-4px;bottom:-2px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--gold);color:#1b120c;font-size:11px;line-height:20px;text-align:center}
-.bead h3{font:400 18px/1.15 var(--serif);margin:0 0 6px}
+.bead-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 6px}.bead h3{font:400 18px/1.15 var(--serif);margin:0}.bead-head .line{font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .controls{display:flex;align-items:center;gap:6px;font-size:13px}
 .controls button{width:30px;height:30px;border-radius:50%;background:none;border:1px solid rgba(212,174,103,.4);line-height:1}
 .controls button:hover{border-color:var(--gold)}
 .controls output{min-width:1.6em;text-align:center;font-variant-numeric:tabular-nums}
-.controls .line{margin-left:auto;font-variant-numeric:tabular-nums}
-.controls .remove{width:auto;height:auto;border:0;padding:4px 0 4px 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);text-decoration:underline;text-underline-offset:3px}
+.controls .remove{margin-left:auto;width:auto;height:auto;border:0;padding:4px 0 4px 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);text-decoration:underline;text-underline-offset:3px}
 .bead.tied .stone{animation:tie .6s cubic-bezier(.2,.9,.25,1.35)}
 @keyframes tie{0%{transform:scale(.7)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
 .total{display:flex;justify-content:space-between;margin:0 0 16px;font-size:15px;font-variant-numeric:tabular-nums}
