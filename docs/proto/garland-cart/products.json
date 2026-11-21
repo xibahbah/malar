@@ -1,8 +1,1 @@
-[
-  {"id":"marigold","name":"Marigold drop earrings","detail":"Brass, freshwater pearl","material":"brass","price":4800,"currency":"USD","image":"pieces/marigold.webp"},
-  {"id":"lotus","name":"Lotus signet ring","detail":"Gold-plated brass","material":"brass","price":6500,"currency":"USD","image":"pieces/lotus.webp"},
-  {"id":"jasmine","name":"Jasmine strand necklace","detail":"Gold-plated brass","material":"brass","price":8600,"currency":"USD","image":"pieces/jasmine.webp"},
-  {"id":"vase","name":"Hand-thrown bud vase","detail":"Stoneware, amber glaze","material":"clay","price":3800,"currency":"USD","image":"pieces/vase.webp"},
-  {"id":"kolam","name":"Kolam brass tray","detail":"Etched brass, 10 in","material":"brass","price":5400,"currency":"USD","image":"pieces/kolam.webp"},
-  {"id":"basket","name":"Woven palm basket","detail":"Palm leaf, natural dye","material":"palm","price":4200,"currency":"USD","image":"pieces/basket.webp"}
-]
+[{"id":"marigold","name":"Marigold drop earrings","price":4800,"currency":"USD","crop":"15 130 350 450"},{"id":"lotus","name":"Lotus signet ring","price":6500,"currency":"USD","crop":"410 215 370 290"},{"id":"jasmine","name":"Jasmine strand necklace","price":8600,"currency":"USD","crop":"800 80 420 510"}]
