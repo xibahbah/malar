@@ -78,7 +78,7 @@ test('ending separates black, typography, and flowers; flowers develop without f
  const first=endingPose(y,top,h,0),words=endingPose(y,top,h,1300),late=endingPose(y,top,h,6000);
  assert.equal(first.dark,1);assert.equal(first.copy,0);assert.ok(blooms(0).every(x=>x===0));
  assert.equal(words.copy,1);assert.ok(blooms(1300).every(x=>x===0));
- assert.ok(blooms(6000).every(x=>x===1));assert.ok(blooms(2400)[0]>blooms(2400)[12]);
+ assert.ok(blooms(6500).every(x=>x===1));assert.ok(blooms(2400)[0]>blooms(2400)[12]);
  assert.equal(endingPose(top,top,h,6000).gate,0);
  assert.ok(endingPose(top,top,h,0).dark>0&&endingPose(top,top,h,0).dark<1);
 });
@@ -119,7 +119,7 @@ test('coast velocity is continuous across packets and frame-rate independent',as
 });
 test('picked flower springs overshoot and settle without frame-rate dependence',async()=>{
  const {springStep,stems}=await import('../docs/proto/viewing-room/botanical.js');
- assert.equal(stems.length,13);
+ assert.equal(stems.length,22);assert.equal(new Set(stems.map(s=>s[0])).size,6);
  const simulate=fps=>{let p=180,v=0,crossed=false;for(let i=0;i<fps*3;i++){const n=springStep(p,v,0,1/fps);p=n.position;v=n.velocity;if(p<0)crossed=true;}return {p,v,crossed};};
  const a=simulate(60),b=simulate(120);assert.equal(a.crossed,true);assert.ok(Math.abs(a.p)<.001);assert.ok(Math.abs(a.p-b.p)<1e-8);
 });

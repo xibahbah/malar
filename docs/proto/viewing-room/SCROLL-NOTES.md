@@ -1,4 +1,13 @@
-# Viewport fit, continuous coasting, and botanical interaction — current
+# Kerala botanical collection — current
+
+- Replaced the repeated rose/lily composition with six newly generated transparent photographic assets: Chemparathy (hibiscus), Chethi (Ixora), Mulla (jasmine), Kanikonna (Cassia fistula), Sankhupushpam (butterfly pea), and Chendumalli (Tagetes marigold). Source direction and complete prompts are in flowers/GENERATED-ASSETS.md. These are illustrative assets, not scientific identification plates.
+- Twenty-two independently animated branches create a cascading canopy, large low focal blooms, small clustered flowers, and fine connecting vines. Placement is asymmetric, with separate narrow-screen coordinates for every branch. Six WebP files total approximately 1.4 MB, retaining generated alpha.
+- Each branch receives its own tonal depth. Antique gold, dusty red, ivory, and slate indigo remain distinguishable in a muted palette. The center stays clear for typography; edge crops are contained within the ending stage.
+- Canopy flowers descend from their attachment point, side branches enter inward, and lower stems rise. Entrance is staggered at 65ms; all flowers finish by 6.2s after the timed sequence starts. Drag, spring return, and idle motion are retained.
+
+---
+
+# Previous viewport and momentum revision
 
 - Portrait cards now occupy 55vh in height, landscapes about 55vh. Narrow portrait cards use 43.75vh, leaving room for the caption and chapter heading. Objects heading spacing is reduced. Verified the vase, caption, and heading together at 1280×720, 2048×1194, and 390×844; no horizontal document overflow.
 - Wheel motion uses an analytical critically damped spring (frequency 9), retaining velocity across packets and reversal. Removed cancellation on delayed scroll events from the controller's own writes. Keyboard, pointer, modal, touch, and reduced-motion escape paths remain. Sequential browser observations show continued travel without another wheel input in both directions.

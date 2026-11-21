@@ -3,7 +3,7 @@
 const here = new URL('./', import.meta.url);
 import {layers,scrollPose,follow,clamp,smooth,endingPose} from './scroll-motion.js?v=3';
 import {createMomentum} from './momentum.js?v=2';
-import {mountBotanical} from './botanical.js?v=1';
+import {mountBotanical} from './botanical.js?v=2';
 const $ = s => document.querySelector(s);
 const money = cents => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');

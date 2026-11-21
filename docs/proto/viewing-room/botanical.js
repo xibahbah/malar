@@ -1,22 +1,32 @@
 import {clamp,smooth} from './scroll-motion.js?v=3';
 
-// A layered, asymmetrical frame. Central type remains clear of the blooms.
+// Independent silhouettes: cascading canopy, large low blooms, airy connecting vines.
+// asset, x/y/w/h (%), angle, entrance order, narrow layout, depth brightness.
 export const stems=[
- ['lily-red',-10,18,34,86,-22,0],
- ['rose-burgundy',5,23,24,88,-12,2],
- ['rose-mauve',17,51,20,65,18,4],
- ['lily-red',-5,62,32,64,27,5],
- ['rose-burgundy',29,74,18,57,-24,8],
- ['lily-red',75,22,35,88,18,1],
- ['rose-burgundy',73,44,24,84,19,3],
- ['rose-mauve',63,65,22,66,-14,6],
- ['lily-red',83,66,29,65,-27,7],
- ['rose-mauve',13,-34,23,66,168,10],
- ['rose-burgundy',42,-43,22,73,186,11],
- ['lily-red',72,-34,31,66,155,9],
- ['lily-red',-11,-31,31,74,145,12]
+ ['kanikonna-kerala',4,-29,25,85,-9,0,[-10,-15,52,53,-12],.62],
+ ['jasmine-kerala',-7,-22,28,80,122,5,[-20,-22,54,56,136],.52],
+ ['ixora-kerala',-7,4,23,69,24,8,[-25,12,52,50,18],.55],
+ ['hibiscus-kerala',-2,30,29,82,-19,2,[-30,47,68,58,-20],.76],
+ ['butterfly-pea-kerala',14,36,15,58,12,11,[-11,27,38,49,14],.62],
+ ['jasmine-kerala',-5,64,31,78,47,6,[-24,70,64,51,42],.73],
+ ['marigold-kerala',20,75,24,68,-31,3,[5,80,49,44,-29],.66],
+ ['ixora-kerala',-3,84,27,71,33,15,[-13,90,52,44,29],.63],
+ ['jasmine-kerala',31,73,25,64,-63,13,[18,89,53,46,-58],.58],
+ ['butterfly-pea-kerala',45,77,17,62,-44,17,[45,86,38,43,-35],.62],
+ ['marigold-kerala',58,70,24,72,15,4,[66,83,48,49,17],.72],
+ ['hibiscus-kerala',75,63,31,90,23,1,[72,66,64,54,20],.69],
+ ['ixora-kerala',81,31,26,74,-22,9,[79,39,49,48,-17],.7],
+ ['butterfly-pea-kerala',72,23,18,66,-8,10,[78,22,39,45,-10],.58],
+ ['jasmine-kerala',87,-11,26,80,-32,7,[83,-5,51,56,-30],.67],
+ ['kanikonna-kerala',74,-35,22,76,17,12,[66,-20,50,56,18],.54],
+ ['ixora-kerala',40,-44,22,69,152,16,[34,-39,48,53,151],.46],
+ ['marigold-kerala',25,-43,21,68,164,14,[14,-34,43,46,164],.54],
+ ['kanikonna-kerala',93,42,19,70,-15,18,[104,62,40,48,-15],.43],
+ ['hibiscus-kerala',-17,70,28,89,-58,19,[-39,91,61,58,-58],.45],
+ ['jasmine-kerala',65,88,29,78,63,20,[53,99,61,51,63],.6],
+ ['ixora-kerala',87,86,24,72,13,21,[98,97,50,49,13],.49]
 ];
-export const bloomProgress=(elapsed,order)=>smooth((elapsed-1400-order*95)/3400);
+export const bloomProgress=(elapsed,order)=>smooth((elapsed-1400-order*65)/3400);
 export function springStep(position,velocity,target,dt){
  // Analytical underdamped spring: a small overshoot, independent of frame rate.
  const omega=10,damping=5,frequency=Math.sqrt(omega*omega-damping*damping);
@@ -25,7 +35,7 @@ export function springStep(position,velocity,target,dt){
  return {position:target+decay*(x*c+b*s),velocity:decay*((-damping*x+frequency*b)*c+(-damping*b-frequency*x)*s)};
 }
 export function mountBotanical(container,base,reduced){
- container.innerHTML=stems.map(([asset,x,y,w,h,angle,order],i)=>`<div class="flower-place stem-${i}" style="--x:${x}%;--y:${y}%;--w:${w}%;--h:${h}%;--stem-angle:${angle}deg;--layer:${order%3}"><div class="flower-reveal"><img class="night-flower" src="${new URL('flowers/'+asset+'.webp',base)}" alt="" draggable="false" decoding="async"></div></div>`).join('');
+ container.innerHTML=stems.map(([asset,x,y,w,h,angle,order,mobile,light],i)=>`<div class="flower-place stem-${i}" style="--x:${x}%;--y:${y}%;--w:${w}%;--h:${h}%;--stem-angle:${angle}deg;--layer:${order%3};--growth-origin:${y<0?0:100}%;--light:${light};--mx:${mobile[0]}%;--my:${mobile[1]}%;--mw:${mobile[2]}%;--mh:${mobile[3]}%;--ma:${mobile[4]}deg"><div class="flower-reveal"><img class="night-flower" src="${new URL('flowers/'+asset+'.webp',base)}" alt="" draggable="false" decoding="async"></div></div>`).join('');
  const flowers=[...container.children].map((el,i)=>({el,img:el.querySelector('img'),i,x:0,y:0,vx:0,vy:0,lift:0,tx:0,ty:0,cx:0,cy:0}));
  let pointer=null,drag=null,stageRect=null;
  function measure(){
@@ -53,7 +63,8 @@ export function mountBotanical(container,base,reduced){
    const progress=reduced.matches?1:bloomProgress(elapsed,stems[f.i][6]);
    const visible=progress*gate;
    f.el.style.setProperty('--bloom',visible.toFixed(4));
-   f.el.style.setProperty('--enter-y',((1-progress)*95).toFixed(2)+'px');
+   f.el.style.setProperty('--enter-y',((1-progress)*(stems[f.i][2]<0?-95:95)).toFixed(2)+'px');
+   f.el.style.setProperty('--enter-x',((1-progress)*(stems[f.i][1]<20?-55:stems[f.i][1]>70?55:0)).toFixed(2)+'px');
    f.el.style.setProperty('--enter-turn',((1-progress)*(f.i%2?16:-16)).toFixed(2)+'deg');
    f.el.style.setProperty('--bloom-scale',(.76+.24*progress).toFixed(4));
    f.el.style.pointerEvents=visible>.4?'auto':'none';
