@@ -1,0 +1,8 @@
+[
+  {"id":"marigold","name":"Marigold drop earrings","spec":"Brass, freshwater pearl","price":4800,"image":"pieces/marigold.webp"},
+  {"id":"lotus","name":"Lotus signet ring","spec":"Gold-plated brass","price":6500,"image":"pieces/lotus.webp"},
+  {"id":"jasmine","name":"Jasmine strand necklace","spec":"Gold-plated brass","price":8600,"image":"pieces/jasmine.webp"},
+  {"id":"vase","name":"Hand-thrown bud vase","spec":"Stoneware, amber glaze","price":3800,"image":"pieces/vase.webp"},
+  {"id":"kolam","name":"Kolam brass tray","spec":"Etched brass, 10 in","price":5400,"image":"pieces/kolam.webp"},
+  {"id":"basket","name":"Woven palm basket","spec":"Palm leaf, natural dye","price":4200,"image":"pieces/basket.webp"}
+]

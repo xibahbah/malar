@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#21150e">
+<base href="../../">
+<title>Malar — Viewing room</title>
+<link rel="stylesheet" href="proto/viewing-room/room.css?v=1">
+<!-- The homepage's own relief engine, unmodified. -->
+<script src="garden.js?v=ambient-viewing-room" defer></script>
+<script type="module" src="proto/viewing-room/room.js?v=1"></script>
+</head>
+<body class="ambient-landing">
+
+<header class="bar">
+  <a class="mark" href="./">malar</a>
+  <button id="menu" class="bag-button" aria-haspopup="dialog" aria-controls="bag">Bag <span id="bag-count">0</span></button>
+</header>
+<button id="sound" hidden aria-pressed="false">Sound off</button>
+
+<main>
+  <section class="stage" id="garden" aria-label="The collection">
+    <div class="hero"><canvas aria-hidden="true"></canvas></div>
+    <span class="wordmark-latin" hidden></span>
+    <div class="room" id="room"></div>
+  </section>
+</main>
+
+<nav class="index" id="index" aria-label="Pieces"></nav>
+
+<dialog id="bag" aria-labelledby="bag-title">
+  <div class="bag-head">
+    <h2 id="bag-title">Bag</h2>
+    <button type="button" id="bag-close" class="plain">Close</button>
+  </div>
+  <ul id="bag-lines"></ul>
+  <p class="bag-total"><span>Total</span><span id="bag-total">$0</span></p>
+  <button type="button" id="bag-checkout" class="solid">Checkout</button>
+  <p id="bag-note" class="bag-note" role="status"></p>
+</dialog>
+
+</body>
+</html>
