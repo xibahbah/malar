@@ -81,7 +81,8 @@ function renderBag() {
   if (!count()) {
     const li = document.createElement('li');
     li.className = 'empty';
-    li.textContent = 'Your bag is empty.';
+    li.innerHTML = '<p>Your bag is empty.</p><button type="button" class="bag-continue">Continue</button>';
+    li.querySelector('button').onclick = () => bag.close();
     lines.append(li);
   }
   for (const p of products) {
@@ -91,7 +92,7 @@ function renderBag() {
     if (!q) continue;
     const li = document.createElement('li');
     li.innerHTML = `
-      ${p.gift?`<div class="bag-gift-mirror" aria-hidden="true"><span>malar</span><strong>${money(p.price)}</strong></div>`:`<div class="bag-object"><img src="${p.image}" alt=""></div>`}
+      <img class="bag-thumbnail${p.gift ? ' bag-gift-image' : ''}" src="${p.image}" alt="">
       <span class="name">${p.name}</span>
       <span class="line">${money(p.price * q)}</span>
       <span class="qty">
@@ -106,8 +107,18 @@ function renderBag() {
   }
   if(focused){const next=[...lines.querySelectorAll('button')].find(b=>b.getAttribute('aria-label')===focused);(next||lines.querySelector('button')||$('#bag-close')).focus({preventScroll:true});}
 }
-$('#bag-open').onclick = () => { note.textContent = ''; bag.showModal(); };
+$('#bag-open').onclick = openBag;
 $('#bag-close').onclick = () => bag.close();
+bag.addEventListener('keydown', e => {
+  if (e.key !== 'Tab') return;
+  const controls = [...bag.querySelectorAll('button:not(:disabled),a[href]')].filter(el => el.getClientRects().length);
+  const first = controls[0], last = controls.at(-1);
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault(); last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault(); first.focus();
+  }
+});
 bag.addEventListener('click', e => { const r=bag.getBoundingClientRect();if(e.target===bag&&(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom))bag.close(); });
 checkout.onclick = () => {
   // TODO: payment provider. Until then this is a mock and says so.
@@ -128,7 +139,7 @@ room.insertAdjacentHTML('beforeend', `<section class="night-garden" id="night-ga
   </div><div class="night-copy"><p class="night-eyebrow">Malar · A small studio</p><h2 id="night-title">Malar means flower.</h2><a data-scroll="collection" href="#collection">Back to the collection</a></div>
   <div class="night-note"><span>Handmade jewelry &amp; objects</span><button type="button" data-open-bag>Bag · ${count()}</button></div></div>
 </section>`);
-function openBag(){document.querySelector('#garden-menu')?.close();note.textContent='';bag.showModal();}
+function openBag(){document.querySelector('#garden-menu')?.close();note.textContent='';bag.showModal();$('#bag-close').focus({preventScroll:true});}
 document.querySelectorAll('[data-open-bag]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();openBag();}));
 document.querySelectorAll('[data-scroll]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();document.querySelector('#garden-menu')?.close();const destination=document.getElementById(el.dataset.scroll);if(destination)momentum.go(scrollY+destination.getBoundingClientRect().top-110);}));
 

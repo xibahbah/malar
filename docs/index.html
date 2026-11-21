@@ -40,9 +40,10 @@
 <link rel="stylesheet" href="garden.css?v=title-shadow">
 <link rel="stylesheet" href="proto/viewing-room/room.css?v=10">
 <link rel="stylesheet" href="proto/viewing-room/metal.css?v=1">
+<link rel="stylesheet" href="proto/viewing-room/bag.css?v=1">
 <!-- Original relief and lighting, with a separate background scroll rate. -->
 <script src="garden.js?v=continuous-scroll-2" defer></script>
-<script type="module" src="proto/viewing-room/room.js?v=11"></script>
+<script type="module" src="proto/viewing-room/room.js?v=12"></script>
 </head>
 <body class="ambient-landing viewing-room">
 <div id="garden-loader" role="progressbar" aria-label="Loading the garden" aria-valuemin="1" aria-valuemax="100" aria-valuenow="1"><span class="garden-loader-number" aria-hidden="true">1</span></div>
@@ -94,14 +95,17 @@
 
 
 <dialog id="bag" aria-labelledby="bag-title">
-  <div class="bag-head">
-    <div><p class="bag-eyebrow">Malar · Your collection</p><h2 id="bag-title">Bag</h2></div>
-    <button type="button" id="bag-close" class="plain">Close</button>
-  </div>
-  <ul id="bag-lines"></ul>
-  <p class="bag-total"><span>Total</span><span id="bag-total">$0</span></p>
-  <button type="button" id="bag-checkout" class="solid">Demo checkout</button>
-  <p id="bag-note" class="bag-note" role="status"></p>
+  <header class="bag-head">
+    <h2 id="bag-title">Bag</h2>
+    <button type="button" id="bag-close" autofocus>Close</button>
+  </header>
+  <ul id="bag-lines" aria-label="Items in your bag"></ul>
+  <footer class="bag-footer">
+    <p class="bag-total"><span>Total</span><span id="bag-total" aria-live="polite">$0</span></p>
+    <button type="button" id="bag-checkout">Checkout</button>
+    <p class="bag-disclaimer">Demo checkout. Nothing is charged.</p>
+    <p id="bag-note" class="bag-note" role="status"></p>
+  </footer>
 </dialog>
 
 </body>

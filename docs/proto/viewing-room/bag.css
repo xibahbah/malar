@@ -1,0 +1,41 @@
+/* Bag only. MalarEditorial is the local Cormorant face; MalarText is Manrope. */
+.viewing-room #bag{
+  box-sizing:border-box;position:fixed;inset:0 0 0 auto;margin:0;
+  width:min(440px,100vw);height:100dvh;max-width:100vw;max-height:100dvh;
+  padding:32px;border:0;border-left:1px solid rgba(201,163,92,.45);
+  background:#140e0a;color:#efe3cc;box-shadow:none;overflow:hidden;
+  font-family:MalarText;grid-template-rows:auto minmax(0,1fr) auto;gap:0;align-content:stretch;
+}
+.viewing-room #bag[open]{display:grid;animation:bag-slide-in 400ms cubic-bezier(.22,.61,.36,1)}
+#bag::backdrop{background:rgba(10,6,3,.6);backdrop-filter:none}
+#bag *,#bag *::before,#bag *::after{box-sizing:border-box;min-width:0}
+#bag button{font-family:MalarText;color:#efe3cc;background:transparent;border:0;border-radius:0;box-shadow:none;text-shadow:none;cursor:pointer}
+#bag :focus-visible{outline:1px solid #c9a35c;outline-offset:3px}
+#bag .bag-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0;padding:0 0 24px}
+#bag .bag-head h2{margin:0;font:400 40px/1 MalarEditorial;letter-spacing:0}
+#bag #bag-close{flex:none;padding:10px 0 10px 10px;font:400 12px/1.5 MalarText;letter-spacing:.16em;text-transform:uppercase}
+#bag #bag-lines{min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#c9a35c #140e0a;margin:0;padding:0 4px 0 0;list-style:none}
+#bag #bag-lines li{display:grid;grid-template-columns:56px minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;gap:6px 12px;padding:20px 0;border:0;border-top:1px solid rgba(239,227,204,.12);box-shadow:none}
+#bag #bag-lines .bag-thumbnail{grid-column:1;grid-row:1/3;display:block;width:56px;height:64px;object-fit:contain;border:0;border-radius:0;filter:none;background:none;box-shadow:none}
+#bag #bag-lines .bag-gift-image{height:56px;object-fit:contain}
+#bag #bag-lines .name{grid-column:2;grid-row:1;font:400 22px/1.12 MalarEditorial;overflow-wrap:anywhere;color:#efe3cc}
+#bag #bag-lines .line{grid-column:3;grid-row:1;justify-self:end;font:400 20px/1.2 MalarEditorial;font-variant-numeric:tabular-nums;color:#efe3cc}
+#bag #bag-lines .qty{grid-column:2;grid-row:2;display:flex;align-items:center;gap:4px;font:400 12px/1 MalarText;font-variant-numeric:tabular-nums;color:#efe3cc}
+#bag #bag-lines .qty button{width:32px;height:32px;padding:0;flex:none;border:0;border-radius:0;background:transparent;box-shadow:none;font-size:18px;line-height:1}
+#bag #bag-lines .qty button:hover{color:#c9a35c}
+#bag #bag-lines .remove{grid-column:3;grid-row:2;justify-self:end;padding:8px 0;font:400 11px/1.5 MalarText;letter-spacing:0;text-transform:uppercase;color:#b9a88c;text-decoration:none}
+#bag #bag-lines .remove:hover,#bag .bag-continue:hover{text-decoration:underline;text-underline-offset:4px}
+#bag #bag-lines .empty{display:block;border:0;padding:20px 0;color:#b9a88c;font:400 22px/1.4 MalarEditorial}
+#bag .empty p{margin:0 0 12px}
+#bag .bag-continue{padding:8px 0;font:400 12px/1.5 MalarText;text-decoration:underline;text-underline-offset:4px}
+#bag .bag-footer{min-width:0;margin:0;padding-top:22px;border-top:1px solid rgba(201,163,92,.45)}
+#bag .bag-total{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 20px;padding:0;border:0;background:none;box-shadow:none}
+#bag .bag-total span:first-child{font:400 12px/1.5 MalarText;letter-spacing:.16em;text-transform:uppercase;color:#b9a88c}
+#bag .bag-total #bag-total{font:400 34px/1 MalarEditorial;font-variant-numeric:tabular-nums;color:#efe3cc}
+#bag #bag-checkout{width:100%;height:56px;padding:0 12px;border:1px solid #c9a35c;background:transparent;color:#efe3cc;font:400 12px/1.5 MalarText;letter-spacing:.2em;text-transform:uppercase;filter:none;transition:background-color 200ms,color 200ms}
+#bag #bag-checkout:hover:not(:disabled){background:#c9a35c;color:#140e0a}
+#bag #bag-checkout:disabled{cursor:not-allowed;opacity:.5}
+#bag .bag-disclaimer,#bag #bag-note{margin:12px 0 0;min-height:0;font:400 12px/1.5 MalarText;color:#b9a88c}
+#bag #bag-note:empty{display:none}
+@keyframes bag-slide-in{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){.viewing-room #bag[open]{animation:none}#bag #bag-checkout{transition:none}}
