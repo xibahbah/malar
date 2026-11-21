@@ -38,12 +38,12 @@
   });
 </script>
 <link rel="stylesheet" href="garden.css?v=title-shadow">
-<link rel="stylesheet" href="proto/viewing-room/room.css?v=12">
+<link rel="stylesheet" href="proto/viewing-room/room.css?v=13">
 <link rel="stylesheet" href="proto/viewing-room/metal.css?v=3">
-<link rel="stylesheet" href="proto/viewing-room/bag.css?v=5">
+<link rel="stylesheet" href="proto/viewing-room/bag.css?v=6">
 <!-- Original relief and lighting, with a separate background scroll rate. -->
 <script src="garden.js?v=gallery-3" defer></script>
-<script type="module" src="proto/viewing-room/room.js?v=17"></script>
+<script type="module" src="proto/viewing-room/room.js?v=18"></script>
 </head>
 <body class="ambient-landing viewing-room">
 <div id="garden-loader" role="progressbar" aria-label="Loading the garden" aria-valuemin="1" aria-valuemax="100" aria-valuenow="1"><span class="garden-loader-number" aria-hidden="true">1</span></div>
@@ -52,7 +52,16 @@
   <a class="mark" href="./" aria-label="Malar home">malar</a>
   <button id="collection-toggle" type="button" aria-controls="collection-index" aria-expanded="false" aria-label="Open collection index" hidden>Index</button>
   <button id="bag-open" class="bag-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="bag">Bag <span id="bag-count">0</span></button>
-  <button id="menu" aria-controls="bag" aria-expanded="false" aria-haspopup="dialog">Menu <i aria-hidden="true"></i></button>
+  <div class="menu-disclosure">
+    <button id="menu" type="button" aria-controls="site-links" aria-expanded="false">Menu <i aria-hidden="true"></i></button>
+    <nav id="site-links" aria-label="Main" hidden>
+      <a data-scroll="garden" href="#garden">The Garden</a>
+      <a data-scroll="collection" href="#collection">Jewelry</a>
+      <a data-scroll="crafts" href="#crafts">Objects</a>
+      <a data-scroll="studio" href="#studio">Story</a>
+      <a data-scroll="gift" href="#gift">Gift cards</a>
+    </nav>
+  </div>
 </header>
 <button id="sound" hidden aria-pressed="false">Sound off</button>
 
@@ -73,14 +82,6 @@
     <h2 id="bag-title">Bag</h2>
     <button type="button" id="bag-close" autofocus>Close</button>
   </header>
-  <nav class="drawer-nav" aria-label="Main" hidden>
-    <a data-scroll="garden" href="#garden">The Garden</a>
-    <a data-scroll="collection" href="#collection">Jewelry</a>
-    <a data-scroll="crafts" href="#crafts">Objects</a>
-    <a data-scroll="studio" href="#studio">Story</a>
-    <a data-scroll="gift" href="#gift">Gift cards</a>
-    <button type="button" data-open-bag>Bag <span class="nav-bag-count"></span></button>
-  </nav>
   <ul id="bag-lines" aria-label="Items in your bag"></ul>
   <footer class="bag-footer">
     <p class="bag-total"><span>Total</span><span id="bag-total" aria-live="polite">$0</span></p>

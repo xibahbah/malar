@@ -8,7 +8,7 @@ Native document scrolling owns wheel and trackpad inertia. During ordinary scrol
 
 A fast sustained gesture pulls the existing collection back around the viewport center. The same six pictures and their spacing scale together. As the pictures approach their index positions, linked product names appear between them. The Index button keeps the overview open. Choosing a piece moves its thumbnail to the reading point before it expands and receives keyboard focus. Touch and reduced-motion layouts use native scroll and a static version of the same menu.
 
-The scroll-triggered overview returns to reading size after significant scrolling subsides. Pointer movement over a row does not pin it. All six rows fit between the header and the viewport bottom. The Menu and Bag share a flat, matte patina-green panel.
+The scroll-triggered overview returns to reading size after significant scrolling subsides. Moving the pointer toward the central thumbnails or names holds the overview while choosing. Leaving that area or starting a fresh scroll releases it. All six rows fit between the header and the viewport bottom. Menu discloses five text links directly below its trigger. Bag opens separately as a compact panel sized to its contents.
 
 ---
 

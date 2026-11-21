@@ -4,7 +4,7 @@ const here = new URL('./', import.meta.url);
 import {layers,scrollPose,follow,clamp,smooth,endingPose} from './scroll-motion.js?v=3';
 import {createMomentum} from './momentum.js?v=4';
 import {mountGiftCard,giftCardMarkup} from './metal.js?v=3';
-import {mountCollectionCamera} from './collection-camera.js?v=4';
+import {mountCollectionCamera} from './collection-camera.js?v=5';
 import {mountBotanical} from './botanical.js?v=3';
 const $ = s => document.querySelector(s);
 const money = cents => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
@@ -73,13 +73,12 @@ const seen = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(el => seen.observe(el));
 
 /* ---------- bag drawer ---------- */
-const bar = $('.bar'), nav = $('.drawer-nav');
+const bar = $('.bar'), menu = $('#menu'), nav = $('#site-links');
 let drawerTrigger = null;
 const bag = $('#bag'), lines = $('#bag-lines'), note = $('#bag-note'), checkout = $('#bag-checkout');
 function renderBag() {
   const focused = lines.contains(document.activeElement) ? document.activeElement.getAttribute('aria-label') : null;
   $('#bag-count').textContent = count();
-  nav.querySelector('.nav-bag-count').textContent = count();
   document.querySelectorAll('.night-note [data-open-bag]').forEach(el=>el.textContent='Bag · '+count());
   $('#bag-total').textContent = money(total());
   checkout.disabled = !count();
@@ -113,31 +112,48 @@ function renderBag() {
   }
   if(focused){const next=[...lines.querySelectorAll('button')].find(b=>b.getAttribute('aria-label')===focused);(next||lines.querySelector('button')||$('#bag-close')).focus({preventScroll:true});}
 }
-function openDrawer(view, trigger) {
-  const menuView = view === 'Menu';
+function setMenu(open, restoreFocus = false) {
+  nav.hidden = !open;
+  menu.setAttribute('aria-expanded', String(open));
+  if (restoreFocus) menu.focus({preventScroll:true});
+}
+menu.addEventListener('click', () => {
+  if (nav.hidden) {
+    camera.dismiss();
+    momentum.stop();
+  }
+  setMenu(nav.hidden);
+});
+document.addEventListener('pointerdown', e => {
+  if (!nav.hidden && !menu.parentElement.contains(e.target)) setMenu(false);
+});
+menu.parentElement.addEventListener('focusout', e => {
+  if (!menu.parentElement.contains(e.relatedTarget)) setMenu(false);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !nav.hidden) {
+    e.preventDefault();
+    setMenu(false, true);
+  }
+});
+function openBag(trigger) {
+  setMenu(false);
   camera.dismiss();
   momentum.stop();
   if (!bag.open) drawerTrigger = trigger;
   note.textContent = '';
-  nav.hidden = !menuView;
-  lines.hidden = menuView;
-  bag.querySelector('.bag-footer').hidden = menuView;
-  $('#bag-title').textContent = view;
-  $('#menu').setAttribute('aria-expanded', String(menuView));
-  $('#bag-open').setAttribute('aria-expanded', String(!menuView));
+  $('#bag-open').setAttribute('aria-expanded', 'true');
   if (!bag.open) bag.showModal();
   $('#bag-close').focus({preventScroll:true});
 }
 function addItem(id, trigger) {
   const quantity = items[id] || 0;
   if (quantity < 20) setQty(id, quantity + 1);
-  openDrawer('Bag', trigger);
+  openBag(trigger);
   return quantity < 20;
 }
-$('#menu').onclick = e => openDrawer('Menu', e.currentTarget);
-$('#bag-open').onclick = e => openDrawer('Bag', e.currentTarget);
+$('#bag-open').onclick = e => openBag(e.currentTarget);
 bag.addEventListener('close', () => {
-  $('#menu').setAttribute('aria-expanded', 'false');
   $('#bag-open').setAttribute('aria-expanded', 'false');
   drawerTrigger?.focus({preventScroll:true});
   drawerTrigger = null;
@@ -177,7 +193,7 @@ room.insertAdjacentHTML('beforeend', `<section class="night-garden" id="night-ga
 </section>`);
 document.querySelectorAll('[data-open-bag]').forEach(el => el.addEventListener('click', e => {
   e.preventDefault();
-  openDrawer('Bag', el);
+  openBag(el);
 }));
 function goToSection(id) {
   const destination = document.getElementById(id);
@@ -186,6 +202,7 @@ function goToSection(id) {
 document.querySelectorAll('[data-scroll]').forEach(el => el.addEventListener('click', e => {
   e.preventDefault();
   if (bag.open) bag.close();
+  if (!nav.hidden) setMenu(false, nav.contains(document.activeElement));
   goToSection(el.dataset.scroll);
 }));
 
@@ -295,7 +312,7 @@ const dimensions=new ResizeObserver(measure);
 dimensions.observe(content);dimensions.observe(room);
 document.fonts.ready.then(measure);measure();
 const initialId=location.hash.slice(1);
-if(initialId==='bag')openDrawer('Bag',$('#bag-open'));
+if(initialId==='bag')openBag($('#bag-open'));
 else if(initialId && document.getElementById(initialId)){
  const section=document.getElementById(initialId);
  const anchor=section.matches('.piece') ? section.querySelector('.plate') : section;

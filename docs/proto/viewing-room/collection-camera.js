@@ -87,6 +87,39 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
   let mode = 'detail', selected = -1, focusList = false, focusingPiece = false;
   let directInput = false, wasNavigating = false, zoomStyles = false;
   let previousTransform = '', activeChapter = -1;
+  let aiming = false, pointerX = null, pointerY = null, lastWheelAt = -Infinity;
+  const readingTime = 1450;
+
+  function releasePointer(now) {
+    if (!aiming) return;
+    aiming = false;
+    holdUntil = now + 650;
+    wake();
+  }
+
+  // A stationary cursor can have a link scroll underneath it. Only physical
+  // movement into the pictures and titles should suspend automatic return.
+  window.addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
+    const dx = pointerX === null ? e.movementX : e.clientX - pointerX;
+    const dy = pointerY === null ? e.movementY : e.clientY - pointerY;
+    if (pointerX !== null && Math.hypot(dx, dy) < 4) return;
+    pointerX = e.clientX;
+    pointerY = e.clientY;
+    if (!enabled || (mode !== 'glance' && mode !== 'return')) return;
+    const inside = pointerX >= width * .17 && pointerX <= width * .83 &&
+      pointerY >= indexTop && pointerY <= indexTop + chapters.length * rowHeight;
+    if (!inside) { releasePointer(performance.now()); return; }
+    if (Math.hypot(dx, dy) >= 4 && (mode === 'glance' || zoom > .62)) {
+      aiming = true;
+      mode = 'glance';
+      wake();
+    }
+  }, {passive:true});
+  window.addEventListener('pointerout', e => {
+    if (!e.relatedTarget) { pointerX = pointerY = null; releasePointer(performance.now()); }
+  });
+  window.addEventListener('blur', () => releasePointer(performance.now()));
 
   function atCollection(center, margin = .47) {
     return center >= centers[0] - height * margin && center <= centers.at(-1) + height * margin;
@@ -167,7 +200,7 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
       }
     }
     const open = mode === 'glance' || mode === 'browse';
-    setInterface(open, open && view.labels > .2);
+    setInterface(open, (open || mode === 'return') && view.labels > .2);
   }
 
   function focusSelected() {
@@ -180,6 +213,7 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
 
   function snap(y) {
     mode = 'detail';
+    aiming = false;
     selected = -1;
     focusList = false;
     zoom = zoomVelocity = sweep = panVelocity = time = 0;
@@ -224,6 +258,7 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
   function dismiss(restoreFocus = false) {
     if (mode === 'detail' && !zoom) return;
     mode = 'detail';
+    aiming = false;
     selected = -1;
     focusList = false;
     sweep = 0;
@@ -271,7 +306,7 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
   });
 
   toggle.addEventListener('click', e => {
-    if (mode !== 'detail') { dismiss(true); return; }
+    if (mode !== 'detail' && mode !== 'return') { dismiss(true); return; }
     stopNavigation();
     mode = 'browse';
     focusList = e.detail === 0;
@@ -331,14 +366,15 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
     if (mode === 'detail' && selected < 0 && !direct && delta && Math.abs(sweep) > height * .86 &&
         (atCollection(position + height / 2) || atCollection(target + height / 2))) {
       mode = 'glance';
+      aiming = false;
       enteredAt = now;
-      holdUntil = now + 1000;
+      holdUntil = now + readingTime;
     }
     // Let the small native inertia tail play out without renewing the overview.
     if (mode === 'glance' && Math.abs(delta) > height * .00028 * Math.min(elapsed, 50)) {
-      holdUntil = now + 1000;
+      holdUntil = now + readingTime;
     }
-    if (mode === 'glance' && now >= holdUntil) mode = 'detail';
+    if (mode === 'glance' && !aiming && now >= holdUntil) mode = 'return';
     if ((mode === 'browse' || (mode === 'glance' && now - enteredAt > 500)) &&
         delta && !atCollection(target + height / 2, 1.05)) dismiss();
     if (navigating && mode !== 'detail') dismiss();
@@ -352,10 +388,11 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
         position = target; panVelocity = 0;
       }
       if (mode === 'select' && Math.abs(target - position) < height * .14) mode = 'detail';
-      const goal = mode === 'detail' ? 0 : 1;
+      const goal = mode === 'detail' || mode === 'return' ? 0 : 1;
       const lens = advanceZoom(zoom, zoomVelocity, goal, dt);
       zoom = lens.position;
       zoomVelocity = lens.velocity;
+      if (!zoom && mode === 'return') mode = 'detail';
     } else {
       const before = position;
       position = direct ? target : advanceCamera(position, lastTarget, target, elapsed, height);
@@ -364,13 +401,17 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
     lastTarget = target;
     paintProjection();
     if (!zoom && mode === 'detail' && selected >= 0 && position === target) focusSelected();
-    const moving = position !== target || (mode === 'detail' ? zoom > 0 : zoom < 1) || mode === 'glance' || mode === 'select';
+    const moving = position !== target || (mode === 'detail' ? zoom > 0 : zoom < 1) || (mode === 'glance' && !aiming) || mode === 'return' || mode === 'select';
     return {y:y-target+position, moving, detail:1 - smooth(zoom / .8)};
   }
 
   addEventListener('wheel', e => {
     if (!e.ctrlKey && Math.abs(e.deltaY) >= Math.abs(e.deltaX)) {
       directInput = false;
+      if (pointerX === null) { pointerX = e.clientX; pointerY = e.clientY; }
+      const now = performance.now();
+      if (Math.abs(e.deltaY) >= 2 && now - lastWheelAt > 160) releasePointer(now);
+      lastWheelAt = now;
       if (selected >= 0) { selected = -1; mode = 'detail'; }
     }
   }, {passive:true});

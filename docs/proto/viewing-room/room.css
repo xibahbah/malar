@@ -167,6 +167,8 @@ a{color:inherit;text-decoration:none}
   color:var(--ink);text-decoration:none;text-align:center;letter-spacing:-.035em;
   font:400 clamp(25px,3vw,52px)/1.1 var(--serif)
 }
+.with-camera .chapter-index a{width:66%;margin-inline:auto;padding-inline:0}
+.with-camera .chapter-index a span{max-width:52%}
 .chapter-index:not([inert]) a{pointer-events:auto}
 .chapter-index a span{max-width:44%;opacity:var(--emphasis,1);transition:opacity 140ms}
 .chapter-index a:is(:hover,:focus-visible) span{opacity:1;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.15em}
