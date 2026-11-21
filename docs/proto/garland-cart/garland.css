@@ -44,13 +44,13 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:4vw;padding:0 5v
   -webkit-mask:linear-gradient(transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(transparent,#000 8%,#000 92%,transparent)}
 #load{grid-column:1/-1;text-align:center}
 .piece{grid-column:1/-1;display:grid;grid-template-columns:subgrid;align-items:center}
-.pendant{grid-column:2;position:relative;display:flex;flex-direction:column;align-items:center;transform-origin:50% 0;
+.pendant{grid-column:2;grid-row:1;position:relative;display:flex;flex-direction:column;align-items:center;transform-origin:50% 0;
   transform:rotate(var(--swing,0deg));will-change:transform}
 .knot{width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f3d898,#a57f42 60%,#5c4322);box-shadow:0 0 0 3px rgba(27,18,12,.9),0 2px 6px #000}
 .drop{width:1px;height:34px;background:linear-gradient(var(--gold),var(--gold-deep))}
 .pendant img{display:block;max-width:100%;height:clamp(200px,28vh,300px);width:auto;object-fit:contain;
   filter:brightness(var(--lit,.8)) drop-shadow(var(--sx,6px) var(--sy,14px) 14px rgba(0,0,0,.6));transition:filter .2s linear}
-.label{align-self:center;max-width:22em}
+.label{grid-row:1;align-self:center;max-width:22em}
 .piece:nth-child(odd) .label{grid-column:1;text-align:right;padding-right:40px;justify-self:end}
 .piece:nth-child(even) .label{grid-column:3;text-align:left;padding-left:40px;justify-self:start}
 .label h2{font:400 clamp(26px,2.3vw,40px)/1.05 var(--serif);margin:0 0 8px}
@@ -129,9 +129,9 @@ dialog h2{font:400 40px/1 var(--serif);margin:0 0 24px}
   main{grid-template-columns:1fr;padding:0 0 140px}
   .intro{padding:4vh 6vw 6vh}
   .hang{grid-template-columns:1fr;row-gap:9vh;--hang:100%}
-  .pendant{grid-column:1}
+  .pendant{grid-column:1;grid-row:1}
   .pendant img{height:clamp(180px,34vh,260px);max-width:78vw}
-  .piece .label,.piece:nth-child(odd) .label,.piece:nth-child(even) .label{grid-column:1;justify-self:center;text-align:center;padding:18px 22px;margin-top:-4vh;
+  .piece .label,.piece:nth-child(odd) .label,.piece:nth-child(even) .label{grid-column:1;grid-row:2;justify-self:center;text-align:center;padding:18px 22px;margin-top:-4vh;
     background:rgba(22,14,9,.88);border:1px solid rgba(212,174,103,.3);position:relative;z-index:1}
   .strand-panel{position:relative;top:auto;margin:0 5vw}
   .strand{max-height:none}
