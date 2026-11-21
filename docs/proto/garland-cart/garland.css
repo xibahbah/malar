@@ -51,7 +51,7 @@ button:focus-visible,a:focus-visible,textarea:focus-visible{outline:1px solid va
 .piece:nth-child(odd) .label{grid-column:1;text-align:right;padding-right:40px;justify-self:end}
 .piece:nth-child(even) .label{grid-column:3;text-align:left;padding-left:40px;justify-self:start}
 .label h2{font:400 clamp(26px,2.3vw,40px)/1.05 var(--serif);margin:0 0 8px}
-.label .detail{margin:0;color:var(--ink-dim);font-size:13px}
+.label .spec{margin:0;color:var(--ink-dim);font-size:13px}
 .label .price{display:block;margin:14px 0 18px;font-size:16px;font-variant-numeric:tabular-nums}
 .add{display:inline-flex;align-items:center;gap:10px;background:none;border:1px solid rgba(212,174,103,.55);border-radius:999px;padding:10px 20px;white-space:nowrap;
   font-size:12px;letter-spacing:.12em;text-transform:uppercase;transition:background .25s,border-color .25s}
@@ -60,7 +60,7 @@ button:focus-visible,a:focus-visible,textarea:focus-visible{outline:1px solid va
 .on{display:block;margin-top:10px;font-size:12px;color:var(--gold);min-height:1.6em}
 
 /* The strand: your cart, drawn as a hanging garland. */
-.strand-panel{position:sticky;top:24px;margin-top:22vh;padding:28px 24px;background:rgba(22,14,9,.72);border:1px solid rgba(212,174,103,.22);
+.strand-panel{position:sticky;top:92px;margin-top:22vh;padding:28px 24px;background:rgba(22,14,9,.72);border:1px solid rgba(212,174,103,.22);
   -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .strand-head{display:flex;align-items:baseline;justify-content:space-between}
 .strand-head h2{font:400 30px/1 var(--serif);margin:0}

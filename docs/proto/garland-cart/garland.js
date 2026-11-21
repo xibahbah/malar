@@ -42,7 +42,7 @@ for (const p of products) {
     <div class="label">
       <p class="kicker">${p.material}</p>
       <h2>${p.name}</h2>
-      <p class="detail">${p.detail}</p>
+      <p class="spec">${p.detail}</p>
       <span class="price">${money(p.price)}</span>
       <button class="add" data-add="${p.id}" aria-describedby="on-${p.id}">Add to strand</button>
       <span class="on" id="on-${p.id}"></span>
