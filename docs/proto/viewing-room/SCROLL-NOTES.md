@@ -1,3 +1,26 @@
+# Motion revision — 2026-11-21 (current)
+
+This revision supersedes the independent-caption rates and native-wheel decision below.
+
+## Fresh reference inspection
+The reference now loaded successfully in the local browser. Captured 42 screenshots through opening, multiple project/image-caption groups, short increments, fast forward/reverse input, long black interval, and botanical footer. Consecutive screenshots after the same wheel input visibly continue moving. In the David Whyte sequence the image and its paragraph advance together with only a modest relative gap change. The ending has a substantial empty black interval; returning to the footer also reveals continued botanical motion without another wheel event. Screenshot sampling is not frame-exact instrumentation; the chosen values below are our art direction, not recovered reference constants.
+
+## Current behavior
+- Each card and caption shares one rate and the same settling constant. Relative caption parallax is bounded to 14px; hover adds at most 8px card lift. Removed delayed caption blur so fast passes show the whole chapter.
+- Six foreground rates: 1.18, 1.32, 1.24, 1.38, 1.21, 1.29; wall remains 0.24 on desktop. Chapter columns are inset and limited to 1440px, with different portrait/landscape proportions.
+- Fine-pointer wheel input drives real document scrolling with a 260ms exponential time constant. Stopping input leaves a decaying coast; reversing direction immediately discards the previous forward target. Touch remains native. Keyboard, scrollbar and modal interaction release the controller. Reduced motion bypasses it.
+- Ending is 280svh (260svh narrow). Wall darkens over 145vh. Once black, typography fades in over 950ms; flowers start after 1450ms, stagger 350ms and develop over 3200ms independently of further scrolling. Reverse travel fades the sequence out and resets before reentry.
+- Existing transparent flowers are smaller and less saturated, with a clear central type area and containment inside the ending stage. Individual mouse repulsion and slow return combine with low-amplitude idle sway. No new generated asset was required.
+- No verified MALAR contact email exists in this checkout. The ending retains brand copy rather than copying the reference's email or inventing a destination.
+- Corrected legacy #studio/#gift/#crafts style leakage affecting chapter layout. Open dialogs lock the underlying document.
+
+## Verification
+- Seven Node checks: distinct depth rates, crossing continuity/reversal, frame-rate-independent easing, no-WebGL fallback, bounded caption attachment during reversal, autonomous ending sequence, and wheel coasting/reversal/keyboard/dialog release.
+- Local browser: desktop 1280×720 and narrow 390×844; document width equals viewport at both. Original relief/hero loads; all six product images load. Repeated forward/reverse scroll, black-only → text-only → flowers, flower pointer response, return link, menu Story navigation, add/remove and bag open/close checked. No captured console warnings/errors.
+- Physical touch-device performance and OS reduced-motion visual behavior are not measured; reduced-motion logic is implemented and pure/fallback paths are covered. Product photography and checkout remain the existing demo.
+
+---
+
 # Continuous homepage — decision record
 
 ## Earlier reference observation (previous implementation)

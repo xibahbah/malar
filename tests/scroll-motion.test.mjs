@@ -55,3 +55,53 @@ test('the no-WebGL fallback handles desktop, narrow and reduced-motion settings'
   if(reduced)assert.equal(wallPosition,0);else assert.ok(wallPosition>0 && wallPosition<100);
  }
 });
+
+test('captions stay attached throughout fast forward/reverse scroll and settling',()=>{
+ for(const layer of layers){
+  let card=0,text=0;
+  for(const y of [0,500,1500,2300,900,1700,0]){
+   const target=scrollPose(layer,y,1400,900,600);
+   for(let n=0;n<45;n++){
+    card=follow(card,target.travel,1000/60,layer.settle);
+    text=follow(text,target.textTravel,1000/60,layer.settle);
+    assert.ok(Math.abs(card-text)<=14.00001);
+   }
+  }
+ }
+});
+
+test('ending separates black, typography, and flowers; flowers develop without further scroll',async()=>{
+ const {endingPose}=await import('../docs/proto/viewing-room/scroll-motion.js');
+ const top=6000,h=1000,y=top+h;
+ const first=endingPose(y,top,h,0),words=endingPose(y,top,h,1300),late=endingPose(y,top,h,6000);
+ assert.equal(first.dark,1);assert.equal(first.copy,0);assert.deepEqual(first.flowers,[0,0,0]);
+ assert.equal(words.copy,1);assert.deepEqual(words.flowers,[0,0,0]);
+ assert.deepEqual(late.flowers,[1,1,1]);
+ assert.equal(endingPose(top,top,h,6000).gate,0);
+ assert.ok(endingPose(top,top,h,0).dark>0&&endingPose(top,top,h,0).dark<1);
+});
+
+test('wheel motion coasts, reverses promptly, and releases keyboard/dialog scrolling',async()=>{
+ const {createMomentum}=await import('../docs/proto/viewing-room/momentum.js');
+ const saved=new Map(),set=(k,v)=>{saved.set(k,Object.getOwnPropertyDescriptor(globalThis,k));Object.defineProperty(globalThis,k,{value:v,writable:true,configurable:true});};
+ const events={},frames=new Map();let seq=0,time=0,modal=false;
+ try{
+  set('scrollY',0);set('innerHeight',800);
+  set('matchMedia',()=>({matches:true,addEventListener(){}}));
+  set('Element',class{});
+  set('document',{documentElement:{scrollHeight:6000},body:{},hidden:false,querySelector:()=>modal?{}:null,addEventListener(){}});
+  set('addEventListener',(type,fn)=>{events[type]=fn;});
+  set('requestAnimationFrame',fn=>{frames.set(++seq,fn);return seq;});
+  set('cancelAnimationFrame',id=>frames.delete(id));
+  set('window',{scrollTo:({top})=>{globalThis.scrollY=top;events.scroll();}});
+  const controller=createMomentum({matches:false,addEventListener(){}});
+  const step=()=>{time+=1000/60;const list=[...frames.values()];frames.clear();for(const f of list)f(time);};
+  const wheel=delta=>{let prevented=false;events.wheel({deltaX:0,deltaY:delta,deltaMode:0,target:null,preventDefault(){prevented=true;}});return prevented;};
+  assert.equal(wheel(700),true);step();const first=scrollY;for(let i=0;i<15;i++)step();
+  assert.ok(scrollY>first+200&&scrollY<700); // Input has stopped but travel continues.
+  const before=scrollY;wheel(-200);step();assert.ok(scrollY<before);
+  events.keydown({key:'PageUp'});const stopped=scrollY;step();assert.equal(scrollY,stopped);
+  modal=true;assert.equal(wheel(300),false);assert.equal(frames.size,0);
+  modal=false;controller.go(99999);for(let i=0;i<220;i++)step();assert.equal(scrollY,5200);
+ }finally{for(const [k,d]of saved){if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}
+});

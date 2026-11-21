@@ -1,10 +1,12 @@
 // Continuous gallery: shallow stone planes and raised photographic cutouts.
 // Data lives in products.json; the bag is a small local module (no payment yet).
 const here = new URL('./', import.meta.url);
-import {layers, scrollPose, follow} from './scroll-motion.js?v=1';
+import {layers,scrollPose,follow,clamp,smooth,endingPose} from './scroll-motion.js?v=2';
+import {createMomentum} from './momentum.js?v=1';
 const $ = s => document.querySelector(s);
 const money = cents => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+const momentum=createMomentum(reduce);
 const pad = n => String(n).padStart(2, '0');
 
 const products = await (await fetch(new URL('products.json?v=5', here))).json();
@@ -42,7 +44,7 @@ const pieces = products.filter(p=>!p.gift).map((p, i) => {
         <div class="object-shadow" aria-hidden="true"><img src="${p.image}" alt="" decoding="async" loading="lazy"></div>
         <div class="object-layer"><img src="${p.image}" alt="${p.name}" decoding="async" loading="lazy"></div>
       </div></div>
-    <div class="text reveal">
+    <div class="text">
       <p class="no">${pad(i + 1)}</p>
       <h3 id="name-${p.id}">${p.name}</h3>
       <p class="spec">${p.spec}</p>
@@ -120,26 +122,37 @@ renderBag();
 
 
 
-/* ---------- one restrained end sequence, existing upstream cutouts ---------- */
+/* ---------- black interval → typography → timed botanical entrance ---------- */
 room.insertAdjacentHTML('beforeend', `<section class="night-garden" id="night-garden" aria-labelledby="night-title">
   <div class="night-stage"><div class="night-flowers" aria-hidden="true">
-    <img class="night-flower rose" src="${new URL('flowers/rose-burgundy.webp',here)}" alt="" loading="lazy" decoding="async">
-    <img class="night-flower lily" src="${new URL('flowers/lily-red.webp',here)}" alt="" loading="lazy" decoding="async">
-    <img class="night-flower mauve" src="${new URL('flowers/rose-mauve.webp',here)}" alt="" loading="lazy" decoding="async">
-  </div><div class="night-copy"><h2 id="night-title">malar</h2><p>Malar means flower.</p><a data-scroll="collection" href="#collection">Back to the collection</a></div>
+    <div class="flower-place rose"><div class="flower-reveal"><img class="night-flower" src="${new URL('flowers/rose-burgundy.webp',here)}" alt="" draggable="false" loading="eager" decoding="async"></div></div>
+    <div class="flower-place lily"><div class="flower-reveal"><img class="night-flower" src="${new URL('flowers/lily-red.webp',here)}" alt="" draggable="false" loading="eager" decoding="async"></div></div>
+    <div class="flower-place mauve"><div class="flower-reveal"><img class="night-flower" src="${new URL('flowers/rose-mauve.webp',here)}" alt="" draggable="false" loading="eager" decoding="async"></div></div>
+  </div><div class="night-copy"><p class="night-eyebrow">Malar · A small studio</p><h2 id="night-title">Malar means flower.</h2><a data-scroll="collection" href="#collection">Back to the collection</a></div>
   <div class="night-note"><span>Handmade jewelry &amp; objects</span><button type="button" data-open-bag>Bag · ${count()}</button></div></div>
 </section>`);
 function openBag(){document.querySelector('#garden-menu')?.close();note.textContent='';bag.showModal();}
 document.querySelectorAll('[data-open-bag]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();openBag();}));
-document.querySelectorAll('[data-scroll]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();document.querySelector('#garden-menu')?.close();document.getElementById(el.dataset.scroll)?.scrollIntoView({behavior:reduce.matches?'instant':'smooth'});}));
+document.querySelectorAll('[data-scroll]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();document.querySelector('#garden-menu')?.close();const destination=document.getElementById(el.dataset.scroll);if(destination)momentum.go(scrollY+destination.getBoundingClientRect().top-110);}));
 
-/* ---------- shared scroll clock, no wheel interception or scroll hijack ---------- */
+/* ---------- one clock for paired foreground motion and the timed ending ---------- */
 const fine=matchMedia('(min-width:761px) and (pointer:fine)');
 const root=document.documentElement,finale=document.querySelector('.night-garden');
 const models=pieces.map(({el},i)=>({el,plate:el.querySelector('.plate'),motion:el.querySelector('.plate-motion'),text:el.querySelector('.text'),layer:layers[i],i,center:0,rect:null,x:0,y:0,focus:false,hover:false,pitch:0,yaw:0,lift:0,travel:0,textTravel:0,objectPitch:0,initialized:false}));
-let frame=0,last=0,finaleTop=0,viewHeight=innerHeight,visibleModels=new Set(models);
-const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
-const smooth=x=>{x=clamp(x,0,1);return x*x*(3-2*x)};
+let frame=0,last=0,finaleTop=0,viewHeight=innerHeight,visibleModels=new Set(models),endingStarted=null;
+const flowers=[...finale.querySelectorAll('.flower-place')].map((el,i)=>({el,img:el.querySelector('img'),i,x:0,y:0,tx:0,ty:0,active:false}));
+flowers.forEach(f=>{
+ const move=e=>{
+  if(reduce.matches||e.pointerType!=='mouse')return;
+  const r=f.el.getBoundingClientRect();
+  f.tx=clamp((r.left+r.width*.5-e.clientX)*.45,-65,65);
+  f.ty=clamp((r.top+r.height*.4-e.clientY)*.22,-28,28);
+  f.active=true;schedule();
+ };
+ f.el.addEventListener('pointermove',move);
+ f.el.addEventListener('pointerleave',()=>{f.active=false;f.tx=f.ty=0;schedule();});
+ f.el.addEventListener('pointercancel',()=>{f.active=false;f.tx=f.ty=0;schedule();});
+});
 function schedule(){if(!frame&&!document.hidden)frame=requestAnimationFrame(paint);}
 function measure(){
  viewHeight=innerHeight;
@@ -159,13 +172,29 @@ models.forEach(m=>{
 function paint(now){
  frame=0;const dt=last?Math.min(50,now-last):16.67;last=now;let unsettled=false;
  const y=scrollY;document.querySelector('.bar').inert=y<viewHeight*.52;root.style.setProperty('--bar-visible',smooth((y-viewHeight*.5)/(viewHeight*.3)).toFixed(3));
- const dark=smooth((y+viewHeight*.88-finaleTop)/(viewHeight*.8));
- root.style.setProperty('--night',dark.toFixed(4));
- const bloom=smooth((y+viewHeight*.6-finaleTop)/(viewHeight*.68));
- finale.style.setProperty('--flower-presence',reduce.matches?'1':bloom.toFixed(4));
- finale.style.setProperty('--flower-rise',(reduce.matches?0:(1-bloom)*85).toFixed(2)+'px');
- const drift=reduce.matches?0:clamp((y-finaleTop)/viewHeight,-1,1);
- finale.style.setProperty('--rose-drift',(-drift*30).toFixed(2)+'px');finale.style.setProperty('--lily-drift',(-drift*60).toFixed(2)+'px');finale.style.setProperty('--mauve-drift',(drift*18).toFixed(2)+'px');
+ const entry=y-finaleTop;
+ if(entry>=viewHeight*.85&&endingStarted===null)endingStarted=now;
+ if(entry<viewHeight*.3)endingStarted=null;
+ const elapsed=endingStarted===null?0:now-endingStarted;
+ const ending=endingPose(y,finaleTop,viewHeight,reduce.matches?10000:elapsed);
+ root.style.setProperty('--night',ending.dark.toFixed(4));
+ finale.style.setProperty('--copy-presence',ending.copy.toFixed(4));
+ finale.style.setProperty('--note-presence',ending.note.toFixed(4));
+ const inEnding=entry>viewHeight*.3&&entry<finale.offsetHeight;
+ finale.querySelector('.night-copy').inert=ending.copy<.05;
+ finale.querySelector('.night-note').inert=ending.note<.05;
+ flowers.forEach(f=>{
+  const visible=ending.flowers[f.i];
+  f.el.style.setProperty('--bloom',visible.toFixed(4));
+  f.el.style.setProperty('--bloom-rise',((1-visible)*42).toFixed(2)+'px');
+  f.el.style.setProperty('--bloom-scale',(.92+.08*visible).toFixed(4));
+  f.el.style.pointerEvents=visible>.3?'auto':'none';
+  f.x=reduce.matches?0:follow(f.x,f.tx,dt,f.active?180:680);
+  f.y=reduce.matches?0:follow(f.y,f.ty,dt,f.active?220:720);
+  const sway=reduce.matches?0:Math.sin(elapsed/3300+f.i*2)*1.15*visible;
+  f.img.style.transform=`translate3d(${f.x.toFixed(2)}px,${f.y.toFixed(2)}px,0) rotate(${(sway+f.x*.085).toFixed(3)}deg)`;
+ });
+ if(inEnding&&!reduce.matches&&endingStarted!==null)unsettled=true;
  for(const m of models){
   const enabled=fine.matches&&!reduce.matches;
   if(enabled&&!visibleModels.has(m))continue;
@@ -173,7 +202,7 @@ function paint(now){
   const raised=enabled&&(m.hover||m.focus);
   const targets={pitch:enabled?pose.pitch-m.y*5:0,yaw:enabled?p*(m.i%2?1.6:-1.6)+m.x*7:0,lift:raised?-8:0,travel:enabled?pose.travel:0,textTravel:enabled?pose.textTravel:0,objectPitch:enabled?-p*3:0};
   for(const key in targets){
-   const settle=key==='travel'?m.layer.settle:key==='textTravel'?180:95;
+   const settle=key==='travel'||key==='textTravel'?m.layer.settle:95;
    m[key]=!enabled||!m.initialized?targets[key]:follow(m[key],targets[key],dt,settle);
    if(Math.abs(targets[key]-m[key])>.015)unsettled=true;else m[key]=targets[key];
   }
