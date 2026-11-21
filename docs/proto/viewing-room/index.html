@@ -6,26 +6,91 @@
 <meta name="theme-color" content="#21150e">
 <base href="../../">
 <title>Malar — Viewing room</title>
-<link rel="stylesheet" href="proto/viewing-room/room.css?v=5">
+<style>
+  html {background:#21150e}
+  #garden-loader {
+    position:fixed; inset:0; z-index:100; display:grid; place-items:center; margin:0;
+    background:#21150e; transition:opacity 180ms ease-out;
+  }
+  .garden-loader-number {
+    color:#fff; font:400 28px/1 "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-variant-numeric:tabular-nums;
+  }
+  #garden-loader.loaded {opacity:0}
+  .garden-loading {overflow:hidden}
+  @media (prefers-reduced-motion:reduce) {
+    #garden-loader {transition:none}
+  }
+</style><script>
+  document.documentElement.classList.add('garden-loading');
+  if (!location.hash && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('relief-intro');
+  }
+  window.malarIntroFallback = setTimeout(() => {
+    document.documentElement.classList.remove('garden-loading', 'relief-intro', 'relief-reveal');
+    document.getElementById('garden-loader')?.remove();
+  }, 15000);
+  history.scrollRestoration = 'manual';
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted && !location.hash) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  });
+</script>
+<link rel="stylesheet" href="garden.css?v=title-shadow">
+<link rel="stylesheet" href="proto/viewing-room/room.css?v=6">
 <!-- The homepage's own relief engine, unmodified. -->
 <script src="garden.js?v=ambient-viewing-room" defer></script>
-<script type="module" src="proto/viewing-room/room.js?v=5"></script>
+<script type="module" src="proto/viewing-room/room.js?v=6"></script>
 </head>
-<body class="ambient-landing">
+<body class="ambient-landing viewing-room">
+<div id="garden-loader" role="progressbar" aria-label="Loading the garden" aria-valuemin="1" aria-valuemax="100" aria-valuenow="1"><span class="garden-loader-number" aria-hidden="true">1</span></div>
+<noscript><style>#garden-loader{display:none}</style><p>Enable JavaScript to explore the collection.</p></noscript>
+<button id="menu" aria-controls="garden-menu" aria-expanded="false" aria-haspopup="dialog">Menu <i></i></button>
 
-<header class="bar">
+<header class="bar" inert>
   <a class="mark" href="./">malar</a>
-  <button id="menu" class="bag-button" aria-haspopup="dialog" aria-controls="bag">Bag <span id="bag-count">0</span></button>
+  <button id="bag-open" class="bag-button" aria-haspopup="dialog" aria-controls="bag">Bag <span id="bag-count">0</span></button>
 </header>
 <button id="sound" hidden aria-pressed="false">Sound off</button>
 
 <main>
   <section class="stage" id="garden" aria-label="The collection">
     <div class="hero"><canvas aria-hidden="true"></canvas></div>
-    <span class="wordmark-latin" hidden></span>
+    <div class="axis"><h1 class="wordmark"><span class="wordmark-latin">MALAR</span><span class="wordmark-script" lang="ml">മലർ</span></h1></div>
     <div class="room" id="room"></div>
   </section>
 </main>
+
+<dialog id="garden-menu" aria-label="Menu">
+  <section class="leaf-menu" aria-label="Navigation">
+    <canvas class="leaf-surface" aria-hidden="true"></canvas>
+    <form method="dialog"><button>Close ×</button></form>
+    <nav aria-label="Main">
+      <a data-scroll="garden" href="proto/viewing-room/#garden"><span>The<br>Garden</span></a>
+      <a data-scroll="collection" href="proto/viewing-room/#collection"><span>Jewelry</span></a>
+      <a data-scroll="crafts" href="proto/viewing-room/#crafts"><span>Crafts</span></a>
+      <a data-scroll="studio" href="proto/viewing-room/#studio"><span>Story</span></a>
+      <a data-scroll="gift" href="proto/viewing-room/#gift"><span>Gift<br>Cards</span></a>
+      <a data-open-bag href="proto/viewing-room/#bag"><span>Bag</span></a>
+    </nav>
+  </section>
+</dialog>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <filter id="engraved-lettering" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+    <!-- Keep the fine serifs while reducing coverage at the sides of each stroke. -->
+    <feMorphology in="SourceGraphic" operator="erode" radius="1 0" result="core"/>
+    <feComposite in="SourceGraphic" in2="core" operator="arithmetic" k2=".42" k3=".58" result="cut"/>
+    <feOffset in="cut" dy=".8" result="lower"/>
+    <feComposite in="lower" in2="cut" operator="out" result="rim"/>
+    <feFlood flood-color="#fff0bd" flood-opacity=".72" result="gold"/>
+    <feComposite in="gold" in2="rim" operator="in" result="shine"/>
+    <feOffset in="cut" dy="-.42" result="upper"/>
+    <feColorMatrix in="upper" type="matrix" values="0 0 0 0 .14 0 0 0 0 .075 0 0 0 0 .037 0 0 0 .26 0" result="shadow"/>
+    <feMerge><feMergeNode in="shine"/><feMergeNode in="shadow"/><feMergeNode in="cut"/></feMerge>
+  </filter>
+</svg>
+
 
 <dialog id="bag" aria-labelledby="bag-title">
   <div class="bag-head">
@@ -34,9 +99,10 @@
   </div>
   <ul id="bag-lines"></ul>
   <p class="bag-total"><span>Total</span><span id="bag-total">$0</span></p>
-  <button type="button" id="bag-checkout" class="solid">Checkout</button>
+  <button type="button" id="bag-checkout" class="solid">Demo checkout</button>
   <p id="bag-note" class="bag-note" role="status"></p>
 </dialog>
 
 </body>
 </html>
+

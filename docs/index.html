@@ -1,5 +1,11 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#21150e"><title>Malar — The Garden</title>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#21150e">
+<base href="./">
+<title>Malar — Handmade jewelry &amp; objects</title>
 <style>
   html {background:#21150e}
   #garden-loader {
@@ -30,52 +36,43 @@
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
   });
-</script><link rel="preload" href="gilded-edge.png" as="image"><link rel="stylesheet" href="garden.css?v=title-shadow"><script src="garden.js?v=ambient-viewing-room" defer></script><link rel="stylesheet" href="collection.css?v=12"><script src="collection.js?v=12" defer></script></head>
-<body class="ambient-landing">
+</script>
+<link rel="stylesheet" href="garden.css?v=title-shadow">
+<link rel="stylesheet" href="proto/viewing-room/room.css?v=6">
+<!-- The homepage's own relief engine, unmodified. -->
+<script src="garden.js?v=ambient-viewing-room" defer></script>
+<script type="module" src="proto/viewing-room/room.js?v=6"></script>
+</head>
+<body class="ambient-landing viewing-room">
 <div id="garden-loader" role="progressbar" aria-label="Loading the garden" aria-valuemin="1" aria-valuemax="100" aria-valuenow="1"><span class="garden-loader-number" aria-hidden="true">1</span></div>
-<noscript><style>#garden-loader{display:none}</style></noscript><button id="menu" aria-controls="garden-menu" aria-expanded="false" aria-haspopup="dialog">Menu <i></i></button><main><section class="stage" id="garden" aria-label="Interactive Kerala garden relief"><div class="hero">
-<canvas aria-hidden="true"></canvas>
-</div><div class="axis"><h1 class="wordmark"><span class="wordmark-latin">MALAR</span><span class="wordmark-script" lang="ml">മലർ</span></h1></div><span id="grove" aria-hidden="true"></span><div class="garden-content">
-<header class="shop-header">
-  <a class="shop-brand" href="#garden">MALAR</a>
-  <nav class="shop-nav" aria-label="Shop"><a href="#collection">Jewelry</a>
-    <a href="#crafts">Crafts</a>
-    <a href="#studio">Story</a>
-    <a href="#gift">Gift cards</a></nav>
-  <div class="shop-controls">
-    <button id="sound" aria-pressed="false">Sound off</button>
-    
-  </div>
+<noscript><style>#garden-loader{display:none}</style><p>Enable JavaScript to explore the collection.</p></noscript>
+<button id="menu" aria-controls="garden-menu" aria-expanded="false" aria-haspopup="dialog">Menu <i></i></button>
+
+<header class="bar" inert>
+  <a class="mark" href="./">malar</a>
+  <button id="bag-open" class="bag-button" aria-haspopup="dialog" aria-controls="bag">Bag <span id="bag-count">0</span></button>
 </header>
-<section class="editorial" id="collection" aria-labelledby="collection-title">
- <div class="collection-intro"><h2 id="collection-title">Jewelry</h2></div>
- <div class="stone-grid" id="jewelry-grid"></div>
-</section>
-<section class="editorial" id="crafts" aria-labelledby="crafts-title">
- <div class="craft-intro"><h2 id="crafts-title">Objects</h2></div>
- <div class="stone-grid craft-grid" id="craft-grid"></div>
-</section>
-<section id="studio" class="story-section" aria-labelledby="studio-title">
- <div class="story-stone" role="img" aria-label="A quiet botanical carving in pale stone"></div>
- <article class="story-copy"><h2 id="studio-title">A small studio.</h2><p>Malar means flower. Jewelry and objects, made by hand in small batches.</p><div class="story-stats"><div><strong>100%</strong><span>Handmade</span></div><div><strong>12</strong><span>Makers</span></div><div><strong>Small</strong><span>Batches only</span></div></div></article>
-</section>
-<section id="gift" class="gift-section" aria-labelledby="gift-title">
- <div class="gift-art"><b>malar</b><small>GIFT CARD</small><output id="gift-value">$50</output></div>
- <article class="gift-copy"><h2 id="gift-title">Gift cards</h2><div class="gift-amounts" aria-label="Gift card amount"><button data-amount="25" aria-pressed="false">$25</button><button data-amount="50" aria-pressed="true">$50</button><button data-amount="100" aria-pressed="false">$100</button><button data-amount="custom" aria-pressed="false">Custom</button><input id="custom-gift" class="custom-value" type="number" min="1" placeholder="Amount" aria-label="Custom amount in dollars" hidden></div><button class="quiet-button" id="gift-action">Send a gift card</button><p class="gift-status" id="gift-status" role="status"></p></article>
-</section>
-<section id="account" class="account-note"><h2>Your account</h2><p>Customer accounts are coming soon.</p></section>
-<footer class="shop-footer editorial-footer"><a class="footer-logo" href="#garden" aria-label="Malar, back to top">malar</a><form class="newsletter"><input type="email" required placeholder="Your email" aria-label="Your email"><button type="submit">Join</button></form><p class="newsletter-note" id="newsletter-status" role="status"></p><p class="copyright">© 2026 malar · Handmade jewelry &amp; crafts</p></footer></div></section></main>
+<button id="sound" hidden aria-pressed="false">Sound off</button>
+
+<main>
+  <section class="stage" id="garden" aria-label="The collection">
+    <div class="hero"><canvas aria-hidden="true"></canvas></div>
+    <div class="axis"><h1 class="wordmark"><span class="wordmark-latin">MALAR</span><span class="wordmark-script" lang="ml">മലർ</span></h1></div>
+    <div class="room" id="room"></div>
+  </section>
+</main>
+
 <dialog id="garden-menu" aria-label="Menu">
   <section class="leaf-menu" aria-label="Navigation">
     <canvas class="leaf-surface" aria-hidden="true"></canvas>
     <form method="dialog"><button>Close ×</button></form>
     <nav aria-label="Main">
-      <a href="#garden"><span>The<br>Garden</span></a>
-      <a href="#collection"><span>Jewelry</span></a>
-      <a href="#crafts"><span>Crafts</span></a>
-      <a href="#studio"><span>Story</span></a>
-      <a href="#gift"><span>Gift<br>Cards</span></a>
-      <a href="#account"><span>Account</span></a>
+      <a data-scroll="garden" href="#garden"><span>The<br>Garden</span></a>
+      <a data-scroll="collection" href="#collection"><span>Jewelry</span></a>
+      <a data-scroll="crafts" href="#crafts"><span>Crafts</span></a>
+      <a data-scroll="studio" href="#studio"><span>Story</span></a>
+      <a data-scroll="gift" href="#gift"><span>Gift<br>Cards</span></a>
+      <a data-open-bag href="#bag"><span>Bag</span></a>
     </nav>
   </section>
 </dialog>
@@ -93,6 +90,19 @@
     <feMerge><feMergeNode in="shine"/><feMergeNode in="shadow"/><feMergeNode in="cut"/></feMerge>
   </filter>
 </svg>
+
+
+<dialog id="bag" aria-labelledby="bag-title">
+  <div class="bag-head">
+    <h2 id="bag-title">Bag</h2>
+    <button type="button" id="bag-close" class="plain">Close</button>
+  </div>
+  <ul id="bag-lines"></ul>
+  <p class="bag-total"><span>Total</span><span id="bag-total">$0</span></p>
+  <button type="button" id="bag-checkout" class="solid">Demo checkout</button>
+  <p id="bag-note" class="bag-note" role="status"></p>
+</dialog>
+
 </body>
 </html>
 

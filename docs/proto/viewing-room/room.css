@@ -104,3 +104,74 @@ a{color:inherit;text-decoration:none}
 @media (prefers-reduced-motion:reduce){
   .reveal{opacity:1;filter:none;transition:none}
 }
+
+
+/* Continuous gallery: preserve the original landing and its engine. */
+.viewing-room .stage{height:auto;min-height:100svh}
+.viewing-room .hero{isolation:isolate}
+.viewing-room .hero:before{display:none}
+.viewing-room .hero:after{content:"";position:absolute;inset:0;background:#080706;opacity:var(--night,0);pointer-events:none;z-index:1}
+.viewing-room .hero canvas{z-index:0}
+.viewing-room .stage>.axis{z-index:2}
+.viewing-room #menu{position:fixed;z-index:7;top:24px;right:var(--pad);font:14px var(--sans);color:var(--ink)}
+.viewing-room .bar{padding-right:calc(var(--pad) + 110px);z-index:6;opacity:var(--bar-visible,0)}
+.viewing-room .bar a{font-family:var(--serif)}
+.viewing-room .room{padding-top:116svh}
+.viewing-room .piece{max-width:none;scroll-margin-top:100px}
+.room-heading{font:400 clamp(38px,5vw,76px)/1.08 var(--serif);margin:0 0 9vh 8%;color:var(--ink);scroll-margin-top:120px}
+.room-heading.objects{margin:10vh 0 16vh 51%}
+.viewing-room .plate{position:relative;display:block;background:none;overflow:visible;perspective:1600px;transform-style:preserve-3d;outline:none;cursor:default}
+.plate-motion{position:absolute;inset:0;transform-style:preserve-3d;transform:translate3d(0,var(--card-travel,0px),0) rotateX(var(--card-pitch,0deg)) rotateY(var(--card-yaw,0deg));will-change:transform}
+.plate-stone{position:absolute;inset:0;background:#e9e7df url('../../stone-atlas.png') var(--stone-pos,50% 0)/300% 200%;border:1px solid #f3f0e7;border-radius:0;box-shadow:inset 0 0 0 1px #ffffff40,0 18px 40px #00000035;backface-visibility:hidden;transform:translateZ(0)}
+/* Thin edge, not the old stacked bottom lip. */
+.plate-stone:before,.plate-stone:after{content:"";position:absolute;background:#c3bfb3;pointer-events:none}
+.plate-stone:before{inset:0 auto 0 0;width:2px;transform-origin:left;transform:rotateY(90deg)}
+.plate-stone:after{inset:auto 0 0;height:2px;transform-origin:bottom;transform:rotateX(-90deg)}
+.object-layer,.object-shadow{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.object-layer{transform:translateZ(var(--object-height,25px)) rotateX(var(--object-pitch,0deg)) rotateY(var(--object-yaw,0deg));transform-style:preserve-3d}
+.viewing-room .object-layer img,.viewing-room .object-shadow img{width:70%;height:72%;object-fit:contain;max-width:none;max-height:none;filter:none;user-select:none;-webkit-user-drag:none}
+.object-shadow{transform:translate3d(var(--shadow-x,5px),var(--shadow-y,9px),1px)}
+.viewing-room .object-shadow img{filter:brightness(0) blur(8px);opacity:.23}
+.plate:focus-visible{outline:1px solid var(--gold);outline-offset:10px}
+.plate:focus-visible .plate-motion{outline:1px solid #fff4}
+.viewing-room .text{position:relative;z-index:2;transform:translate3d(0,var(--text-travel,0px),0)}
+.viewing-room .text h3{color:var(--ink)}
+.viewing-room .buy{flex-wrap:wrap}
+.viewing-room #bag[open]{display:block}
+.viewing-room #bag p{max-width:none}
+.viewing-room .leaf-menu nav a:hover{text-decoration:none}
+.night-garden{position:relative;height:145svh;margin:0 calc(-1 * var(--pad));isolation:isolate;scroll-margin-top:0}
+.night-stage{position:sticky;top:0;height:100svh;overflow:hidden;display:grid;place-items:center;perspective:1400px}
+.night-flowers{position:absolute;inset:0;pointer-events:none;opacity:var(--flower-presence,0);transform:translateY(var(--flower-rise,70px));will-change:transform,opacity}
+.night-flower{position:absolute;object-fit:contain;filter:saturate(.65) brightness(.60);transform-origin:50% 85%;will-change:transform;user-select:none}
+.night-flower.rose{height:126vh;left:-7vw;bottom:-61vh;transform:translateY(var(--rose-drift,0px)) rotate(24deg) rotateY(-8deg)}
+.night-flower.lily{height:95vh;right:-12vw;bottom:-20vh;transform:translateY(var(--lily-drift,0px)) rotate(-26deg) rotateY(9deg);filter:saturate(.70) brightness(.67)}
+.night-flower.mauve{height:115vh;right:8vw;top:-78vh;transform:translateY(var(--mauve-drift,0px)) rotate(182deg);filter:saturate(.45) brightness(.42)}
+.night-copy{position:relative;z-index:1;text-align:center;padding:20px;max-width:640px}
+.night-copy h2{font:400 clamp(72px,13vw,180px)/1 var(--serif);letter-spacing:-.04em;margin:0 0 18px}
+.night-copy p{font:400 clamp(23px,2.3vw,34px)/1.2 var(--serif);margin:0 auto 36px;color:var(--ink)}
+.night-copy a{font:12px var(--sans);letter-spacing:.12em;border-bottom:1px solid #efe3cc70;padding-bottom:7px}
+.night-note{position:absolute;bottom:30px;left:var(--pad);right:var(--pad);display:flex;justify-content:space-between;gap:20px;font:11px/1.5 var(--sans);color:#a69c8d}
+.night-note button{padding:0;font:inherit}
+.viewing-room .end{font-size:11px;opacity:.7;padding:0 0 14vh}
+@media(max-width:760px){
+ .viewing-room #menu{top:24px;font-size:12px}.viewing-room .bar{padding-right:calc(var(--pad) + 85px)}
+ .viewing-room .plate{transform-style:flat}.plate-motion{will-change:auto}
+ .viewing-room .room{padding-top:115svh}.room-heading{margin-left:0}.room-heading.objects{margin-left:0}
+ .night-flower.rose{left:-47vw;height:110vh;bottom:-43vh}.night-flower.lily{right:-75vw;height:80vh;bottom:-6vh}
+ .night-flower.mauve{right:-45vw;height:95vh;top:-65vh}.night-copy{max-width:88vw}.night-note{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .plate-motion,.object-layer,.object-shadow,.viewing-room .text{transform:none!important;will-change:auto}
+ .night-flowers{opacity:1;transform:none;will-change:auto}.night-flower{will-change:auto}
+ .reveal{opacity:1;filter:none;transition:none}
+}
+.room-story{max-width:700px;margin:8vh auto 24vh;text-align:center;scroll-margin-top:120px}
+.room-story h2,.room-gift h2{font:400 clamp(36px,4vw,60px)/1.1 var(--serif);margin:0 0 24px;letter-spacing:-.012em}
+.room-story p{font:400 clamp(24px,3vw,40px)/1.3 var(--serif);max-width:24em;color:var(--ink-2);margin:auto}
+.room-gift{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:10vw;margin:0 8% 22vh;scroll-margin-top:120px}
+.gift-plate{aspect-ratio:1.6;background:#c89d4e url('../../gift-gold.svg') center/cover;display:flex;align-items:flex-end;justify-content:space-between;padding:7%;color:#503914;box-shadow:0 15px 32px #0003}
+.gift-plate span{font:400 clamp(32px,4vw,60px)/1 var(--serif)}.gift-plate output{font:400 24px var(--serif)}
+.gift-values{display:flex;gap:22px;margin:0 0 26px}.gift-values button{padding:5px 0;border-bottom:1px solid transparent;font-size:14px}.gift-values button[aria-pressed=true]{border-color:var(--ink)}
+#gift-added{min-height:1.5em;font-size:12px;color:var(--ink-2)}
+@media(max-width:760px){.room-gift{grid-template-columns:1fr;margin:0 0 18vh;gap:32px}.room-story{margin-block:4vh 18vh}.night-copy p{max-width:100%}}
