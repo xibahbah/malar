@@ -548,12 +548,14 @@ function garden(hero) {
     if(!frame && visible && artSize && !document.hidden) frame=requestAnimationFrame(draw);
   }
   function resize(){
-    const d=Math.min(devicePixelRatio,1.6);
+    const area=hero.clientWidth*hero.clientHeight;
+    const d=Math.min(devicePixelRatio,1.25,Math.sqrt(1600000/Math.max(1,area)));
     canvas.width=Math.round(hero.clientWidth*d);
     canvas.height=Math.round(hero.clientHeight*d);
     gl.viewport(0,0,canvas.width,canvas.height);
-    w=Math.max(32,Math.round(hero.clientWidth/6));
-    h=Math.max(32,Math.round(hero.clientHeight/6));
+    const fieldScale=Math.min(1/6,Math.sqrt(28000/Math.max(1,area)));
+    w=Math.max(32,Math.round(hero.clientWidth*fieldScale));
+    h=Math.max(32,Math.round(hero.clientHeight*fieldScale));
     energy=new Float32Array(w*h); field=new Float32Array(w*h);
     revealEnergy=new Float32Array(w*h); revealField=new Float32Array(w*h);
     bytes=new Uint8Array(w*h*4);
@@ -759,6 +761,7 @@ function garden(hero) {
   function draw(t){
     frame=0;
     if(!visible || document.hidden) return;
+    if(layeredGallery&&Number(root.style.getPropertyValue('--night'))>=.999){previousTime=null;return;}
     const firstFrame = previousTime === null;
     const elapsed = firstFrame ? .016 : (t - previousTime) / 1000;
     // Keep a slow frame during startup from skipping a visible part of the reveal.
@@ -866,6 +869,7 @@ function garden(hero) {
   document.addEventListener('visibilitychange',schedule);
   reduce.addEventListener('change',schedule);
   addEventListener('scroll',schedule,{passive:true});
+  addEventListener('malar:wall-wake',schedule);
   canvas.addEventListener('webglcontextlost', () => {
     canvas.classList.remove('ready');
     finishEntrance();

@@ -1,8 +1,9 @@
 // Continuous gallery: shallow stone planes and raised photographic cutouts.
 // Data lives in products.json; the bag is a small local module (no payment yet).
 const here = new URL('./', import.meta.url);
-import {layers,scrollPose,follow,clamp,smooth,endingPose} from './scroll-motion.js?v=2';
-import {createMomentum} from './momentum.js?v=1';
+import {layers,scrollPose,follow,clamp,smooth,endingPose} from './scroll-motion.js?v=3';
+import {createMomentum} from './momentum.js?v=2';
+import {mountBotanical} from './botanical.js?v=1';
 const $ = s => document.querySelector(s);
 const money = cents => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
@@ -125,9 +126,6 @@ renderBag();
 /* ---------- black interval → typography → timed botanical entrance ---------- */
 room.insertAdjacentHTML('beforeend', `<section class="night-garden" id="night-garden" aria-labelledby="night-title">
   <div class="night-stage"><div class="night-flowers" aria-hidden="true">
-    <div class="flower-place rose"><div class="flower-reveal"><img class="night-flower" src="${new URL('flowers/rose-burgundy.webp',here)}" alt="" draggable="false" loading="eager" decoding="async"></div></div>
-    <div class="flower-place lily"><div class="flower-reveal"><img class="night-flower" src="${new URL('flowers/lily-red.webp',here)}" alt="" draggable="false" loading="eager" decoding="async"></div></div>
-    <div class="flower-place mauve"><div class="flower-reveal"><img class="night-flower" src="${new URL('flowers/rose-mauve.webp',here)}" alt="" draggable="false" loading="eager" decoding="async"></div></div>
   </div><div class="night-copy"><p class="night-eyebrow">Malar · A small studio</p><h2 id="night-title">Malar means flower.</h2><a data-scroll="collection" href="#collection">Back to the collection</a></div>
   <div class="night-note"><span>Handmade jewelry &amp; objects</span><button type="button" data-open-bag>Bag · ${count()}</button></div></div>
 </section>`);
@@ -139,25 +137,15 @@ document.querySelectorAll('[data-scroll]').forEach(el=>el.addEventListener('clic
 const fine=matchMedia('(min-width:761px) and (pointer:fine)');
 const root=document.documentElement,finale=document.querySelector('.night-garden');
 const models=pieces.map(({el},i)=>({el,plate:el.querySelector('.plate'),motion:el.querySelector('.plate-motion'),text:el.querySelector('.text'),layer:layers[i],i,center:0,rect:null,x:0,y:0,focus:false,hover:false,pitch:0,yaw:0,lift:0,travel:0,textTravel:0,objectPitch:0,initialized:false}));
-let frame=0,last=0,finaleTop=0,viewHeight=innerHeight,visibleModels=new Set(models),endingStarted=null;
-const flowers=[...finale.querySelectorAll('.flower-place')].map((el,i)=>({el,img:el.querySelector('img'),i,x:0,y:0,tx:0,ty:0,active:false}));
-flowers.forEach(f=>{
- const move=e=>{
-  if(reduce.matches||e.pointerType!=='mouse')return;
-  const r=f.el.getBoundingClientRect();
-  f.tx=clamp((r.left+r.width*.5-e.clientX)*.45,-65,65);
-  f.ty=clamp((r.top+r.height*.4-e.clientY)*.22,-28,28);
-  f.active=true;schedule();
- };
- f.el.addEventListener('pointermove',move);
- f.el.addEventListener('pointerleave',()=>{f.active=false;f.tx=f.ty=0;schedule();});
- f.el.addEventListener('pointercancel',()=>{f.active=false;f.tx=f.ty=0;schedule();});
-});
+let frame=0,last=0,finaleTop=0,viewHeight=innerHeight,visibleModels=new Set(models),endingStarted=null,wallHidden=false;
+const flowerGarden=finale.querySelector('.night-flowers');
+const botanical=mountBotanical(flowerGarden,here,reduce);
+const nightCopy=finale.querySelector('.night-copy'),nightNote=finale.querySelector('.night-note');
 function schedule(){if(!frame&&!document.hidden)frame=requestAnimationFrame(paint);}
 function measure(){
  viewHeight=innerHeight;
  models.forEach(m=>{const r=m.plate.getBoundingClientRect();m.center=scrollY+r.top+r.height/2;m.rect={x:r.left,top:scrollY+r.top,width:r.width,height:r.height};});
- finaleTop=scrollY+finale.getBoundingClientRect().top;schedule();
+ finaleTop=scrollY+finale.getBoundingClientRect().top;botanical.measure();schedule();
 }
 const visibility=new IntersectionObserver(entries=>{for(const entry of entries){const m=models.find(x=>x.el===entry.target);if(entry.isIntersecting)visibleModels.add(m);else{visibleModels.delete(m);m.initialized=false;}}schedule();},{rootMargin:'100% 0px'});
 models.forEach(m=>{
@@ -178,22 +166,14 @@ function paint(now){
  const elapsed=endingStarted===null?0:now-endingStarted;
  const ending=endingPose(y,finaleTop,viewHeight,reduce.matches?10000:elapsed);
  root.style.setProperty('--night',ending.dark.toFixed(4));
+ if(wallHidden&&ending.dark<.999)dispatchEvent(new Event('malar:wall-wake'));
+ wallHidden=ending.dark>=.999;
  finale.style.setProperty('--copy-presence',ending.copy.toFixed(4));
  finale.style.setProperty('--note-presence',ending.note.toFixed(4));
+ flowerGarden.style.opacity=ending.gate.toFixed(4);flowerGarden.inert=ending.gate<.05;
  const inEnding=entry>viewHeight*.3&&entry<finale.offsetHeight;
- finale.querySelector('.night-copy').inert=ending.copy<.05;
- finale.querySelector('.night-note').inert=ending.note<.05;
- flowers.forEach(f=>{
-  const visible=ending.flowers[f.i];
-  f.el.style.setProperty('--bloom',visible.toFixed(4));
-  f.el.style.setProperty('--bloom-rise',((1-visible)*42).toFixed(2)+'px');
-  f.el.style.setProperty('--bloom-scale',(.92+.08*visible).toFixed(4));
-  f.el.style.pointerEvents=visible>.3?'auto':'none';
-  f.x=reduce.matches?0:follow(f.x,f.tx,dt,f.active?180:680);
-  f.y=reduce.matches?0:follow(f.y,f.ty,dt,f.active?220:720);
-  const sway=reduce.matches?0:Math.sin(elapsed/3300+f.i*2)*1.15*visible;
-  f.img.style.transform=`translate3d(${f.x.toFixed(2)}px,${f.y.toFixed(2)}px,0) rotate(${(sway+f.x*.085).toFixed(3)}deg)`;
- });
+ nightCopy.inert=ending.copy<.05;nightNote.inert=ending.note<.05;
+ if(inEnding||ending.gate>0)botanical.paint(elapsed,ending.gate,dt);
  if(inEnding&&!reduce.matches&&endingStarted!==null)unsettled=true;
  for(const m of models){
   const enabled=fine.matches&&!reduce.matches;

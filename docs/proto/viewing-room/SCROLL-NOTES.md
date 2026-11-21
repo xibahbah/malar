@@ -1,4 +1,15 @@
-# Motion revision — 2026-11-21 (current)
+# Viewport fit, continuous coasting, and botanical interaction — current
+
+- Portrait cards now occupy 55vh in height, landscapes about 55vh. Narrow portrait cards use 43.75vh, leaving room for the caption and chapter heading. Objects heading spacing is reduced. Verified the vase, caption, and heading together at 1280×720, 2048×1194, and 390×844; no horizontal document overflow.
+- Wheel motion uses an analytical critically damped spring (frequency 9), retaining velocity across packets and reversal. Removed cancellation on delayed scroll events from the controller's own writes. Keyboard, pointer, modal, touch, and reduced-motion escape paths remain. Sequential browser observations show continued travel without another wheel input in both directions.
+- Thirteen arranged stems replace three. Flowers enter after the type, starting at 1400ms with 95ms stagger and a 3400ms unfold. Desaturated blooms surround clear central type. Mouse proximity pushes stems aside; dragging lifts and pulls a stem up to 240px horizontally / 180px vertically, with underdamped spring return. Gentle idle sway continues without scrolling. Touch scrolling remains native.
+- The botanical behavior is isolated in botanical.js, including the layout, entrance timing, and spring integrator. Existing transparent assets are reused.
+- WebGL pixel count is capped at 1.6 million and its CPU interaction field at approximately 28,000 cells. Rendering pauses under the fully black ending and explicitly resumes on exit. This limits work; no hardware FPS claim is made.
+- Nine Node checks pass, including delayed-scroll regression, velocity continuity, frame-rate equivalence, real thirteen-stem entrance timing, and elastic return. JavaScript syntax and diff whitespace checks pass. Local browser console captured no warnings/errors. Desktop grab/release and narrow ending inspected; physical touch hardware was not tested.
+
+---
+
+# Earlier motion revision — 2026-11-21
 
 This revision supersedes the independent-caption rates and native-wheel decision below.
 

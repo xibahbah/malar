@@ -21,6 +21,5 @@ export function endingPose(scroll,top,viewport,elapsed){
  const dark=smooth((scroll-top+viewport*.6)/(viewport*1.45));
  const gate=smooth((scroll-top-viewport*.35)/(viewport*.5));
  return {dark,gate,copy:gate*smooth((elapsed-180)/950),
-  flowers:[0,1,2].map(i=>gate*smooth((elapsed-1450-i*350)/3200)),
   note:gate*smooth((elapsed-2600)/1200)};
 }
