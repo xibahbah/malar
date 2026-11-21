@@ -4,7 +4,7 @@ const here = new URL('./', import.meta.url);
 import {layers,scrollPose,follow,clamp,smooth,endingPose} from './scroll-motion.js?v=3';
 import {createMomentum} from './momentum.js?v=4';
 import {mountGiftCard,giftCardMarkup} from './metal.js?v=3';
-import {mountCollectionCamera} from './collection-camera.js?v=2';
+import {mountCollectionCamera} from './collection-camera.js?v=3';
 import {mountBronze} from './bronze.js?v=1';
 import {mountBotanical} from './botanical.js?v=3';
 const $ = s => document.querySelector(s);

@@ -236,7 +236,7 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
     stopNavigation();
     if (record && location.hash !== chapters[i].link.hash) {
       history.replaceState({...history.state, collectionScroll:scrollY}, '');
-      history.pushState(null, '', chapters[i].link.hash);
+      history.pushState(null, '', chapters[i].link.href);
     }
     // Center the chosen original in overview before opening it at reading size.
     if (!enabled || (!zoom && mode === 'detail')) {
@@ -333,6 +333,8 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
       holdUntil = now + 1850;
     }
     if (mode === 'glance' && Math.abs(delta) > 1) holdUntil = now + 1850;
+    // Leave time to choose even when the device draws the pullback slowly.
+    if (mode === 'glance' && zoom < .82) holdUntil = Math.max(holdUntil, now + 1250);
     if (mode === 'glance' && now >= holdUntil) mode = 'detail';
     if ((mode === 'browse' || (mode === 'glance' && now - enteredAt > 500)) &&
         delta && !atCollection(target + height / 2, 1.05)) dismiss();
