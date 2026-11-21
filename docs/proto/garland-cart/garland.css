@@ -31,7 +31,9 @@ button:focus-visible,a:focus-visible,textarea:focus-visible{outline:1px solid va
 .top nav a{font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:var(--ink-dim)}
 .top nav a:hover{color:var(--ink)}
 
-main{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:4vw;padding:0 5vw 120px;align-items:start}
+main{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:4vw;padding:0 5vw 120px;align-items:start;max-width:1720px;margin:0 auto}
+.top{max-width:1720px;margin:0 auto}
+@media (min-width:1800px){:root{--hang:520px}.pendant img{height:clamp(260px,30vh,400px)}main{grid-template-columns:minmax(0,1fr) 360px}}
 .kicker{margin:0 0 10px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
 .intro{text-align:center;padding:6vh 0 8vh}
 .intro h1{font:400 clamp(48px,7vw,104px)/.95 var(--serif);margin:0;letter-spacing:-.01em}
