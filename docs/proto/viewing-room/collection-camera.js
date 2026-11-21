@@ -34,14 +34,14 @@ export function projectCollection(progress, position, height, compactScale) {
   return {
     scale,
     translateY: pivot - (position + pivot) * scale,
-    align: smooth((progress - .22) / .78),
+    align: smooth((progress - .18) / .55),
     captions: 1 - smooth((progress - .24) / .46),
     labels: smooth((progress - .62) / .34)
   };
 }
 
 export function advanceZoom(position, velocity, goal, seconds) {
-  const next = coastStep(position, velocity, goal, seconds, goal ? 6 : 6.8);
+  const next = coastStep(position, velocity, goal, seconds, goal ? 6 : 6.2);
   if (Math.abs(next.position - goal) < .001 && Math.abs(next.velocity) < .009) {
     return {position:goal, velocity:0};
   }
@@ -81,7 +81,7 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
   windowEl.append(nav);
 
   let enabled = false, top = 0, range = 0, height = 1, width = 1;
-  let centers = [], metrics = [], rowHeight = 100, compactScale = .2;
+  let centers = [], metrics = [], indexTop = 72, rowHeight = 100, compactScale = .2;
   let position = 0, lastTarget = 0, time = 0, panVelocity = 0;
   let zoom = 0, zoomVelocity = 0, sweep = 0, enteredAt = 0, holdUntil = 0;
   let mode = 'detail', selected = -1, focusList = false, focusingPiece = false;
@@ -156,14 +156,13 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
       const {plate, row} = chapters[i], m = metrics[i];
       const naturalX = (m.x - width / 2) * view.scale;
       const naturalY = centers[i] * view.scale + view.translateY;
-      const rowY = height / 2 + (i - chapter) * rowHeight;
+      const rowY = indexTop + (i + .5) * rowHeight;
       const dx = ((m.x < width / 2 ? -sideOffset : sideOffset) - naturalX) * view.align;
       const dy = (rowY - naturalY) * view.align;
       const thumbnailScale = 1 + (m.thumbnailScale - 1) * view.align;
       plate.style.transform = 'translate3d(' + (dx / view.scale).toFixed(2) + 'px,' +
         (dy / view.scale).toFixed(2) + 'px,0) scale(' + thumbnailScale.toFixed(5) + ')';
       if (!nav.hidden) {
-        row.style.transform = 'translate3d(0,' + (naturalY + dy - rowHeight / 2).toFixed(2) + 'px,0)';
         row.style.setProperty('--emphasis', Math.max(.62, 1 - Math.abs(i - chapter) * .28).toFixed(3));
       }
     }
@@ -204,14 +203,20 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
     range = Math.max(0, contentHeight - height);
     centers = chapters.map(({plate}) => layoutOffset(plate, content, 'offsetTop') + plate.offsetHeight / 2);
     const meanGap = (centers.at(-1) - centers[0]) / Math.max(1, centers.length - 1);
-    rowHeight = clamp(height * .15, 74, 142);
+    const headerBottom = document.querySelector('.bar').getBoundingClientRect().bottom;
+    const available = Math.max(1, height - headerBottom - 32);
+    rowHeight = Math.min(132, available / chapters.length);
+    indexTop = headerBottom + 12 + (available - chapters.length * rowHeight) / 2;
     compactScale = clamp(rowHeight / Math.max(1, meanGap), .145, .235);
-    const thumbHeight = clamp(height * .102, 62, 104);
+    const thumbHeight = Math.min(104, rowHeight * .68);
     metrics = chapters.map(({plate}) => ({
       x:layoutOffset(plate, content, 'offsetLeft') + plate.offsetWidth / 2,
       thumbnailScale:thumbHeight / Math.max(1, plate.offsetHeight * compactScale)
     }));
     nav.style.setProperty('--row-height', rowHeight + 'px');
+    chapters.forEach(({row}, i) => {
+      row.style.transform = 'translate3d(0,' + (indexTop + i * rowHeight).toFixed(2) + 'px,0)';
+    });
     if (changedMode || (!zoom && mode === 'detail')) snap(scrollY);
     wake();
   }
@@ -287,16 +292,13 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
       select(i);
     });
     link.addEventListener('focus', () => {
-      if (nav.inert) return;
+      if (nav.inert || !link.matches(':focus-visible')) return;
       mode = 'browse';
-      if (enabled && link.matches(':focus-visible')) {
+      if (enabled) {
         const r = link.getBoundingClientRect();
         if (r.top < 58 || r.bottom > height - 20) centerPiece(i);
       }
       wake();
-    });
-    link.addEventListener('pointermove', () => {
-      if (!nav.inert && mode === 'glance') mode = 'browse';
     });
     link.addEventListener('keydown', e => {
       let next;
@@ -330,11 +332,12 @@ export function mountCollectionCamera(track, pieces, {wake, stopNavigation}) {
         (atCollection(position + height / 2) || atCollection(target + height / 2))) {
       mode = 'glance';
       enteredAt = now;
-      holdUntil = now + 1850;
+      holdUntil = now + 1000;
     }
-    if (mode === 'glance' && Math.abs(delta) > 1) holdUntil = now + 1850;
-    // Leave time to choose even when the device draws the pullback slowly.
-    if (mode === 'glance' && zoom < .82) holdUntil = Math.max(holdUntil, now + 1250);
+    // Let the small native inertia tail play out without renewing the overview.
+    if (mode === 'glance' && Math.abs(delta) > height * .00028 * Math.min(elapsed, 50)) {
+      holdUntil = now + 1000;
+    }
     if (mode === 'glance' && now >= holdUntil) mode = 'detail';
     if ((mode === 'browse' || (mode === 'glance' && now - enteredAt > 500)) &&
         delta && !atCollection(target + height / 2, 1.05)) dismiss();

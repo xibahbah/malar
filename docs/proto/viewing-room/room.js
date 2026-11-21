@@ -4,8 +4,7 @@ const here = new URL('./', import.meta.url);
 import {layers,scrollPose,follow,clamp,smooth,endingPose} from './scroll-motion.js?v=3';
 import {createMomentum} from './momentum.js?v=4';
 import {mountGiftCard,giftCardMarkup} from './metal.js?v=3';
-import {mountCollectionCamera} from './collection-camera.js?v=3';
-import {mountBronze} from './bronze.js?v=1';
+import {mountCollectionCamera} from './collection-camera.js?v=4';
 import {mountBotanical} from './botanical.js?v=3';
 const $ = s => document.querySelector(s);
 const money = cents => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
@@ -77,7 +76,6 @@ document.querySelectorAll('.reveal').forEach(el => seen.observe(el));
 const bar = $('.bar'), nav = $('.drawer-nav');
 let drawerTrigger = null;
 const bag = $('#bag'), lines = $('#bag-lines'), note = $('#bag-note'), checkout = $('#bag-checkout');
-mountBronze(bag, reduce);
 function renderBag() {
   const focused = lines.contains(document.activeElement) ? document.activeElement.getAttribute('aria-label') : null;
   $('#bag-count').textContent = count();
@@ -192,7 +190,7 @@ document.querySelectorAll('[data-scroll]').forEach(el => el.addEventListener('cl
 }));
 
 /* ---------- one clock for paired foreground motion and the timed ending ---------- */
-const fine=matchMedia('(min-width:761px) and (pointer:fine)');
+const fine=matchMedia('(min-width:761px) and (min-height:360px) and (pointer:fine)');
 const root=document.documentElement,finale=document.querySelector('.night-garden');
 const models=pieces.map(({el},i)=>({el,plate:el.querySelector('.plate'),motion:el.querySelector('.plate-motion'),text:el.querySelector('.text'),layer:layers[i],i,center:0,rect:null,x:0,y:0,focus:false,hover:false,pitch:0,yaw:0,lift:0,travel:0,textTravel:0,objectPitch:0,initialized:false}));
 let frame=0,last=0,finaleTop=0,viewHeight=innerHeight,finaleHeight=0,endingStarted=null,wallHidden=false;
@@ -240,7 +238,8 @@ function paint(now){
  const y=sceneY=cameraFrame.y;
  unsettled=cameraFrame.moving;
  if(hero.setGalleryScroll)hero.setGalleryScroll(y);
- if(nativeY<viewHeight*2)axis.style.translate='0 '+(nativeY-y).toFixed(2)+'px';
+ axis.style.translate=nativeY<viewHeight*2?'0 '+(nativeY-y).toFixed(2)+'px':'';
+ axis.style.opacity=cameraFrame.detail<1?String(cameraFrame.detail):'';
  bar.classList.toggle('show-mark',y>viewHeight*.6);
  const entry=y-finaleTop;
  if(entry>=viewHeight*.85&&endingStarted===null)endingStarted=now;
