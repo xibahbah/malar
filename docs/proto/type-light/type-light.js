@@ -14,7 +14,7 @@ function art(p,shadow){
  const id=`crop-${p.id}-${shadow?'shadow':'art'}`;
  return `<svg class="${shadow?'cast-shadow':'product-art'}" viewBox="${p.crop.join(' ')}" aria-hidden="true"><defs><clipPath id="${id}"><rect x="${p.crop[0]}" y="${p.crop[1]}" width="${p.crop[2]}" height="${p.crop[3]}"/></clipPath></defs><image href="../../product-objects.png" width="1230" height="1278" clip-path="url(#${id})"/></svg>`;
 }
-grid.innerHTML=products.map(p=>`<article class="product" data-id="${p.id}"><button type="button" class="piece" aria-label="Select ${p.name}, ${p.material}, $${p.price}" aria-pressed="false"><span class="art-frame">${art(p,true)}${art(p,false)}</span></button><div class="meta"><span class="number">${p.id}</span><div class="description"><h2 class="name">${p.label}</h2><span class="material">${p.material}</span></div><span class="price">$${p.price}</span></div></article>`).join('');
+grid.innerHTML=products.map(p=>`<article class="product" data-id="${p.id}"><button type="button" class="piece" aria-label="Select ${p.name}, ${p.material}, $${p.price}" aria-pressed="false"><span class="art-frame" style="--ratio:${p.crop[2]/p.crop[3]}">${art(p,true)}${art(p,false)}</span></button><div class="meta"><span class="number">${p.id}</span><div class="description"><h2 class="name">${p.label}</h2><span class="material">${p.material}</span></div><span class="price">$${p.price}</span></div></article>`).join('');
 const items=[...grid.querySelectorAll('.product')];
 let hovered=null,focused=null,pinned=null;
 function selection(){
@@ -36,6 +36,9 @@ document.addEventListener('pointerdown',e=>{if(!e.target.closest('.product')){pi
 const title=document.querySelector('h1');
 let bounds=[],titleBounds,lastX=NaN,lastY=NaN;
 function measure(){
+ const word=document.querySelector('.malayalam');
+ // Preserve the requested 3.5× height while fitting the word to the left half.
+ word.style.setProperty('--ml-scale',(catalogue.clientWidth/2-parseFloat(getComputedStyle(catalogue).paddingLeft))/word.offsetWidth);
  bounds=items.map(item=>item.querySelector('.art-frame').getBoundingClientRect());
  titleBounds=title.getBoundingClientRect();lastX=NaN;updateLight();
 }
@@ -50,7 +53,11 @@ function updateLight(){
  const y=parseFloat(root.style.getPropertyValue('--ly'))||innerHeight*.18;
  if(Math.abs(x-lastX)<.15&&Math.abs(y-lastY)<.15)return;
  lastX=x;lastY=y;
- const [tx,ty]=vector(titleBounds,x,y,6);
+ const dx=titleBounds.left+titleBounds.width/2-x,dy=titleBounds.top+titleBounds.height/2-y;
+ const distance=Math.hypot(dx,dy),length=Math.max(1,Math.min(2,distance*.018));
+ const ux=distance?dx/distance:Math.SQRT1_2,uy=distance?dy/distance:Math.SQRT1_2;
+ const tx=ux*length,ty=uy*length;
+ title.style.setProperty('--hx',(-ux).toFixed(3)+'px');title.style.setProperty('--hy',(-uy).toFixed(3)+'px');
  title.style.setProperty('--tx',tx.toFixed(2)+'px');title.style.setProperty('--ty',ty.toFixed(2)+'px');
  items.forEach((item,i)=>{const [sx,sy]=vector(bounds[i],x,y,18);item.style.setProperty('--sx',sx.toFixed(2)+'px');item.style.setProperty('--sy',sy.toFixed(2)+'px');});
  if(debug)document.querySelector('#lamp-readout').textContent=`--lx ${x.toFixed(1)}px  --ly ${y.toFixed(1)}px\nViewport ${innerWidth} × ${innerHeight} · ${reduced.matches?'static':'live'} light`;
