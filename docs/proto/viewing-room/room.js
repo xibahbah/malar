@@ -160,8 +160,7 @@ function renderBag() {
   if (!quantity && !lines.querySelector('.empty')) {
     const empty = document.createElement('li');
     empty.className = 'empty';
-    empty.innerHTML = '<p>Your bag is empty.</p><button type="button" class="bag-continue">Continue</button>';
-    empty.querySelector('button').onclick = () => bag.close();
+    empty.textContent = 'Your bag is empty.';
     lines.append(empty);
   }
   if (rowWithFocus && (rowWithFocus.inert || !rowWithFocus.isConnected)) {
