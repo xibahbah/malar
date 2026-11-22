@@ -97,8 +97,13 @@ function renderBag() {
     if (!q) continue;
     const li = document.createElement('li');
     li.innerHTML = `
-      <img class="bag-thumbnail${p.gift ? ' bag-gift-image' : ''}" src="${p.image}" alt="">
-      <span class="name">${p.name}</span>
+      <span class="bag-art${p.gift ? ' bag-art-gift' : ''}" aria-hidden="true">
+        <img src="${p.image}" alt="">
+        ${p.gift ? '<span class="card-mark">malar</span>' : ''}
+      </span>
+      <span class="bag-product"><span class="name">${p.gift ? 'Gift card' : p.name}</span>
+        <span class="unit-price">${money(p.price)} each</span>
+      </span>
       <span class="line">${money(p.price * q)}</span>
       <span class="qty">
         <button type="button" data-d="-1" aria-label="One fewer ${p.name}">−</button>
@@ -144,7 +149,6 @@ function openBag(trigger) {
   note.textContent = '';
   $('#bag-open').setAttribute('aria-expanded', 'true');
   if (!bag.open) bag.showModal();
-  $('#bag-close').focus({preventScroll:true});
 }
 function addItem(id, trigger) {
   const quantity = items[id] || 0;
