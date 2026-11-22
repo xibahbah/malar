@@ -76,27 +76,10 @@ document.querySelectorAll('.reveal').forEach(el => seen.observe(el));
 const bar = $('.bar'), menu = $('#menu'), nav = $('#site-links');
 let drawerTrigger = null;
 const bag = $('#bag'), lines = $('#bag-lines'), note = $('#bag-note'), checkout = $('#bag-checkout');
-function renderBag() {
-  const focused = lines.contains(document.activeElement) ? document.activeElement.getAttribute('aria-label') : null;
-  $('#bag-count').textContent = count();
-  document.querySelectorAll('.night-note [data-open-bag]').forEach(el=>el.textContent='Bag · '+count());
-  $('#bag-total').textContent = money(total());
-  checkout.disabled = !count();
-  lines.replaceChildren();
-  if (!count()) {
-    const li = document.createElement('li');
-    li.className = 'empty';
-    li.innerHTML = '<p>Your bag is empty.</p><button type="button" class="bag-continue">Continue</button>';
-    li.querySelector('button').onclick = () => bag.close();
-    lines.append(li);
-  }
-  for (const p of products) {
-    const status=pieces.find(entry=>entry.p.id===p.id)?.status;
-    const q = items[p.id] || 0;
-    if(status)status.textContent = q ? `In bag · ${q}` : '';
-    if (!q) continue;
-    const li = document.createElement('li');
-    li.innerHTML = `
+function createBagRow(p) {
+  const li = document.createElement('li');
+  li.dataset.product = p.id;
+  li.innerHTML = `
       <span class="bag-art${p.gift ? ' bag-art-gift' : ''}" aria-hidden="true">
         <img src="${p.image}" alt="">
         ${p.gift ? '<span class="card-mark">malar</span>' : ''}
@@ -104,18 +87,86 @@ function renderBag() {
       <span class="bag-product"><span class="name">${p.gift ? 'Gift card' : p.name}</span>
         <span class="unit-price">${money(p.price)} each</span>
       </span>
-      <span class="line">${money(p.price * q)}</span>
+      <span class="line"></span>
       <span class="qty">
         <button type="button" data-d="-1" aria-label="One fewer ${p.name}">−</button>
-        <span aria-label="Quantity">${q}</span>
+        <span aria-label="Quantity"></span>
         <button type="button" data-d="1" aria-label="One more ${p.name}">+</button>
       </span>
       <button type="button" class="remove" aria-label="Remove ${p.name}">Remove</button>`;
-    li.querySelectorAll('[data-d]').forEach(b => b.onclick = () => setQty(p.id, q + Number(b.dataset.d)));
-    li.querySelector('.remove').onclick = () => setQty(p.id, 0);
-    lines.append(li);
+  li.querySelectorAll('[data-d]').forEach(b => b.onclick = () => setQty(p.id, (items[p.id] || 0) + Number(b.dataset.d)));
+  li.querySelector('.remove').onclick = () => setQty(p.id, 0);
+  return li;
+}
+
+// The amount is committed immediately, even when the previous gesture is still settling.
+function updateBagValue(el, next, direction) {
+  if (el.textContent === next) return;
+  const animate = el.textContent && bag.open && !reduce.matches && direction;
+  el.textContent = next;
+  if (!animate) return;
+  el.getAnimations().forEach(animation => animation.cancel());
+  el.animate([
+    {transform:'translateY(' + direction * 6 + 'px)', opacity:.4},
+    {transform:'translateY(0)', opacity:1}
+  ], {duration:200, easing:'cubic-bezier(.2,.7,.25,1)'});
+}
+
+function removeBagRow(row) {
+  if (!bag.open || reduce.matches || !row.offsetHeight) { row.remove(); return; }
+  const style = getComputedStyle(row);
+  const start = {height:row.offsetHeight + 'px', paddingTop:style.paddingTop, paddingBottom:style.paddingBottom};
+  row.inert = true;
+  row.style.overflow = 'clip';
+  const exit = row.animate([
+    {...start, opacity:1, offset:0},
+    {...start, opacity:0, offset:.4},
+    {height:'0px', paddingTop:'0px', paddingBottom:'0px', borderTopWidth:'0px', opacity:0}
+  ], {duration:240, easing:'cubic-bezier(.25,.7,.35,1)', fill:'forwards'});
+  exit.onfinish = () => row.remove();
+}
+
+function renderBag() {
+  const focused = document.activeElement;
+  const rowWithFocus = lines.contains(focused) ? focused.closest('li') : null;
+  const quantity = count();
+  $('#bag-count').textContent = quantity;
+  document.querySelectorAll('.night-note [data-open-bag]').forEach(el=>el.textContent='Bag · '+quantity);
+  checkout.disabled = !quantity;
+  if (quantity) lines.querySelector('.empty')?.remove();
+  let direction = 0;
+  let previousRow = null;
+  for (const p of products) {
+    const q = items[p.id] || 0;
+    const status = pieces.find(entry=>entry.p.id===p.id)?.status;
+    if (status) status.textContent = q ? `In bag · ${q}` : '';
+    let row = lines.querySelector('[data-product="' + p.id + '"]:not([inert])');
+    if (!q) {
+      if (row) { direction = -1; removeBagRow(row); }
+      continue;
+    }
+    if (!row) {
+      row = createBagRow(p);
+      lines.insertBefore(row, previousRow ? previousRow.nextSibling : lines.firstChild);
+    }
+    previousRow = row;
+    const counter = row.querySelector('[aria-label="Quantity"]');
+    const change = Math.sign(q - Number(counter.textContent));
+    if (change) direction = change;
+    updateBagValue(counter, String(q), change);
+    updateBagValue(row.querySelector('.line'), money(p.price * q), change);
   }
-  if(focused){const next=[...lines.querySelectorAll('button')].find(b=>b.getAttribute('aria-label')===focused);(next||lines.querySelector('button')||$('#bag-close')).focus({preventScroll:true});}
+  updateBagValue($('#bag-total'), money(total()), direction);
+  if (!quantity && !lines.querySelector('.empty')) {
+    const empty = document.createElement('li');
+    empty.className = 'empty';
+    empty.innerHTML = '<p>Your bag is empty.</p><button type="button" class="bag-continue">Continue</button>';
+    empty.querySelector('button').onclick = () => bag.close();
+    lines.append(empty);
+  }
+  if (rowWithFocus && (rowWithFocus.inert || !rowWithFocus.isConnected)) {
+    (lines.querySelector('li:not([inert]) button') || $('#bag-close')).focus({preventScroll:true});
+  }
 }
 function setMenu(open, restoreFocus = false) {
   nav.hidden = !open;
@@ -167,7 +218,7 @@ bag.addEventListener('close', () => {
 $('#bag-close').onclick = () => bag.close();
 bag.addEventListener('keydown', e => {
   if (e.key !== 'Tab') return;
-  const controls = [...bag.querySelectorAll('button:not(:disabled),a[href]')].filter(el => el.getClientRects().length);
+  const controls = [...bag.querySelectorAll('button:not(:disabled),a[href]')].filter(el => !el.closest('[inert]') && el.getClientRects().length);
   const first = controls[0], last = controls.at(-1);
   if (e.shiftKey && document.activeElement === first) {
     e.preventDefault(); last.focus();
