@@ -3,37 +3,38 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#f9f8f5">
+  <meta name="theme-color" content="#21170f">
   <base href="../">
   <title>Shop — Malar</title>
   <link rel="stylesheet" href="proto/viewing-room/bag.css?v=9">
-  <link rel="stylesheet" href="shop/shop.css?v=3">
+  <link rel="stylesheet" href="shop/shop.css?v=4">
   <script type="module" src="shop/shop.js?v=3"></script>
 </head>
 <body class="viewing-room shop-page">
 <header class="shop-bar">
+  <a class="wordmark" href="./" aria-label="Malar home">malar</a>
+  <a class="shop-link" href="shop/">Shop</a>
+  <button id="bag-open" aria-haspopup="dialog" aria-expanded="false" aria-controls="bag">Bag <span id="bag-count">0</span></button>
   <div class="menu-disclosure">
-    <button id="menu" type="button" aria-controls="site-links" aria-expanded="false">Shop menu</button>
+    <button id="menu" type="button" aria-controls="site-links" aria-expanded="false" aria-label="Shop menu">Menu <i aria-hidden="true"></i></button>
     <nav id="site-links" aria-label="Shop menu" hidden>
       <a href="shop/">Jewelry</a><a href="shop/?category=objects">Objects</a><a href="shop/?category=all">View all</a>
     </nav>
   </div>
-  <a class="wordmark" href="./" aria-label="Malar home">malar</a>
-  <button id="bag-open" aria-haspopup="dialog" aria-expanded="false" aria-controls="bag">Bag (<span id="bag-count">0</span>)</button>
 </header>
 <main>
   <section class="catalog" aria-labelledby="shop-title">
-    <div class="catalog-header">
-      <h1 id="shop-title">Shop</h1>
-      <nav class="departments" aria-label="Shop categories">
-        <a href="shop/" data-category="Jewelry">Jewelry</a>
-        <a href="shop/?category=objects" data-category="Objects">Objects</a>
-        <a href="shop/?category=all" data-category="All">View all</a>
-      </nav>
-    </div>
     <div class="collection-body">
-      <div class="toolbar">
+      <div class="catalog-header">
+        <h1 id="shop-title">Shop</h1>
         <span id="piece-count" role="status"></span>
+      </div>
+      <div class="toolbar">
+        <nav class="departments" aria-label="Shop categories">
+          <a href="shop/" data-category="Jewelry">Jewelry</a>
+          <a href="shop/?category=objects" data-category="Objects">Objects</a>
+          <a href="shop/?category=all" data-category="All">View all</a>
+        </nav>
         <label class="catalog-search"><span aria-hidden="true"></span><input type="search" id="catalog-query" aria-label="Search this collection" placeholder="Search" maxlength="120"></label>
         <button id="refine-toggle" type="button" aria-expanded="false" aria-controls="refine">Filter &amp; sort</button>
       </div>
