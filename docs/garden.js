@@ -234,7 +234,7 @@ if (dialog.id === 'garden-menu') {
 
 let audio, volume, playing = false;
 const sound = document.querySelector('#sound');
-sound.onclick = async () => {
+if (sound) sound.onclick = async () => {
   if (!audio) {
     audio = new AudioContext();
     volume = audio.createGain();

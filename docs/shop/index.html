@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#21150e">
+  <base href="../">
+  <title>Shop — Malar</title>
+  <link rel="stylesheet" href="proto/viewing-room/room.css?v=14">
+  <link rel="stylesheet" href="proto/viewing-room/bag.css?v=9">
+  <link rel="stylesheet" href="shop/shop.css">
+  <script defer src="garden.js?v=gallery-4"></script>
+  <script type="module" src="shop/shop.js"></script>
+</head>
+<body class="viewing-room ambient-landing shop-page">
+<header class="bar show-mark">
+  <a class="mark" href="./" aria-label="Malar home">malar</a>
+  <a class="shop-link" aria-current="page" href="shop/">Shop</a>
+  <button id="bag-open" class="bag-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="bag">Bag <span id="bag-count">0</span></button>
+  <div class="menu-disclosure">
+    <button id="menu" type="button" aria-controls="site-links" aria-expanded="false">Menu <i aria-hidden="true"></i></button>
+    <nav id="site-links" aria-label="Main" hidden>
+      <a data-scroll="garden" href="./#garden">The Garden</a>
+      <a data-scroll="collection" href="./#collection">Jewelry</a>
+      <a data-scroll="crafts" href="./#crafts">Objects</a>
+      <a data-scroll="studio" href="./#studio">Story</a>
+      <a data-scroll="gift" href="./#gift">Gift cards</a>
+    </nav>
+  </div>
+</header>
+<main class="stage" id="garden">
+  <div class="hero" aria-hidden="true"><canvas></canvas></div>
+  <section class="catalog" aria-labelledby="shop-title">
+    <h1 id="shop-title">Shop</h1>
+    <div class="catalog-tools">
+      <nav aria-label="Shop categories">
+        <a href="shop/" data-category="Jewelry">Jewelry</a>
+        <a href="shop/?category=objects" data-category="Objects">Objects</a>
+        <a href="shop/?category=all" data-category="All">View all</a>
+      </nav>
+      <span id="piece-count" role="status"></span>
+    </div>
+    <div class="catalog-grid" id="catalog-products"></div>
+    <noscript>Enable JavaScript to browse the shop.</noscript>
+  </section>
+</main>
+<dialog id="bag" aria-labelledby="bag-title">
+  <header class="bag-head">
+    <h2 id="bag-title" tabindex="-1" autofocus>Bag</h2>
+    <button type="button" id="bag-close">Close</button>
+  </header>
+  <ul id="bag-lines" aria-label="Items in your bag"></ul>
+  <footer class="bag-footer">
+    <p class="bag-total"><span>Total</span><span id="bag-total" aria-live="polite">$0</span></p>
+    <button type="button" id="bag-checkout"><span>Checkout</span><span class="checkout-arrow" aria-hidden="true">↗</span></button>
+    <p class="bag-disclaimer">Demo checkout. Nothing is charged.</p>
+    <p id="bag-note" class="bag-note" role="status"></p>
+  </footer>
+</dialog>
+</body>
+</html>

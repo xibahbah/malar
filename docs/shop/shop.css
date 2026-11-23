@@ -1,0 +1,37 @@
+.shop-page .bar {position:absolute}
+.shop-page .hero {pointer-events:none}
+.catalog {
+  position:relative; z-index:1; max-width:1680px; margin:auto;
+  padding:clamp(104px,14svh,158px) var(--pad) clamp(64px,9vw,140px);
+}
+.catalog h1 {margin:0 0 clamp(24px,3vw,46px); font:400 clamp(62px,7.8vw,118px)/.94 var(--serif); letter-spacing:-.055em}
+.catalog-tools {display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:22px; border-bottom:1px solid #efe3cc40}
+.catalog-tools nav {display:flex; gap:clamp(18px,2.4vw,38px)}
+.catalog-tools a {display:grid; align-items:center; min-height:44px; border-bottom:1px solid transparent; margin-bottom:-1px; color:var(--ink-2)}
+.catalog-tools a[aria-current], .catalog-tools a:hover {color:var(--ink); border-color:currentColor}
+#piece-count,.shop-spec {font:400 13px/1.5 var(--sans); color:var(--ink-2)}
+.catalog-grid {display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:48px clamp(16px,2vw,36px)}
+.shop-piece {min-width:0}
+.shop-detail {display:block}
+.shop-photo {display:grid; place-items:center; overflow:hidden; aspect-ratio:1.13; background:#e9e7df url(../stone-atlas.png) var(--stone)/300% 200%}
+.shop-photo img {width:76%; height:76%; object-fit:contain; filter:drop-shadow(2px 5px 3px #32271b32)}
+.shop-caption {display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-top:15px}
+.shop-caption h2 {margin:0; font:400 clamp(22px,2.05vw,36px)/1.06 var(--serif); letter-spacing:-.03em}
+.shop-price {font-size:14px; font-variant-numeric:tabular-nums; white-space:nowrap}
+.shop-spec {margin:5px 0 2px}
+.shop-add {min-height:40px; color:var(--ink); font:400 13px/1 var(--sans); text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:5px; text-decoration-color:#efe3cc70}
+.shop-add:hover {text-decoration-color:currentColor}
+@media(max-width:760px) {
+  .catalog-grid {grid-template-columns:repeat(2,minmax(0,1fr)); gap:30px 14px}
+  .shop-photo {aspect-ratio:4/5}
+  .shop-caption {flex-wrap:wrap; column-gap:6px; row-gap:5px; margin-top:11px}
+  .shop-caption h2 {flex-basis:100%}
+  .shop-spec {font-size:12px}
+}
+@media(prefers-reduced-motion:no-preference) {
+  .catalog h1,.shop-piece {animation:shop-enter 460ms cubic-bezier(.2,.7,.25,1) backwards}
+  .shop-piece {animation-delay:calc(45ms + var(--order,0)*40ms)}
+  .shop-photo img {transition:transform 320ms ease-out}
+  @media(hover:hover){.shop-detail:hover img {transform:scale(1.035)}}
+  @keyframes shop-enter {from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none}}
+}
