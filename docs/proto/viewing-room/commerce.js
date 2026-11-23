@@ -3,7 +3,7 @@ const $ = selector => document.querySelector(selector);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 export const money = cents => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
 
-export const products = await (await fetch(new URL('products.json?v=6', here))).json();
+export const products = await (await fetch(new URL('products.json?v=7', here))).json();
 for (const p of products) p.image = new URL(p.image, here).href;
 for(const amount of [25,50,100])products.push({id:'gift-'+amount,name:'Gift card · $'+amount,price:amount*100,image:new URL('../../gift-gold.svg',here).href,gift:true});
 
