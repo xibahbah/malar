@@ -1,8 +1,166 @@
 [
-  {"id":"marigold","category":"Jewelry","name":"Marigold drop earrings","spec":"Brass, freshwater pearl","price":4800,"image":"pieces/marigold.webp","type":"Earrings","materials":["Brass","Freshwater pearl"]},
-  {"id":"lotus","category":"Jewelry","name":"Lotus signet ring","spec":"Gold-plated brass","price":6500,"image":"pieces/lotus.webp","type":"Rings","materials":["Gold-plated brass"]},
-  {"id":"jasmine","category":"Jewelry","name":"Jasmine strand necklace","spec":"Gold-plated brass","price":8600,"image":"pieces/jasmine.webp","type":"Necklaces","materials":["Gold-plated brass"]},
-  {"id":"vase","category":"Objects","name":"Hand-thrown bud vase","spec":"Stoneware, amber glaze","price":3800,"image":"pieces/vase.webp","type":"Vases","materials":["Stoneware"]},
-  {"id":"kolam","category":"Objects","name":"Kolam brass tray","spec":"Etched brass, 10 in","price":5400,"image":"pieces/kolam.webp","type":"Trays","materials":["Brass"]},
-  {"id":"basket","category":"Objects","name":"Woven palm basket","spec":"Palm leaf, natural dye","price":4200,"image":"pieces/basket.webp","type":"Baskets","materials":["Palm leaf"]}
+  {
+    "id": "marigold",
+    "category": "Jewelry",
+    "name": "Marigold drop earrings",
+    "spec": "Brass, freshwater pearl",
+    "price": 4800,
+    "image": "pieces/marigold.webp",
+    "type": "Earrings",
+    "materials": [
+      "Brass",
+      "Freshwater pearl"
+    ],
+    "description": "A pair of open marigold blooms in warm brass. Small freshwater pearls gather beneath each flower and sway from the curved ear hooks."
+  },
+  {
+    "id": "lotus",
+    "category": "Jewelry",
+    "name": "Lotus signet ring",
+    "spec": "Gold-plated brass",
+    "price": 6500,
+    "image": "pieces/lotus.webp",
+    "type": "Rings",
+    "materials": [
+      "Gold-plated brass"
+    ],
+    "description": "A lotus rises in relief from the broad oval face of this signet. The tapered gold-plated band brings the sculpted flower close to the hand."
+  },
+  {
+    "id": "jasmine",
+    "category": "Jewelry",
+    "name": "Jasmine strand necklace",
+    "spec": "Gold-plated brass",
+    "price": 8600,
+    "image": "pieces/jasmine.webp",
+    "type": "Necklaces",
+    "materials": [
+      "Gold-plated brass"
+    ],
+    "description": "Ivory jasmine buds form a continuous strand, punctuated by small gold-toned beads. The cluster at the centre gives the necklace a gentle point."
+  },
+  {
+    "id": "vase",
+    "category": "Objects",
+    "name": "Hand-thrown bud vase",
+    "spec": "Stoneware, amber glaze",
+    "price": 3800,
+    "image": "pieces/vase.webp",
+    "type": "Vases",
+    "materials": [
+      "Stoneware"
+    ],
+    "description": "An amber glaze pools around the narrow mouth of this round stoneware vase. The russet surface changes tone from shoulder to foot, even with a single stem inside."
+  },
+  {
+    "id": "kolam",
+    "category": "Objects",
+    "name": "Kolam brass tray",
+    "spec": "Etched brass, 10 in",
+    "price": 5400,
+    "image": "pieces/kolam.webp",
+    "type": "Trays",
+    "materials": [
+      "Brass"
+    ],
+    "description": "A low brass tray with a floral kolam etched into its centre. The gently raised rim catches light around the edge and holds small everyday objects."
+  },
+  {
+    "id": "basket",
+    "category": "Objects",
+    "name": "Woven palm basket",
+    "spec": "Palm leaf, natural dye",
+    "price": 4200,
+    "image": "pieces/basket.webp",
+    "type": "Baskets",
+    "materials": [
+      "Palm leaf"
+    ],
+    "description": "Wide palm-leaf strips cross diagonally around this low, round basket. A folded rim frames the open top and shows the shifts of colour in the weave."
+  },
+  {
+    "id": "nila",
+    "category": "Jewelry",
+    "name": "Nila open cuff",
+    "spec": "Polished gold-plated brass",
+    "price": 7200,
+    "image": "pieces/nila.webp",
+    "type": "Bracelets",
+    "materials": [
+      "Gold-plated brass"
+    ],
+    "description": "A rounded band curves around the wrist and ends in two softly polished tips. The open shape leaves a sliver of skin between them.",
+    "shopOnly": true
+  },
+  {
+    "id": "champak",
+    "category": "Jewelry",
+    "name": "Champak dome studs",
+    "spec": "Gold-plated brass",
+    "price": 4600,
+    "image": "pieces/champak.webp",
+    "type": "Earrings",
+    "materials": [
+      "Gold-plated brass"
+    ],
+    "description": "Fine flutes run across each domed stud like the folds of a champak petal. Alternating ridges of light and shadow give the pair depth.",
+    "shopOnly": true
+  },
+  {
+    "id": "anar",
+    "category": "Jewelry",
+    "name": "Anar garnet ring",
+    "spec": "Garnet, gold-plated brass",
+    "price": 9800,
+    "image": "pieces/anar.webp",
+    "type": "Rings",
+    "materials": [
+      "Garnet",
+      "Gold-plated brass"
+    ],
+    "description": "An oval garnet sits inside a smooth gold-toned bezel. Its deep pomegranate colour draws the eye to the centre of the ring.",
+    "shopOnly": true
+  },
+  {
+    "id": "tulsi",
+    "category": "Jewelry",
+    "name": "Tulsi leaf pendant",
+    "spec": "Gold-plated brass",
+    "price": 6800,
+    "image": "pieces/tulsi.webp",
+    "type": "Necklaces",
+    "materials": [
+      "Gold-plated brass"
+    ],
+    "description": "A single sculpted leaf hangs from a fine chain. The raised midrib and fine veins catch the light as the pendant turns.",
+    "shopOnly": true
+  },
+  {
+    "id": "deepam",
+    "category": "Objects",
+    "name": "Deepam incense holder",
+    "spec": "Fluted brass",
+    "price": 5600,
+    "image": "pieces/deepam.webp",
+    "type": "Incense holders",
+    "materials": [
+      "Brass"
+    ],
+    "description": "A low brass form with fluted sides holds a single incense stick at its centre. The shallow circular footprint sits quietly on a shelf or table.",
+    "shopOnly": true
+  },
+  {
+    "id": "rain",
+    "category": "Objects",
+    "name": "Rain celadon dish",
+    "spec": "Glazed stoneware",
+    "price": 4400,
+    "image": "pieces/rain.webp",
+    "type": "Dishes",
+    "materials": [
+      "Stoneware"
+    ],
+    "description": "A pale celadon glaze gathers in the shallow well of this dish. Its open shape leaves room for a ring, a pair of earrings or a small keepsake.",
+    "shopOnly": true
+  }
 ]

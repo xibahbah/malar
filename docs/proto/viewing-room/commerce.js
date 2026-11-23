@@ -3,9 +3,12 @@ const $ = selector => document.querySelector(selector);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 export const money = cents => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
 
-export const products = await (await fetch(new URL('products.json?v=7', here))).json();
-for (const p of products) p.image = new URL(p.image, here).href;
-for(const amount of [25,50,100])products.push({id:'gift-'+amount,name:'Gift card · $'+amount,price:amount*100,image:new URL('../../gift-gold.svg',here).href,gift:true});
+export const catalogProducts = await (await fetch(new URL('products.json?v=8', here))).json();
+for (const p of catalogProducts) p.image = new URL(p.image, here).href;
+for(const amount of [25,50,100])catalogProducts.push({id:'gift-'+amount,name:'Gift card · $'+amount,price:amount*100,image:new URL('../../gift-gold.svg',here).href,gift:true});
+
+// The gallery has six choreographed scenes. The bag is shared across the full catalogue.
+export const products = catalogProducts.filter(product => !product.shopOnly);
 
 export function mountCommerce({pausePage = () => {}, resumePage = () => {}, productStatus = () => null} = {}) {
   /* ---------- bag ---------- */
@@ -15,14 +18,14 @@ export function mountCommerce({pausePage = () => {}, resumePage = () => {}, prod
     items = {};
     try {
       const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
-      for (const {id} of products) {
+      for (const {id} of catalogProducts) {
         if (Number.isInteger(saved[id]) && saved[id] > 0) items[id] = Math.min(20, saved[id]);
       }
     } catch {}
   }
   restoreItems();
   const count = () => Object.values(items).reduce((a, b) => a + b, 0);
-  const total = () => products.reduce((sum, p) => sum + p.price * (items[p.id] || 0), 0);
+  const total = () => catalogProducts.reduce((sum, p) => sum + p.price * (items[p.id] || 0), 0);
   function setQty(id, q) {
     q = Math.max(0, Math.min(20, q));
     if (q) items[id] = q; else delete items[id];
@@ -94,7 +97,7 @@ export function mountCommerce({pausePage = () => {}, resumePage = () => {}, prod
     if (quantity) lines.querySelector('.empty')?.remove();
     let direction = 0;
     let previousRow = null;
-    for (const p of products) {
+    for (const p of catalogProducts) {
       const q = items[p.id] || 0;
       const status = productStatus(p.id);
       if (status) status.textContent = q ? `In bag · ${q}` : '';
